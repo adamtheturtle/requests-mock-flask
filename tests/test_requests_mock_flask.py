@@ -2,8 +2,10 @@
 Tests for the ``requests_mock_flask`` package.
 """
 
+from tests.trivial_flask_app import TRIVIAL_FLASK_APP
 
-def test_remove_me() -> None:
+
+def test_flask_client() -> None:
     """
-    Temporary test so that ``pytest`` passes before we have tests.
     """
+    test_client = TRIVIAL_FLASK_APP.test_client()
