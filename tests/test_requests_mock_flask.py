@@ -33,3 +33,4 @@ def test_flask_client() -> None:
 
     # TODO with requests_mock
     # TODO with responses
+    # TODO separate tests for each endpoint type
