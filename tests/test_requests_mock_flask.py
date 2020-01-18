@@ -116,6 +116,22 @@ def test_route_with_variable_no_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com/Frasier',
+            headers={'hello': 'world'},
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
+
 
 def test_route_with_string_variable() -> None:
     """
