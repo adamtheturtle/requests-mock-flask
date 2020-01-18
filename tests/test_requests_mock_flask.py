@@ -5,12 +5,12 @@ Test with a bunch of route types as per:
 https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 """
 
+import json
 import uuid
 from typing import Tuple
+
+from flask import Flask, Response, jsonify, request
 from flask_negotiate import consumes
-
-
-from flask import Flask, Response, jsonify
 
 
 def test_simple_route() -> None:
@@ -342,6 +342,33 @@ def test_request_needs_content_type() -> None:
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
+def test_request_needs_data() -> None:
+    """
+    Routes which require data are supported.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    @consumes('application/json')
+    def _() -> str:
+        return str(request.get_json()['hello'])
+
+    test_client = app.test_client()
+    response = test_client.get(
+        '/',
+        content_type='application/json',
+        data=json.dumps({'hello': 'world'}),
+    )
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'world'
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
