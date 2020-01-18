@@ -10,45 +10,64 @@ def test_simple_route() -> None:
     """
     Test with a trivial Flask application.
     """
-    trivial_flask_app = Flask(__name__)
+    app = Flask(__name__)
 
-    @trivial_flask_app.route('/')
+    @app.route('/')
     def example() -> str:
         return 'Hello, World!'
 
-    test_client = trivial_flask_app.test_client()
+    test_client = app.test_client()
     result = test_client.get('/')
     assert result.status_code == 200
     assert result.headers['Content-Type'] == 'text/html; charset=utf-8'
     assert response.text == 'Hello World!'
 
 def test_route_with_json():
-    trivial_flask_app = Flask(__name__)
+    app = Flask(__name__)
 
-    @trivial_flask_app.route('/something_json')
+    @app.route('/something_json')
     def example() -> Tuple[Response, int]:
         return jsonify({'hello': 'world'})
 
-    @trivial_flask_app.route('/something_json/<int: example_id>')
-    def example(example_id: int) -> Tuple[Response, int]:
-        return jsonify({'hello': 'world'})
-
-    test_client = trivial_flask_app.test_client()
+    test_client = app.test_client()
     result = test_client.get('/')
     assert result.status_code == 200
     assert result.headers['Content-Type'] == 'application/json'
     assert response.text == 'Hello World!'
 
+def test_route_with_variable_no_type_given():
+
+    app = Flask(__name__)
+
+    @app.route('/something_json/<my_variable>')
+    def example(my_variable: str) -> Tuple[Response, int]:
+        return 'Hello: ' + my_variable
+
+
 def test_route_with_string_variable():
-    pass
+
+    app = Flask(__name__)
+
+    @app.route('/something_json/<string: my_variable>')
+    def example(my_variable: str) -> Tuple[Response, int]:
+        return 'Hello: ' + my_variable
+
 
 def test_route_with_int_variable():
-    pass
+    app = Flask(__name__)
+
+    @app.route('/something_json/<int: my_variable>')
+    def example(my_variable: int) -> Tuple[Response, int]:
+        return 'Hello: ' + str(my_variable + 5)
 
 def test_route_with_float_variable():
-    pass
+    app = Flask(__name__)
 
-def test_route_with_path_variable():
+    @app.route('/something_json/<int: my_variable>')
+    def example(my_variable: float) -> Tuple[Response, int]:
+        return 'Hello: ' + str(my_variable + 5)
+
+def test_route_with_path_variable_with_slash():
     pass
 
 def test_route_with_uuid_variable():
@@ -61,6 +80,9 @@ def test_post_verb():
     pass
 
 def test_multiple_http_verbs():
+    pass
+
+def test_wrong_type_given():
     pass
 
 def test_custom_converter():
