@@ -25,10 +25,12 @@ def test_simple_route() -> None:
 
     @app.route('/')
     def _() -> str:
+        assert 'Content-Type' not in request.headers
+        assert request.headers['hello'] == 'world'
         return 'Hello, World!'
 
     test_client = app.test_client()
-    response = test_client.get('/')
+    response = test_client.get('/', headers={'hello': 'world'})
 
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
@@ -45,11 +47,14 @@ def test_simple_route() -> None:
             base_url='http://www.example.com',
         )
 
-        response = requests.get('http://www.example.com')
+        response = requests.get(
+            'http://www.example.com',
+            headers={'hello': 'world'},
+        )
 
-    # assert response.status_code == expected_status_code
-    # assert response.headers['Content-Type'] == expected_content_type
-    # assert response.data == expected_data
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.text == expected_data.decode()
 
 
 def test_route_with_json() -> None:

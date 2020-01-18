@@ -61,10 +61,10 @@ def _request_callback(
     lower_request_method = str(request.method).lower()
     test_client = flask_app.test_client()
     test_client_method = getattr(test_client, lower_request_method)
+    # import pdb; pdb.set_trace()
     response = test_client_method(
         request.path_url,
-        # TODO this probably needs a ``.get`...
-        content_type=request.headers['Content-Type'],
+        headers=dict(request.headers),
         data=request.body,
     )
 
