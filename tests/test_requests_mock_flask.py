@@ -47,14 +47,14 @@ def test_simple_route() -> None:
             base_url='http://www.example.com',
         )
 
-        response = requests.get(
+        responses_response = requests.get(
             'http://www.example.com',
             headers={'hello': 'world'},
         )
 
-    assert response.status_code == expected_status_code
-    assert response.headers['Content-Type'] == expected_content_type
-    assert response.text == expected_data.decode()
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
 
 
 def test_route_with_json() -> None:
