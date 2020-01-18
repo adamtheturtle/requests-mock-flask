@@ -161,8 +161,22 @@ def test_route_with_uuid_variable():
     assert response.data == expected_data
 
 def test_nested_path():
-    # TODO variable after a non-variable, and then with another path after?
-    pass
+    app = Flask(__name__)
+
+    @app.route('/users/<int:my_variable>/posts')
+    def example(my_variable: int) -> Tuple[Response, int]:
+        return 'Posts for: ' + str(my_variable)
+
+    test_client = app.test_client()
+    response = test_client.get('/users/4/posts')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Posts for: 4'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_route_with_multiple_variables():
     pass
