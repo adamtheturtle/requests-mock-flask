@@ -227,10 +227,7 @@ def test_route_with_float_variable() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
-            'http://www.example.com/4.0',
-            headers={'hello': 'world'},
-        )
+        responses_response = requests.get('http://www.example.com/4.0')
 
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
@@ -258,6 +255,19 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get('http://www.example.com/foo/bar')
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
+
 
 def test_route_with_uuid_variable() -> None:
     """
@@ -281,6 +291,21 @@ def test_route_with_uuid_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            f'http://www.example.com/{random_uuid}',
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
+
 
 def test_nested_path() -> None:
     """
@@ -302,6 +327,21 @@ def test_nested_path() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com/users/4/posts',
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
 
 
 def test_route_with_multiple_variables() -> None:
