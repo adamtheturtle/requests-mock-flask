@@ -87,7 +87,6 @@ def test_route_with_json() -> None:
 
         responses_response = requests.get(
             'http://www.example.com',
-            headers={'hello': 'world'},
         )
 
     assert responses_response.status_code == expected_status_code
@@ -125,7 +124,6 @@ def test_route_with_variable_no_type_given() -> None:
 
         responses_response = requests.get(
             'http://www.example.com/Frasier',
-            headers={'hello': 'world'},
         )
 
     assert responses_response.status_code == expected_status_code
@@ -163,7 +161,6 @@ def test_route_with_string_variable() -> None:
 
         responses_response = requests.get(
             'http://www.example.com/Frasier',
-            headers={'hello': 'world'},
         )
 
     assert responses_response.status_code == expected_status_code
@@ -192,6 +189,21 @@ def test_route_with_int_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com/4',
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
+
 
 def test_route_with_float_variable() -> None:
     """
@@ -213,6 +225,22 @@ def test_route_with_float_variable() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com/4.0',
+            headers={'hello': 'world'},
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
 
 
 def test_route_with_path_variable_with_slash() -> None:
