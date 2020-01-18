@@ -85,9 +85,7 @@ def test_route_with_json() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
-            'http://www.example.com',
-        )
+        responses_response = requests.get('http://www.example.com')
 
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
@@ -122,9 +120,7 @@ def test_route_with_variable_no_type_given() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
-            'http://www.example.com/Frasier',
-        )
+        responses_response = requests.get('http://www.example.com/Frasier')
 
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
@@ -159,9 +155,7 @@ def test_route_with_string_variable() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
-            'http://www.example.com/Frasier',
-        )
+        responses_response = requests.get('http://www.example.com/Frasier')
 
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
