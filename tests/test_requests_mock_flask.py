@@ -289,7 +289,7 @@ def test_wrong_type_given() -> None:
 
     @app.route('/<int:my_variable>')
     def _(my_variable: int) -> str:
-        return 'Hello: ' + str(my_variable)
+        ...  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.get('/a')
@@ -310,7 +310,7 @@ def test_404_no_such_method() -> None:
 
     @app.route('/')
     def _() -> str:
-        return 'Hello, World!'
+        ...  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.post('/')
