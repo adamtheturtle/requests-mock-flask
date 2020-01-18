@@ -197,10 +197,45 @@ def test_route_with_multiple_variables():
     assert response.data == expected_data
 
 def test_post_verb():
-    pass
+    app = Flask(__name__)
+
+    @app.route('/', methods=['POST'])
+    def example() -> str:
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    response = test_client.post('/')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_multiple_http_verbs():
-    pass
+    app = Flask(__name__)
+
+    @app.route('/', methods=['GET', 'POST'])
+    def example() -> str:
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    get_response = test_client.get('/')
+    post_response = test_client.post('/')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert get_response.status_code == expected_status_code
+    assert get_response.headers['Content-Type'] == expected_content_type
+    assert get_response.data == expected_data
+
+    assert post_response.status_code == expected_status_code
+    assert post_response.headers['Content-Type'] == expected_content_type
+    assert post_response.data == expected_data
 
 def test_wrong_type_given():
     pass
