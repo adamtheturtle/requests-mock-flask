@@ -288,7 +288,7 @@ def test_wrong_type_given() -> None:
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
-    def _(my_variable: int) -> str:
+    def _(_: int) -> str:
         ...  # pragma: no cover
 
     test_client = app.test_client()
