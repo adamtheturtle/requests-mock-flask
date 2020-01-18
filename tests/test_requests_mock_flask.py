@@ -8,7 +8,11 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 import uuid
 from typing import Tuple
 
+import requests
+import responses
 from flask import Flask, Response, jsonify
+
+from requests_mock_flask import add_flask_app_to_mock
 
 
 def test_simple_route() -> None:
@@ -27,6 +31,19 @@ def test_simple_route() -> None:
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        response = requests.get('http://www.example.com')
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
