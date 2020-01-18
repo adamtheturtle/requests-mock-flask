@@ -7,6 +7,8 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 
 import uuid
 from typing import Tuple
+from flask_negotiate import consumes
+
 
 from flask import Flask, Response, jsonify
 
@@ -321,3 +323,26 @@ def test_404_no_such_method() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
+
+
+def test_request_needs_content_type() -> None:
+    """
+    Routes which require a content type are supported.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    @consumes('application/json')
+    def _() -> str:
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    response = test_client.get('/', content_type='application/json')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
