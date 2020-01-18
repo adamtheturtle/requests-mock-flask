@@ -73,6 +73,17 @@ def test_route_with_string_variable():
     def example(my_variable: str) -> Tuple[Response, int]:
         return 'Hello: ' + my_variable
 
+    test_client = app.test_client()
+    response = test_client.get('/Frasier')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: Frasier'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
 
 def test_route_with_int_variable():
     app = Flask(__name__)
@@ -81,12 +92,35 @@ def test_route_with_int_variable():
     def example(my_variable: int) -> Tuple[Response, int]:
         return 'Hello: ' + str(my_variable + 5)
 
+    test_client = app.test_client()
+    response = test_client.get('/4')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: 9'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
 def test_route_with_float_variable():
     app = Flask(__name__)
 
-    @app.route('/<int:my_variable>')
+    @app.route('/<float:my_variable>')
     def example(my_variable: float) -> Tuple[Response, int]:
         return 'Hello: ' + str(my_variable + 5)
+
+    test_client = app.test_client()
+    response = test_client.get('/4.0')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: 9.0'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
 
 def test_route_with_path_variable_with_slash():
     app = Flask(__name__)
@@ -94,6 +128,17 @@ def test_route_with_path_variable_with_slash():
     @app.route('/<path:my_variable>')
     def example(my_variable: str) -> Tuple[Response, int]:
         return 'Hello: ' + my_variable
+
+    test_client = app.test_client()
+    response = test_client.get('/foo/bar')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: foo/bar'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_route_with_uuid_variable():
     # TODO
@@ -127,6 +172,7 @@ def test_404_no_such_method():
 
 # TODO link to https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 # TODO test with a custom converter
+#  - (maybe https://github.com/wbolster/flask-uuid with strict=False?)
 
 # TODO with requests_mock
 # TODO with responses
