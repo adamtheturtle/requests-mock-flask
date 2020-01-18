@@ -179,7 +179,22 @@ def test_nested_path():
     assert response.data == expected_data
 
 def test_route_with_multiple_variables():
-    pass
+    app = Flask(__name__)
+
+    @app.route('/users/<string:my_org>/<string:my_user>/posts')
+    def example(my_org: str, my_user: str) -> Tuple[Response, int]:
+        return 'Posts for: ' + my_org + '/' + my_user
+
+    test_client = app.test_client()
+    response = test_client.get('/users/cranes/frasier/posts')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Posts for: cranes/frasier'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_post_verb():
     pass
