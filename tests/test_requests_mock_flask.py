@@ -1,5 +1,8 @@
 """
 Tests for the ``requests_mock_flask`` package.
+
+Test with a bunch of route types as per:
+https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 """
 
 import uuid
@@ -271,10 +274,3 @@ def test_404_no_such_method():
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
-
-
-# TODO link to https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
-
-# TODO with requests_mock
-# TODO with responses
-# TODO maybe a for loop for each converter in url_map.converters
