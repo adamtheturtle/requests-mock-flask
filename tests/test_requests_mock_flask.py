@@ -18,9 +18,14 @@ def test_simple_route() -> None:
 
     test_client = app.test_client()
     response = test_client.get('/')
-    assert response.status_code == 200
-    assert response.headers['Content-Type'] == 'text/html; charset=utf-8'
-    assert response.data == b'Hello, World!'
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_route_with_json():
     app = Flask(__name__)
@@ -31,10 +36,14 @@ def test_route_with_json():
 
     test_client = app.test_client()
     response = test_client.get('/')
-    assert response.status_code == 200
-    assert response.headers['Content-Type'] == 'application/json'
-    expected_data = {'hello': 'world'}
-    assert response.json == expected_data
+
+    expected_status_code = 200
+    expected_content_type = 'application/json'
+    expected_json = {'hello': 'world'}
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.json == expected_json
 
 def test_route_with_variable_no_type_given():
 
@@ -43,6 +52,17 @@ def test_route_with_variable_no_type_given():
     @app.route('/<my_variable>')
     def example(my_variable: str) -> Tuple[Response, int]:
         return 'Hello: ' + my_variable
+
+    test_client = app.test_client()
+    response = test_client.get('/Frasier')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: Frasier'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 
 def test_route_with_string_variable():
@@ -96,6 +116,12 @@ def test_wrong_type_given():
     pass
 
 def test_custom_converter():
+    pass
+
+def test_404_no_such_path():
+    pass
+
+def test_404_no_such_method():
     pass
 
 
