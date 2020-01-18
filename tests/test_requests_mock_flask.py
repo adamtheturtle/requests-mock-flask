@@ -12,12 +12,12 @@ from flask import Flask, Response, jsonify
 
 def test_simple_route() -> None:
     """
-    Test with a trivial Flask application.
+    A simple GET route works.
     """
     app = Flask(__name__)
 
     @app.route('/')
-    def example() -> str:
+    def _() -> str:
         return 'Hello, World!'
 
     test_client = app.test_client()
@@ -32,10 +32,13 @@ def test_simple_route() -> None:
     assert response.data == expected_data
 
 def test_route_with_json() -> None:
+    """
+    A route that returns JSON data works.
+    """
     app = Flask(__name__)
 
     @app.route('/')
-    def example() -> Tuple[Response, int]:
+    def _() -> Tuple[Response, int]:
         return jsonify({'hello': 'world'}), 201
 
     test_client = app.test_client()
@@ -50,11 +53,13 @@ def test_route_with_json() -> None:
     assert response.json == expected_json
 
 def test_route_with_variable_no_type_given() -> None:
-
+    """
+    A route with a variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<my_variable>')
-    def example(my_variable: str) -> str:
+    def _(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -70,11 +75,13 @@ def test_route_with_variable_no_type_given() -> None:
 
 
 def test_route_with_string_variable() -> None:
-
+    """
+    A route with a string variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<string:my_variable>')
-    def example(my_variable: str) -> str:
+    def _(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -90,10 +97,13 @@ def test_route_with_string_variable() -> None:
 
 
 def test_route_with_int_variable() -> None:
+    """
+    A route with an int variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
-    def example(my_variable: int) -> str:
+    def _(my_variable: int) -> str:
         return 'Hello: ' + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -108,10 +118,13 @@ def test_route_with_int_variable() -> None:
     assert response.data == expected_data
 
 def test_route_with_float_variable() -> None:
+    """
+    A route with a float variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<float:my_variable>')
-    def example(my_variable: float) -> str:
+    def _(my_variable: float) -> str:
         return 'Hello: ' + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -127,10 +140,13 @@ def test_route_with_float_variable() -> None:
 
 
 def test_route_with_path_variable_with_slash() -> None:
+    """
+    A route with a path variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<path:my_variable>')
-    def example(my_variable: str) -> str:
+    def _(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -148,7 +164,7 @@ def test_route_with_uuid_variable() -> None:
     app = Flask(__name__)
 
     @app.route('/<uuid:my_variable>')
-    def example(my_variable: uuid.UUID) -> str:
+    def _(my_variable: uuid.UUID) -> str:
         return 'Hello: ' + my_variable.hex
 
     test_client = app.test_client()
@@ -167,7 +183,7 @@ def test_nested_path() -> None:
     app = Flask(__name__)
 
     @app.route('/users/<int:my_variable>/posts')
-    def example(my_variable: int) -> str:
+    def _(my_variable: int) -> str:
         return 'Posts for: ' + str(my_variable)
 
     test_client = app.test_client()
@@ -185,7 +201,7 @@ def test_route_with_multiple_variables() -> None:
     app = Flask(__name__)
 
     @app.route('/users/<string:my_org>/<string:my_user>/posts')
-    def example(my_org: str, my_user: str) -> str:
+    def _(my_org: str, my_user: str) -> str:
         return 'Posts for: ' + my_org + '/' + my_user
 
     test_client = app.test_client()
@@ -203,7 +219,7 @@ def test_post_verb() -> None:
     app = Flask(__name__)
 
     @app.route('/', methods=['POST'])
-    def example() -> str:
+    def _() -> str:
         return 'Hello, World!'
 
     test_client = app.test_client()
@@ -221,7 +237,7 @@ def test_multiple_http_verbs() -> None:
     app = Flask(__name__)
 
     @app.route('/', methods=['GET', 'POST'])
-    def example() -> str:
+    def _() -> str:
         return 'Hello, World!'
 
     test_client = app.test_client()
@@ -244,7 +260,7 @@ def test_wrong_type_given() -> None:
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
-    def example(my_variable: int) -> str:
+    def _(my_variable: int) -> str:
         return 'Hello: ' + str(my_variable)
 
     test_client = app.test_client()
@@ -261,7 +277,7 @@ def test_404_no_such_method() -> None:
     app = Flask(__name__)
 
     @app.route('/')
-    def example() -> str:
+    def _() -> str:
         return 'Hello, World!'
 
     test_client = app.test_client()
