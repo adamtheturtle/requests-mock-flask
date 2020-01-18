@@ -238,21 +238,42 @@ def test_multiple_http_verbs():
     assert post_response.data == expected_data
 
 def test_wrong_type_given():
-    pass
+    app = Flask(__name__)
 
-def test_custom_converter():
-    pass
+    @app.route('/<int:my_variable>')
+    def example(my_variable: int) -> Tuple[Response, int]:
+        return 'Hello: ' + str(my_variable)
 
-def test_404_no_such_path():
-    pass
+    test_client = app.test_client()
+    response = test_client.get('/a')
+
+    expected_status_code = 404
+    expected_content_type = 'text/html'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert b'not found on the server' in response.data
 
 def test_404_no_such_method():
-    pass
+    app = Flask(__name__)
+
+    @app.route('/')
+    def example() -> str:
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    response = test_client.post('/')
+
+    expected_status_code = 405
+    expected_content_type = 'text/html'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert b'not allowed for the requested URL.' in response.data
 
 
 # TODO link to https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
-# TODO test with a custom converter
-#  - (maybe https://github.com/wbolster/flask-uuid with strict=False?)
 
 # TODO with requests_mock
 # TODO with responses
