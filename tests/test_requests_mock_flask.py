@@ -161,6 +161,9 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.data == expected_data
 
 def test_route_with_uuid_variable() -> None:
+    """
+    A route with a uuid variable works.
+    """
     app = Flask(__name__)
 
     @app.route('/<uuid:my_variable>')
@@ -180,6 +183,9 @@ def test_route_with_uuid_variable() -> None:
     assert response.data == expected_data
 
 def test_nested_path() -> None:
+    """
+    A route with a variable nested in a path works.
+    """
     app = Flask(__name__)
 
     @app.route('/users/<int:my_variable>/posts')
@@ -198,6 +204,9 @@ def test_nested_path() -> None:
     assert response.data == expected_data
 
 def test_route_with_multiple_variables() -> None:
+    """
+    A route with multiple variables works.
+    """
     app = Flask(__name__)
 
     @app.route('/users/<string:my_org>/<string:my_user>/posts')
@@ -216,6 +225,9 @@ def test_route_with_multiple_variables() -> None:
     assert response.data == expected_data
 
 def test_post_verb() -> None:
+    """
+    A route with the POST verb works.
+    """
     app = Flask(__name__)
 
     @app.route('/', methods=['POST'])
@@ -234,6 +246,9 @@ def test_post_verb() -> None:
     assert response.data == expected_data
 
 def test_multiple_http_verbs() -> None:
+    """
+    A route with multiple verbs works.
+    """
     app = Flask(__name__)
 
     @app.route('/', methods=['GET', 'POST'])
@@ -257,6 +272,9 @@ def test_multiple_http_verbs() -> None:
     assert post_response.data == expected_data
 
 def test_wrong_type_given() -> None:
+    """
+    A route with the wrong type given works.
+    """
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
@@ -274,6 +292,9 @@ def test_wrong_type_given() -> None:
     assert b'not found on the server' in response.data
 
 def test_404_no_such_method() -> None:
+    """
+    A route with the wrong method given works.
+    """
     app = Flask(__name__)
 
     @app.route('/')
