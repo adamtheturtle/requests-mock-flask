@@ -31,17 +31,17 @@ def test_simple_route() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_route_with_json():
+def test_route_with_json() -> None:
     app = Flask(__name__)
 
     @app.route('/')
     def example() -> Tuple[Response, int]:
-        return jsonify({'hello': 'world'})
+        return jsonify({'hello': 'world'}), 201
 
     test_client = app.test_client()
     response = test_client.get('/')
 
-    expected_status_code = 200
+    expected_status_code = 201
     expected_content_type = 'application/json'
     expected_json = {'hello': 'world'}
 
@@ -49,12 +49,12 @@ def test_route_with_json():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.json == expected_json
 
-def test_route_with_variable_no_type_given():
+def test_route_with_variable_no_type_given() -> None:
 
     app = Flask(__name__)
 
     @app.route('/<my_variable>')
-    def example(my_variable: str) -> Tuple[Response, int]:
+    def example(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -69,12 +69,12 @@ def test_route_with_variable_no_type_given():
     assert response.data == expected_data
 
 
-def test_route_with_string_variable():
+def test_route_with_string_variable() -> None:
 
     app = Flask(__name__)
 
     @app.route('/<string:my_variable>')
-    def example(my_variable: str) -> Tuple[Response, int]:
+    def example(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -89,11 +89,11 @@ def test_route_with_string_variable():
     assert response.data == expected_data
 
 
-def test_route_with_int_variable():
+def test_route_with_int_variable() -> None:
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
-    def example(my_variable: int) -> Tuple[Response, int]:
+    def example(my_variable: int) -> str:
         return 'Hello: ' + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -107,11 +107,11 @@ def test_route_with_int_variable():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_route_with_float_variable():
+def test_route_with_float_variable() -> None:
     app = Flask(__name__)
 
     @app.route('/<float:my_variable>')
-    def example(my_variable: float) -> Tuple[Response, int]:
+    def example(my_variable: float) -> str:
         return 'Hello: ' + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -126,11 +126,11 @@ def test_route_with_float_variable():
     assert response.data == expected_data
 
 
-def test_route_with_path_variable_with_slash():
+def test_route_with_path_variable_with_slash() -> None:
     app = Flask(__name__)
 
     @app.route('/<path:my_variable>')
-    def example(my_variable: str) -> Tuple[Response, int]:
+    def example(my_variable: str) -> str:
         return 'Hello: ' + my_variable
 
     test_client = app.test_client()
@@ -144,11 +144,11 @@ def test_route_with_path_variable_with_slash():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_route_with_uuid_variable():
+def test_route_with_uuid_variable() -> None:
     app = Flask(__name__)
 
     @app.route('/<uuid:my_variable>')
-    def example(my_variable: uuid.UUID) -> Tuple[Response, int]:
+    def example(my_variable: uuid.UUID) -> str:
         return 'Hello: ' + my_variable.hex
 
     test_client = app.test_client()
@@ -163,11 +163,11 @@ def test_route_with_uuid_variable():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_nested_path():
+def test_nested_path() -> None:
     app = Flask(__name__)
 
     @app.route('/users/<int:my_variable>/posts')
-    def example(my_variable: int) -> Tuple[Response, int]:
+    def example(my_variable: int) -> str:
         return 'Posts for: ' + str(my_variable)
 
     test_client = app.test_client()
@@ -181,11 +181,11 @@ def test_nested_path():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_route_with_multiple_variables():
+def test_route_with_multiple_variables() -> None:
     app = Flask(__name__)
 
     @app.route('/users/<string:my_org>/<string:my_user>/posts')
-    def example(my_org: str, my_user: str) -> Tuple[Response, int]:
+    def example(my_org: str, my_user: str) -> str:
         return 'Posts for: ' + my_org + '/' + my_user
 
     test_client = app.test_client()
@@ -199,7 +199,7 @@ def test_route_with_multiple_variables():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_post_verb():
+def test_post_verb() -> None:
     app = Flask(__name__)
 
     @app.route('/', methods=['POST'])
@@ -217,7 +217,7 @@ def test_post_verb():
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-def test_multiple_http_verbs():
+def test_multiple_http_verbs() -> None:
     app = Flask(__name__)
 
     @app.route('/', methods=['GET', 'POST'])
@@ -240,11 +240,11 @@ def test_multiple_http_verbs():
     assert post_response.headers['Content-Type'] == expected_content_type
     assert post_response.data == expected_data
 
-def test_wrong_type_given():
+def test_wrong_type_given() -> None:
     app = Flask(__name__)
 
     @app.route('/<int:my_variable>')
-    def example(my_variable: int) -> Tuple[Response, int]:
+    def example(my_variable: int) -> str:
         return 'Hello: ' + str(my_variable)
 
     test_client = app.test_client()
@@ -257,7 +257,7 @@ def test_wrong_type_given():
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
-def test_404_no_such_method():
+def test_404_no_such_method() -> None:
     app = Flask(__name__)
 
     @app.route('/')
