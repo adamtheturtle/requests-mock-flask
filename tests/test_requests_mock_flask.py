@@ -10,6 +10,7 @@ from typing import Tuple
 
 from flask import Flask, Response, jsonify
 
+
 def test_simple_route() -> None:
     """
     A simple GET route works.
@@ -31,6 +32,7 @@ def test_simple_route() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_route_with_json() -> None:
     """
     A route that returns JSON data works.
@@ -51,6 +53,7 @@ def test_route_with_json() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.json == expected_json
+
 
 def test_route_with_variable_no_type_given() -> None:
     """
@@ -117,6 +120,7 @@ def test_route_with_int_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_route_with_float_variable() -> None:
     """
     A route with a float variable works.
@@ -160,6 +164,7 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_route_with_uuid_variable() -> None:
     """
     A route with a uuid variable works.
@@ -182,6 +187,7 @@ def test_route_with_uuid_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_nested_path() -> None:
     """
     A route with a variable nested in a path works.
@@ -202,6 +208,7 @@ def test_nested_path() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
 
 def test_route_with_multiple_variables() -> None:
     """
@@ -224,6 +231,7 @@ def test_route_with_multiple_variables() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_post_verb() -> None:
     """
     A route with the POST verb works.
@@ -244,6 +252,7 @@ def test_post_verb() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
 
 def test_multiple_http_verbs() -> None:
     """
@@ -271,6 +280,7 @@ def test_multiple_http_verbs() -> None:
     assert post_response.headers['Content-Type'] == expected_content_type
     assert post_response.data == expected_data
 
+
 def test_wrong_type_given() -> None:
     """
     A route with the wrong type given works.
@@ -291,6 +301,7 @@ def test_wrong_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
+
 def test_404_no_such_method() -> None:
     """
     A route with the wrong method given works.
@@ -306,7 +317,6 @@ def test_404_no_such_method() -> None:
 
     expected_status_code = 405
     expected_content_type = 'text/html'
-    expected_data = b'Hello, World!'
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
