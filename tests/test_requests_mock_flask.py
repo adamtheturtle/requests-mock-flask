@@ -5,12 +5,14 @@ Test with a bunch of route types as per:
 https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 """
 
+import json
 import uuid
 from typing import Tuple
 
 import requests
 import responses
-from flask import Flask, Response, jsonify
+from flask import Flask, Response, jsonify, request
+from flask_negotiate import consumes
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -338,3 +340,53 @@ def test_404_no_such_method() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
+
+
+def test_request_needs_content_type() -> None:
+    """
+    Routes which require a content type are supported.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    @consumes('application/json')
+    def _() -> str:
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    response = test_client.get('/', content_type='application/json')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
+def test_request_needs_data() -> None:
+    """
+    Routes which require data are supported.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    @consumes('application/json')
+    def _() -> str:
+        return str(request.get_json()['hello'])
+
+    test_client = app.test_client()
+    response = test_client.get(
+        '/',
+        content_type='application/json',
+        data=json.dumps({'hello': 'world'}),
+    )
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'world'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
