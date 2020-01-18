@@ -2,6 +2,7 @@
 Tests for the ``requests_mock_flask`` package.
 """
 
+import uuid
 from typing import Tuple
 
 from flask import Flask, Response, jsonify
@@ -141,8 +142,23 @@ def test_route_with_path_variable_with_slash():
     assert response.data == expected_data
 
 def test_route_with_uuid_variable():
-    # TODO
-    pass
+    app = Flask(__name__)
+
+    @app.route('/<uuid:my_variable>')
+    def example(my_variable: uuid.UUID) -> Tuple[Response, int]:
+        return 'Hello: ' + my_variable.hex
+
+    test_client = app.test_client()
+    random_uuid = uuid.uuid4()
+    response = test_client.get(f'/{random_uuid}')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = bytes(f'Hello: {random_uuid.hex}', 'utf-8')
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_nested_path():
     # TODO variable after a non-variable, and then with another path after?
