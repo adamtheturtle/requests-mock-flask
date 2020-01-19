@@ -50,6 +50,19 @@ def _request_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
+    try:
+        cookies = request.cookies
+    except AttributeError:
+        import pdb; pdb.set_trace()
+        cookies = {}
+
+    for key, value in cookies.items():
+        test_client.set_cookie(
+            server_name=request.base_url,
+            key=key,
+            value=value,
+        )
+
     response = test_client.open(
         path=request.path_url,
         method=request.method,
