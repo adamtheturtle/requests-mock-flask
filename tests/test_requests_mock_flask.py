@@ -11,7 +11,7 @@ from typing import Tuple
 
 import requests
 import responses
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
 
 from requests_mock_flask import add_flask_app_to_mock
@@ -267,6 +267,27 @@ def test_route_with_path_variable_with_slash() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+
+def test_route_with_string_variable_with_slash() -> None:
+    """
+    A route with a string variable when given a slash works.
+    """
+    app = Flask(__name__)
+
+    @app.route('/<string:my_variable>')
+    def _(_: str) -> str:
+        ...  # pragma: no cover
+
+    test_client = app.test_client()
+    response = test_client.get('/foo/bar')
+
+    expected_status_code = 404
+    expected_content_type = 'text/html'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert b'not found on the server' in response.data
 
 
 def test_route_with_uuid_variable() -> None:
@@ -530,6 +551,92 @@ def test_request_needs_data() -> None:
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'world'
 
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
+def test_multiple_functions_same_path_different_type() -> None:
+    """
+    When multiple functions exist with the same path but have a different type,
+    the mock matches them just the same.
+    """
+    app = Flask(__name__)
+
+    @app.route('/<my_variable>')
+    def _(_: float) -> str:
+        ...  # pragma: no cover
+
+    @app.route('/<int:my_variable>')
+    def ___(my_variable: int) -> str:
+        return 'Is int: ' + str(my_variable)
+
+    @app.route('/<string:my_variable>')
+    def ____(_: str) -> str:
+        ...  # pragma: no cover
+
+    test_client = app.test_client()
+    response = test_client.get('/4')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Is int: 4'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
+def test_query_string() -> None:
+    """
+    Query strings work.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    def _() -> str:
+        result = request.args['frasier']
+        return 'Hello: ' + str(result)
+
+    test_client = app.test_client()
+    response = test_client.get('/?frasier=crane')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: crane'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
+def test_cookies() -> None:
+    """
+    Cookies work.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    def _() -> Response:
+        response = make_response()
+        response.set_cookie('frasier_set', 'crane_set')
+        result = request.cookies['frasier']
+        response.data = 'Hello: ' + result
+        assert isinstance(response, Response)
+        return response
+
+    test_client = app.test_client()
+    test_client.set_cookie(server_name='', key='frasier', value='crane')
+    original_cookies = set(test_client.cookie_jar)
+    response = test_client.get('/')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: crane'
+
+    (new_cookie, ) = set(test_client.cookie_jar) - original_cookies
+    assert new_cookie.name == 'frasier_set'
+    assert new_cookie.value == 'crane_set'
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
