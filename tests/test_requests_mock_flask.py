@@ -436,7 +436,7 @@ def test_query_string() -> None:
     @app.route('/')
     def _() -> str:
         result = request.args['frasier']
-        return 'Hello: ' + result
+        return 'Hello: ' + str(result)
 
     test_client = app.test_client()
     response = test_client.get('/?frasier=crane')
@@ -457,11 +457,12 @@ def test_cookies() -> None:
     app = Flask(__name__)
 
     @app.route('/')
-    def _() -> str:
+    def _() -> Response:
         response = make_response()
         response.set_cookie('frasier_set', 'crane_set')
         result = request.cookies['frasier']
         response.data = 'Hello: ' + result
+        assert isinstance(response, Response)
         return response
 
     test_client = app.test_client()
