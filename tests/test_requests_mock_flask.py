@@ -797,3 +797,4 @@ def test_cookies() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+    assert responses_response.cookies['frasier_set'] == 'crane_set'
