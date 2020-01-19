@@ -67,7 +67,6 @@ def test_simple_route() -> None:
     assert req_mock_response.text == expected_data.decode()
 
 
-
 def test_headers() -> None:
     """
     Request headers are sent.
@@ -511,6 +510,7 @@ def test_route_with_uuid_variable() -> None:
     assert req_mock_response.headers['Content-Type'] == expected_content_type
     assert req_mock_response.text == expected_data.decode()
 
+
 def test_nested_path() -> None:
     """
     A route with a variable nested in a path works.
@@ -614,6 +614,7 @@ def test_route_with_multiple_variables() -> None:
     assert req_mock_response.headers['Content-Type'] == expected_content_type
     assert req_mock_response.text == expected_data.decode()
 
+
 def test_post_verb() -> None:
     """
     A route with the POST verb works.
@@ -660,6 +661,7 @@ def test_post_verb() -> None:
     assert req_mock_response.status_code == expected_status_code
     assert req_mock_response.headers['Content-Type'] == expected_content_type
     assert req_mock_response.text == expected_data.decode()
+
 
 def test_multiple_http_verbs() -> None:
     """
@@ -719,12 +721,12 @@ def test_multiple_http_verbs() -> None:
 
     assert req_mock_get_response.status_code == expected_status_code
     assert req_mock_get_response.headers['Content-Type'
-                                          ] == expected_content_type
+                                         ] == expected_content_type
     assert req_mock_get_response.text == expected_data.decode()
 
     assert req_mock_post_response.status_code == expected_status_code
     assert req_mock_post_response.headers['Content-Type'
-                                           ] == expected_content_type
+                                          ] == expected_content_type
     assert req_mock_post_response.text == expected_data.decode()
 
 
