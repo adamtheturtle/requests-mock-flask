@@ -750,12 +750,10 @@ def test_cookies() -> None:
     """
     Cookies work.
     """
-    # TODO does this work differently with get?
     app = Flask(__name__)
 
     @app.route('/', methods=['POST'])
     def _() -> Response:
-        # import pdb; pdb.set_trace()
         response = make_response()
         response.set_cookie('frasier_set', 'crane_set')
         assert request.cookies['frasier'] == 'crane'
