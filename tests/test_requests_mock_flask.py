@@ -750,6 +750,7 @@ def test_cookies() -> None:
     """
     Cookies work.
     """
+    # TODO does this work differently with get?
     app = Flask(__name__)
 
     @app.route('/')
@@ -776,3 +777,19 @@ def test_cookies() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com',
+            cookies={'frasier': 'crane'},
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
