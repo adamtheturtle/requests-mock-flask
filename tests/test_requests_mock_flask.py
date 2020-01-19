@@ -11,6 +11,7 @@ from typing import Tuple
 
 import pytest
 import requests
+import requests_mock
 import responses
 from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
@@ -51,6 +52,20 @@ def test_simple_route() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 
 def test_headers() -> None:
