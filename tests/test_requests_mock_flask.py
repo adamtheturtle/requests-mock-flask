@@ -9,7 +9,7 @@ import json
 import uuid
 from typing import Tuple
 
-from flask import Flask, Response, jsonify, request, make_response
+from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
 
 
