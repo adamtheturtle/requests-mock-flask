@@ -57,6 +57,30 @@ def test_simple_route() -> None:
     assert responses_response.text == expected_data.decode()
 
 
+def test_headers() -> None:
+    """
+    A simple GET route works.
+    """
+    app = Flask(__name__)
+
+    @app.route('/')
+    def _() -> str:
+        assert 'Content-Type' not in request.headers
+        assert request.headers['hello'] == 'world'
+        return 'Hello, World!'
+
+    test_client = app.test_client()
+    response = test_client.get('/', headers={'hello': 'world'})
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello, World!'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+
 def test_route_with_json() -> None:
     """
     A route that returns JSON data works.
