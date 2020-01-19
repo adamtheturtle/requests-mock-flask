@@ -1,4 +1,5 @@
 Flask==1.1.1
-responses==0.10.9
-requests==2.22.0
 Werkzeug==0.16.0
+requests-mock==1.7.0
+requests==2.22.0
+responses==0.10.9
