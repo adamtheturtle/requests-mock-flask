@@ -18,6 +18,7 @@ from flask_negotiate import consumes
 from requests_mock_flask import add_flask_app_to_mock
 
 
+
 def test_simple_route() -> None:
     """
     A simple GET route works.
@@ -781,18 +782,18 @@ def test_cookies() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    # with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
-    #     add_flask_app_to_mock(
-    #         mock_obj=resp_m,
-    #         flask_app=app,
-    #         base_url='http://www.example.com',
-    #     )
-    #
-    #     responses_response = requests.post(
-    #         'http://www.example.com',
-    #         cookies={'frasier': 'crane'},
-    #     )
-    #
-    # assert responses_response.status_code == expected_status_code
-    # assert responses_response.headers['Content-Type'] == expected_content_type
-    # assert responses_response.text == expected_data.decode()
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.post(
+            'http://www.example.com',
+            cookies={'frasier': 'crane', 'frasier2': 'crane2'},
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()

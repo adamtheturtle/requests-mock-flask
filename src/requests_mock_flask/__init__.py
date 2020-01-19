@@ -10,6 +10,8 @@ from urllib.parse import urljoin
 import responses
 from flask import Flask
 from requests import PreparedRequest
+from werkzeug.http import parse_cookie
+
 
 
 def add_flask_app_to_mock(
@@ -50,15 +52,16 @@ def _request_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    try:
-        cookies = request.cookies
-    except AttributeError:
-        import pdb; pdb.set_trace()
-        cookies = {}
+    cookie_string = request.headers.get('Cookie', '')
+    cookie_list = cookie_string.split(';')
+    cookie_list_no_empty = [item for item in cookie_list if item]
+    # import pdb; pdb.set_trace()
+    request_cookies = [list(parse_cookie(cookie).items())[0] for cookie in cookie_list_no_empty]
+    cookies_dict = dict(request_cookies)
 
-    for key, value in cookies.items():
+    for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name=request.base_url,
+            server_name='',
             key=key,
             value=value,
         )
