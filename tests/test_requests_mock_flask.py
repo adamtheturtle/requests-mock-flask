@@ -551,6 +551,19 @@ def test_wrong_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get('http://www.example.com/a')
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert 'not found on the server' in responses_response.text
+
 
 def test_404_no_such_method() -> None:
     """
