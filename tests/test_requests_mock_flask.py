@@ -593,7 +593,7 @@ def test_404_no_such_method() -> None:
         )
 
         with pytest.raises(requests.exceptions.ConnectionError):
-            responses_response = requests.post('http://www.example.com/')
+            requests.post('http://www.example.com/')
 
 
 def test_request_needs_content_type() -> None:
