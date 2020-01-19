@@ -101,6 +101,8 @@ def _requests_mock_callback(
     response.
 
     :param request: The incoming request to pass onto the flask app.
+    :context: An object containing the collected known data about this
+        response.
     :param flask_app: The Flask application to pass requests to.
     :return: A tuple of status code, response headers and response data
         from the flask app.
