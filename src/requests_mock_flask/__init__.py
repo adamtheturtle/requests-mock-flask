@@ -55,7 +55,6 @@ def _request_callback(
     cookie_string = request.headers.get('Cookie', '')
     cookie_list = cookie_string.split(';')
     cookie_list_no_empty = [item for item in cookie_list if item]
-    # import pdb; pdb.set_trace()
     request_cookies = [list(parse_cookie(cookie).items())[0] for cookie in cookie_list_no_empty]
     cookies_dict = dict(request_cookies)
 
