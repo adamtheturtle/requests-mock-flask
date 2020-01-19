@@ -13,7 +13,6 @@ from requests import PreparedRequest
 from werkzeug.http import parse_cookie
 
 
-
 def add_flask_app_to_mock(
     mock_obj: responses.RequestsMock,
     flask_app: Flask,
@@ -55,7 +54,10 @@ def _request_callback(
     cookie_string = request.headers.get('Cookie', '')
     cookie_list = cookie_string.split(';')
     cookie_list_no_empty = [item for item in cookie_list if item]
-    request_cookies = [list(parse_cookie(cookie).items())[0] for cookie in cookie_list_no_empty]
+    request_cookies = [
+        list(parse_cookie(cookie).items())[0]
+        for cookie in cookie_list_no_empty
+    ]
     cookies_dict = dict(request_cookies)
 
     for key, value in cookies_dict.items():

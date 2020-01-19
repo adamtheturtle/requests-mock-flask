@@ -18,7 +18,6 @@ from flask_negotiate import consumes
 from requests_mock_flask import add_flask_app_to_mock
 
 
-
 def test_simple_route() -> None:
     """
     A simple GET route works.
@@ -791,7 +790,10 @@ def test_cookies() -> None:
 
         responses_response = requests.post(
             'http://www.example.com',
-            cookies={'frasier': 'crane', 'frasier2': 'crane2'},
+            cookies={
+                'frasier': 'crane',
+                'frasier2': 'crane2',
+            },
         )
 
     assert responses_response.status_code == expected_status_code
