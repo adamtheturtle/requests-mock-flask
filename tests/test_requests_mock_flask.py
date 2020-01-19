@@ -428,6 +428,23 @@ def test_query_string() -> None:
     """
     Query strings work.
     """
+    app = Flask(__name__)
+
+    @app.route('/')
+    def _() -> str:
+        result = request.args['frasier']
+        return 'Hello: ' + result
+
+    test_client = app.test_client()
+    response = test_client.get('/?frasier=crane')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: crane'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
 
 def test_cookies() -> None:
     """
