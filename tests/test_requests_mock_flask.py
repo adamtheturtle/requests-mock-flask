@@ -107,6 +107,22 @@ def test_headers() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com',
+            headers={'hello': 'world'},
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_route_with_json() -> None:
     """
@@ -141,6 +157,19 @@ def test_route_with_json() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.json() == expected_json
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.json() == expected_json
 
 
 def test_route_with_variable_no_type_given() -> None:
@@ -177,6 +206,19 @@ def test_route_with_variable_no_type_given() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/Frasier')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_route_with_string_variable() -> None:
     """
@@ -211,6 +253,19 @@ def test_route_with_string_variable() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/Frasier')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 
 def test_route_with_int_variable() -> None:
@@ -247,6 +302,19 @@ def test_route_with_int_variable() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/4')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_route_with_float_variable() -> None:
     """
@@ -281,6 +349,19 @@ def test_route_with_float_variable() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/4.0')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 
 def test_route_with_path_variable_with_slash() -> None:
@@ -317,6 +398,19 @@ def test_route_with_path_variable_with_slash() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/foo/bar')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_route_with_string_variable_with_slash() -> None:
     """
@@ -350,6 +444,19 @@ def test_route_with_string_variable_with_slash() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert 'not found on the server' in responses_response.text
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/foo/bar')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert 'not found on the server' in req_mock_response.text
 
 
 def test_route_with_uuid_variable() -> None:
@@ -389,6 +496,20 @@ def test_route_with_uuid_variable() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            f'http://www.example.com/{random_uuid}',
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 def test_nested_path() -> None:
     """
@@ -425,6 +546,21 @@ def test_nested_path() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com/users/4/posts',
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 
 def test_route_with_multiple_variables() -> None:
@@ -463,6 +599,20 @@ def test_route_with_multiple_variables() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com/users/cranes/frasier/posts',
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 def test_post_verb() -> None:
     """
@@ -498,6 +648,18 @@ def test_post_verb() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.post('http://www.example.com/')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 def test_multiple_http_verbs() -> None:
     """
@@ -545,6 +707,26 @@ def test_multiple_http_verbs() -> None:
                                            ] == expected_content_type
     assert responses_post_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_get_response = requests.get('http://www.example.com/')
+        req_mock_post_response = requests.post('http://www.example.com/')
+
+    assert req_mock_get_response.status_code == expected_status_code
+    assert req_mock_get_response.headers['Content-Type'
+                                          ] == expected_content_type
+    assert req_mock_get_response.text == expected_data.decode()
+
+    assert req_mock_post_response.status_code == expected_status_code
+    assert req_mock_post_response.headers['Content-Type'
+                                           ] == expected_content_type
+    assert req_mock_post_response.text == expected_data.decode()
+
 
 def test_wrong_type_given() -> None:
     """
@@ -579,6 +761,19 @@ def test_wrong_type_given() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert 'not found on the server' in responses_response.text
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/a')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert 'not found on the server' in req_mock_response.text
+
 
 def test_404_no_such_method() -> None:
     """
@@ -608,6 +803,16 @@ def test_404_no_such_method() -> None:
         )
 
         with pytest.raises(requests.exceptions.ConnectionError):
+            requests.post('http://www.example.com/')
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        with pytest.raises(requests_mock.exceptions.NoMockAddress):
             requests.post('http://www.example.com/')
 
 
