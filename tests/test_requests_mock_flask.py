@@ -166,6 +166,26 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+def test_route_with_string_variable_with_slash() -> None:
+    """
+    A route with a string variable when given a slash works.
+    """
+    app = Flask(__name__)
+
+    @app.route('/<string:my_variable>')
+    def _(my_variable: str) -> str:
+        return 'Hello: ' + my_variable
+
+    test_client = app.test_client()
+    response = test_client.get('/foo/bar')
+
+    expected_status_code = 404
+    expected_content_type = 'text/html'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert b'not found on the server' in response.data
+
 
 def test_route_with_uuid_variable() -> None:
     """
