@@ -393,3 +393,43 @@ def test_request_needs_data() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
+def test_multiple_functions_same_path_different_type() -> None:
+    """
+    When multiple functions exist with the same path but have a different type,
+    the mock matches them just the same.
+    """
+    app = Flask(__name__)
+
+    @app.route('/<my_variable>')
+    def _(_: float) -> str:
+        ...  # pragma: no cover
+
+    @app.route('/<int:my_variable>')
+    def __(my_variable: int) -> str:
+        return 'Is int: ' + str(my_variable)
+
+    @app.route('/<string:my_variable>')
+    def ___(_: str) -> str:
+        ...  # pragma: no cover
+
+    test_client = app.test_client()
+    response = test_client.get('/4')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Is int: 4'
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+def test_query_string() -> None:
+    """
+    Query strings work.
+    """
+
+def test_cookies() -> None:
+    """
+    Cookies work.
+    """
