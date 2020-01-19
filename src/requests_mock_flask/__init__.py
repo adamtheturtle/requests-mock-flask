@@ -7,6 +7,7 @@ from functools import partial
 from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urljoin
 
+import requests_mock
 import responses
 from flask import Flask
 from requests import PreparedRequest
@@ -14,7 +15,7 @@ from werkzeug.http import parse_cookie
 
 
 def add_flask_app_to_mock(
-    mock_obj: responses.RequestsMock,
+    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker],
     flask_app: Flask,
     base_url: str,
 ) -> None:
