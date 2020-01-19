@@ -48,6 +48,8 @@ def _request_callback(
         from the flask app.
     """
     test_client = flask_app.test_client()
+    # See parameters at
+    # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     response = test_client.open(
         path=request.path_url,
         method=request.method,
