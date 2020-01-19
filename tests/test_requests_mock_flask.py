@@ -225,9 +225,7 @@ def test_route_with_int_variable() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
-            'http://www.example.com/4',
-        )
+        responses_response = requests.get('http://www.example.com/4')
 
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
