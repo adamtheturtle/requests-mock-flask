@@ -174,7 +174,7 @@ def test_route_with_string_variable_with_slash() -> None:
     app = Flask(__name__)
 
     @app.route('/<string:my_variable>')
-    def _(my_variable: str) -> str:
+    def _(_: str) -> str:
         ...  # pragma: no cover
 
     test_client = app.test_client()
