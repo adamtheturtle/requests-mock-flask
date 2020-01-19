@@ -26,11 +26,14 @@ def add_flask_app_to_mock(
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
     if isinstance(mock_obj, responses.RequestsMock):
-        callback = partial(_responses_callback, flask_app=flask_app)
-        register_method = partial(mock_obj.add_callback, callback=callback)
+        resp_callback = partial(_responses_callback, flask_app=flask_app)
+        register_method = partial(
+            mock_obj.add_callback,
+            callback=resp_callback,
+        )
     else:
-        callback = partial(_requests_mock_callback, flask_app=flask_app)
-        register_method = partial(mock_obj.register_uri, text=callback)
+        req_m_callback = partial(_requests_mock_callback, flask_app=flask_app)
+        register_method = partial(mock_obj.register_uri, text=req_m_callback)
 
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any
