@@ -9,6 +9,7 @@ import json
 import uuid
 from typing import Tuple
 
+import pytest
 import requests
 import responses
 from flask import Flask, Response, jsonify, make_response, request
@@ -570,6 +571,16 @@ def test_404_no_such_method() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        with pytest.raises(requests.exceptions.ConnectionError):
+            responses_response = requests.post('http://www.example.com/')
 
 
 def test_request_needs_content_type() -> None:
