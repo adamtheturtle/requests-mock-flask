@@ -408,11 +408,11 @@ def test_multiple_functions_same_path_different_type() -> None:
         ...  # pragma: no cover
 
     @app.route('/<int:my_variable>')
-    def __(my_variable: int) -> str:
+    def ___(my_variable: int) -> str:
         return 'Is int: ' + str(my_variable)
 
     @app.route('/<string:my_variable>')
-    def ___(_: str) -> str:
+    def ____(_: str) -> str:
         ...  # pragma: no cover
 
     test_client = app.test_client()
