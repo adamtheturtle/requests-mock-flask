@@ -54,7 +54,7 @@ def test_simple_route() -> None:
 
 def test_headers() -> None:
     """
-    A simple GET route works.
+    Request headers are sent.
     """
     app = Flask(__name__)
 
