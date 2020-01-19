@@ -854,6 +854,22 @@ def test_request_needs_content_type() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com',
+            headers={'Content-Type': 'application/json'},
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_request_needs_data() -> None:
     """
@@ -897,6 +913,23 @@ def test_request_needs_data() -> None:
     assert responses_response.status_code == expected_status_code
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps({'hello': 'world'}),
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 
 def test_multiple_functions_same_path_different_type() -> None:
@@ -942,6 +975,19 @@ def test_multiple_functions_same_path_different_type() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
 
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get('http://www.example.com/4')
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+
 
 def test_query_string() -> None:
     """
@@ -964,6 +1010,36 @@ def test_query_string() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.get(
+            'http://www.example.com?frasier=crane',
+        )
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.get(
+            'http://www.example.com?frasier=crane',
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
 
 
 def test_cookies() -> None:
@@ -1018,3 +1094,23 @@ def test_cookies() -> None:
     assert responses_response.headers['Content-Type'] == expected_content_type
     assert responses_response.text == expected_data.decode()
     assert responses_response.cookies['frasier_set'] == 'crane_set'
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.post(
+            'http://www.example.com',
+            cookies={
+                'frasier': 'crane',
+                'frasier2': 'crane2',
+            },
+        )
+
+    assert req_mock_response.status_code == expected_status_code
+    assert req_mock_response.headers['Content-Type'] == expected_content_type
+    assert req_mock_response.text == expected_data.decode()
+    assert req_mock_response.cookies['frasier_set'] == 'crane_set'
