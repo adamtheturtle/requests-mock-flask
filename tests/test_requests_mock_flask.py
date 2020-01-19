@@ -175,7 +175,7 @@ def test_route_with_string_variable_with_slash() -> None:
 
     @app.route('/<string:my_variable>')
     def _(my_variable: str) -> str:
-        return 'Hello: ' + my_variable
+        ...  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.get('/foo/bar')
