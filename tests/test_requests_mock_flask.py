@@ -9,7 +9,7 @@ import json
 import uuid
 from typing import Tuple
 
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, make_response
 from flask_negotiate import consumes
 
 
@@ -165,6 +165,7 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
+
 
 def test_route_with_string_variable_with_slash() -> None:
     """
@@ -394,6 +395,7 @@ def test_request_needs_data() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_multiple_functions_same_path_different_type() -> None:
     """
     When multiple functions exist with the same path but have a different type,
@@ -424,6 +426,7 @@ def test_multiple_functions_same_path_different_type() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_query_string() -> None:
     """
     Query strings work.
@@ -446,7 +449,33 @@ def test_query_string() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
+
 def test_cookies() -> None:
     """
     Cookies work.
     """
+    app = Flask(__name__)
+
+    @app.route('/')
+    def _() -> str:
+        response = make_response()
+        response.set_cookie('frasier_set', 'crane_set')
+        result = request.cookies['frasier']
+        response.data = 'Hello: ' + result
+        return response
+
+    test_client = app.test_client()
+    test_client.set_cookie(server_name='', key='frasier', value='crane')
+    original_cookies = set(test_client.cookie_jar)
+    response = test_client.get('/')
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b'Hello: crane'
+
+    (new_cookie, ) = set(test_client.cookie_jar) - original_cookies
+    assert new_cookie.name == 'frasier_set'
+    assert new_cookie.value == 'crane_set'
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
