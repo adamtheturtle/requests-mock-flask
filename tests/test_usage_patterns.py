@@ -49,7 +49,6 @@ class TestRequestsMock:
         It is possible to use the helper with a ``requests_mock`` context
         manager.
         """
-
         app = Flask(__name__)
 
         @app.route('/')
