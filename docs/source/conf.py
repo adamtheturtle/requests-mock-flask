@@ -13,7 +13,10 @@ Configuration for Sphinx.
 # ones.
 extensions = [
     'sphinxcontrib.spelling',
+    'sphinx_substitution_extensions',
 ]
+
+project = 'requests-mock-flask'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -28,6 +31,12 @@ author = 'Adam Dangoor'
 # built documents.
 version = '0.1'
 release = '0.1'
+
+substitutions = [
+    ('|release|', release),
+    ('|github-owner|', 'adamtheturtle'),
+    ('|github-repository|', 'requests-mock-flask'),
+]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -44,3 +53,9 @@ html_show_copyright = False
 htmlhelp_basename = 'requestsmockflaskdoc'
 
 spelling_word_list_filename = '../../spelling_private_dict.txt'
+
+rst_prolog = f"""
+.. |project| replace:: {project}
+"""
+
+always_document_param_types = True
