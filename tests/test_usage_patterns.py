@@ -90,7 +90,10 @@ class TestRequestsMock:
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
 
-    def test_fixture(self, requests_mock: requests_mock.Mocker) -> None:
+    def test_fixture(  # pylint: disable=redefined-outer-name
+        self,
+        requests_mock: requests_mock.Mocker,
+    ) -> None:
         """
         It is possible to use the helper with a ``requests_mock`` fixture.
         """
