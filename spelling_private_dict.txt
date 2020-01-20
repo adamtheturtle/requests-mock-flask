@@ -4,11 +4,10 @@ app
 changelog
 keyring
 linting
-macos
+macOS
 pragma
 pytest
 todo
 tuple
-ubuntu
 ubuntu
 uuid
