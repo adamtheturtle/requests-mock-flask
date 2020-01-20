@@ -17,8 +17,7 @@ from werkzeug.http import parse_cookie
 
 
 def add_flask_app_to_mock(
-    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker,
-                    responses],
+    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker, responses],
     flask_app: Flask,
     base_url: str,
 ) -> None:
