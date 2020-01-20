@@ -106,10 +106,13 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-Why would I use this
---------------------
 
-Any time a test suite calls flask app w...
+Use cases
+---------
+
+* Use the ``requests`` for testing applications.
+* Create a test suite which can test a Flask application as well as a live web application, to make a verified fake.
+* Test a service which calls a Flask application that you have the source code for.
 
 
 Full documentation
