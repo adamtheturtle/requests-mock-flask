@@ -3,8 +3,11 @@ admin
 app
 changelog
 keyring
+linting
+macOS
 pragma
 pytest
 todo
 tuple
+ubuntu
 uuid
