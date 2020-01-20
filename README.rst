@@ -86,10 +86,24 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-   # Using `requests_mock` as a decorator
-   # Using `requests_mock` as a context-manager
+   def test_adapter(self) -> None:
+       """
+       It is possible to use the helper with a ``requests_mock`` fixture.
+       """
+       session = requests.Session()
+       adapter = requests_mock.Adapter()
+       session.mount('mock', adapter)
 
-   # Using `requests_mock` as a `requests` adapter
+       add_flask_app_to_mock(
+           mock_obj=adapter,
+           flask_app=app,
+           base_url='mock://www.example.com',
+       )
+
+       response = session.get('mock://www.example.com')
+
+       assert response.status_code == 200
+       assert response.text == 'Hello, World!'
 
 Why would I use this
 --------------------
