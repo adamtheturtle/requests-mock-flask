@@ -86,7 +86,7 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-   def test_adapter(self) -> None:
+   def test_requests_mock_adapter(self) -> None:
        """
        It is possible to use the helper with a ``requests_mock`` fixture.
        """
