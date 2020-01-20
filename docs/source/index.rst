@@ -120,6 +120,7 @@ Reference
 
    release-process
    changelog
+   contributing
 
 .. _Flask: https://flask.palletsprojects.com/
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
