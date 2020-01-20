@@ -24,12 +24,13 @@ Usage example
 .. code:: python
 
    import flask
+   import requests
    import responses
    import requests_mock
 
    from requests_mock_flask import add_flask_app_to_mock
 
-   app = Flask(__name__)
+   app = flask.Flask(__name__)
 
    @app.route('/')
    def _() -> str:
@@ -51,7 +52,7 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-    def test_responses_context_manager() -> None:
+   def test_responses_context_manager() -> None:
        """
        It is possible to use the helper with a ``responses`` context manager.
        """
@@ -64,29 +65,29 @@ Usage example
                base_url='http://www.example.com',
            )
 
-       response = requests.get('http://www.example.com')
+           response = requests.get('http://www.example.com')
 
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-    def test_requests_mock_context_manager() -> None:
+   def test_requests_mock_context_manager() -> None:
        """
        It is possible to use the helper with a ``requests_mock`` context
-       manager.
+   manager.
        """
-        with requests_mock.Mocker() as resp_m:
+       with requests_mock.Mocker() as resp_m:
            add_flask_app_to_mock(
                mock_obj=resp_m,
                flask_app=app,
                base_url='http://www.example.com',
            )
 
-       response = requests.get('http://www.example.com')
+           response = requests.get('http://www.example.com')
 
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
-   def test_requests_mock_adapter(self) -> None:
+   def test_requests_mock_adapter() -> None:
        """
        It is possible to use the helper with a ``requests_mock`` fixture.
        """
