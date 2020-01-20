@@ -3,6 +3,7 @@ Package for ``requests_mock_flask``.
 """
 
 import re
+import types
 from functools import partial
 from typing import Dict, Optional, Tuple, Union
 from urllib.parse import urljoin
@@ -17,7 +18,8 @@ from werkzeug.http import parse_cookie
 
 
 def add_flask_app_to_mock(
-    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker],
+    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker,
+                    types.ModuleType],
     flask_app: Flask,
     base_url: str,
 ) -> None:
@@ -25,7 +27,7 @@ def add_flask_app_to_mock(
     Make it so that requests sent to the ``base_url`` are forwarded to the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
-    if isinstance(mock_obj, responses.RequestsMock):
+    if hasattr(mock_obj, 'add_callback'):
         resp_callback = partial(_responses_callback, flask_app=flask_app)
         register_method = partial(
             mock_obj.add_callback,

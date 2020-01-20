@@ -38,6 +38,24 @@ class TestResponses:
 
         assert response.status_code == 200
 
+    @responses.activate
+    def test_decorator(self) -> None:
+        app = Flask(__name__)
+
+        @app.route('/')
+        def _() -> str:
+            return 'Hello, World!'
+
+        add_flask_app_to_mock(
+            mock_obj=responses,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        response = requests.get('http://www.example.com')
+
+        assert response.status_code == 200
+
 
 class TestRequestsMock:
     """
