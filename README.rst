@@ -118,8 +118,9 @@ Use cases
 Full documentation
 ------------------
 
-See the `full documentation <https://requests-mock-flask.readthedocs.io/en/latest>`__ for information on all available commands.
+See the `full documentation <https://requests-mock-flask.readthedocs.io/en/latest>`__ for more information including how to contribute.
 
+.. _Flask: https://flask.palletsprojects.com/
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
 .. _responses: https://github.com/getsentry/responses
 
