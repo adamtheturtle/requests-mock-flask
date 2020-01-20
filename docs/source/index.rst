@@ -118,6 +118,7 @@ Reference
 .. toctree::
    :maxdepth: 3
 
+   api-reference
    release-process
    changelog
    contributing
