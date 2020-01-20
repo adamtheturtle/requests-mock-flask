@@ -55,15 +55,26 @@ Usage example
        """
        It is possible to use the helper with a ``responses`` context manager.
        """
-       app = Flask(__name__)
-
-       @app.route('/')
-       def _() -> str:
-       return 'Hello, World!'
-
        with responses.RequestsMock(
            assert_all_requests_are_fired=False,
        ) as resp_m:
+           add_flask_app_to_mock(
+               mock_obj=resp_m,
+               flask_app=app,
+               base_url='http://www.example.com',
+           )
+
+       response = requests.get('http://www.example.com')
+
+       assert response.status_code == 200
+       assert response.text == 'Hello, World!'
+
+    def test_requests_mock_context_manager() -> None:
+       """
+       It is possible to use the helper with a ``requests_mock`` context
+       manager.
+       """
+        with requests_mock.Mocker() as resp_m:
            add_flask_app_to_mock(
                mock_obj=resp_m,
                flask_app=app,
