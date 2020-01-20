@@ -120,7 +120,6 @@ class TestRequestsMock:
         def _() -> str:
             return 'Hello, World!'
 
-
         session = requests.Session()
         adapter = requests_mock.Adapter()
         session.mount('mock', adapter)
