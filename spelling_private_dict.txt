@@ -1,5 +1,7 @@
 RequestsMock
+admin
 app
+changelog
 pragma
 pytest
 todo
