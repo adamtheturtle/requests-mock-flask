@@ -40,6 +40,9 @@ class TestResponses:
 
     @responses.activate
     def test_decorator(self) -> None:
+        """
+        It is possible to use the helper with a ``responses`` decorator.
+        """
         app = Flask(__name__)
 
         @app.route('/')
