@@ -4,11 +4,9 @@ Package for ``requests_mock_flask``.
 
 import re
 from functools import partial
-from typing import Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import urljoin
 
-import requests_mock
-import responses
 from flask import Flask
 from requests import PreparedRequest
 from requests_mock.request import _RequestObjectProxy
@@ -17,7 +15,10 @@ from werkzeug.http import parse_cookie
 
 
 def add_flask_app_to_mock(
-    mock_obj: Union[responses.RequestsMock, requests_mock.Mocker],
+    # We use the ``Any`` type to support:
+    # ``requests_mock.Mocker, ``responses.RequestsMock`` and the ``responses``
+    # module.
+    mock_obj: Any,
     flask_app: Flask,
     base_url: str,
 ) -> None:
@@ -25,7 +26,7 @@ def add_flask_app_to_mock(
     Make it so that requests sent to the ``base_url`` are forwarded to the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
-    if isinstance(mock_obj, responses.RequestsMock):
+    if hasattr(mock_obj, 'add_callback'):
         resp_callback = partial(_responses_callback, flask_app=flask_app)
         register_method = partial(
             mock_obj.add_callback,
