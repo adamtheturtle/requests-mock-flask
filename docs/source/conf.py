@@ -4,6 +4,8 @@
 Configuration for Sphinx.
 """
 
+from pkg_resources import get_distribution
+
 # pylint: disable=invalid-name
 
 # -- General configuration ------------------------------------------------
@@ -29,8 +31,12 @@ author = 'Adam Dangoor'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
-version = '0.1'
-release = '0.1'
+#
+# Use ``pkg_resources`` as per
+# https://github.com/pypa/setuptools_scm#usage-from-sphinx.
+version = get_distribution(project).version
+_month, _day, _year, *_ = version.split('.')
+release = f'{_month}.{_day}.{_year}'
 
 substitutions = [
     ('|release|', release),
