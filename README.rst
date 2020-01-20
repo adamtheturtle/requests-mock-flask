@@ -110,7 +110,7 @@ Usage example
 Use cases
 ---------
 
-* Use the ``requests`` for testing applications.
+* Use the ``requests`` API for testing applications.
 * Create a test suite which can test a Flask application as well as a live web application, to make a verified fake.
 * Test a service which calls a Flask application that you have the source code for.
 
