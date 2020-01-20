@@ -131,7 +131,7 @@ class TestRequestsMock:
             base_url='mock://www.example.com',
         )
 
-        response = requests.get('mock://www.example.com')
+        response = session.get('mock://www.example.com')
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
