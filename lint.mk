@@ -20,7 +20,7 @@ fix-yapf:
 
 .PHONY: mypy
 mypy:
-	mypy *.py src/ tests/ docs/source/
+	mypy *.py src/ tests/ docs/source/ admin
 
 .PHONY: check-manifest
 check-manifest:
@@ -48,7 +48,7 @@ pip-missing-reqs:
 
 .PHONY: pylint
 pylint:
-	pylint *.py src/ tests/ docs/
+	pylint *.py src/ tests/ admin/ docs/
 
 .PHONY: pyroma
 pyroma:
@@ -68,8 +68,7 @@ spelling:
 
 .PHONY: shellcheck
 shellcheck:
-	# At the time of writing, there are no shell files.
-	# shellcheck --exclude SC2164,SC1091 */*.sh
+	shellcheck --exclude SC2164,SC1091 */*.sh
 
 .PHONY: autoflake
 autoflake:
