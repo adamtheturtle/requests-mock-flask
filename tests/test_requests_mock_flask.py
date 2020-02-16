@@ -425,7 +425,7 @@ def test_route_with_string_variable_with_slash() -> None:
     response = test_client.get('/foo/bar')
 
     expected_status_code = 404
-    expected_content_type = 'text/html'
+    expected_content_type = 'text/html; charset=utf-8'
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
@@ -744,7 +744,7 @@ def test_wrong_type_given() -> None:
     response = test_client.get('/a')
 
     expected_status_code = 404
-    expected_content_type = 'text/html'
+    expected_content_type = 'text/html; charset=utf-8'
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
@@ -791,7 +791,7 @@ def test_404_no_such_method() -> None:
     response = test_client.post('/')
 
     expected_status_code = 405
-    expected_content_type = 'text/html'
+    expected_content_type = 'text/html; charset=utf-8'
 
     assert response.status_code == expected_status_code
     assert response.headers['Content-Type'] == expected_content_type
