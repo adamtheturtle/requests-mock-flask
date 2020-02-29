@@ -1,5 +1,5 @@
 Flask-Negotiate==0.1.0
-Sphinx-Substitution-Extensions==2019.12.28.0
+Sphinx-Substitution-Extensions==2020.2.21.0
 autoflake==1.3.1
 check-manifest==0.41
 codecov==2.0.15
