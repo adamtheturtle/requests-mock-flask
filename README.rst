@@ -125,7 +125,7 @@ See the `full documentation <https://requests-mock-flask.readthedocs.io/en/lates
 .. _responses: https://github.com/getsentry/responses
 
 .. |Build Status| image:: https://github.com/adamtheturtle/requests-mock-flask/workflows/CI/badge.svg
-   :target: https://travis-ci.com/adamtheturtle/requests-mock-flask/actions
+   :target: https://github.com/adamtheturtle/requests-mock-flask/actions
 .. |codecov| image:: https://codecov.io/gh/adamtheturtle/requests-mock-flask/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/adamtheturtle/requests-mock-flask
 .. |Documentation Status| image:: https://readthedocs.org/projects/requests-mock-flask/badge/?version=latest
