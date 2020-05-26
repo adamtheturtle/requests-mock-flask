@@ -41,12 +41,6 @@ version = get_distribution(project).version
 _month, _day, _year, *_ = version.split('.')
 release = f'{_month}.{_day}.{_year}'
 
-substitutions = [
-    ('|release|', release),
-    ('|github-owner|', 'adamtheturtle'),
-    ('|github-repository|', 'requests-mock-flask'),
-]
-
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
@@ -65,6 +59,9 @@ spelling_word_list_filename = '../../spelling_private_dict.txt'
 
 rst_prolog = f"""
 .. |project| replace:: {project}
+.. |release| replace:: {release}
+.. |github-owner| replace:: adamtheturtle
+.. |github-repository| replace:: requests-mock-flask
 """
 
 always_document_param_types = True
