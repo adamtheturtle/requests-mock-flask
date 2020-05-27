@@ -63,8 +63,6 @@ Store your PyPI password:
 
 #. Perform a release:
 
-#. Perform a release:
-
    .. prompt:: bash
       :substitutions:
 
