@@ -18,6 +18,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinxcontrib.spelling',
+    'sphinx-prompt',
     'sphinx_substitution_extensions',
 ]
 
