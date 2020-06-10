@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """
 Tests for the ``requests_mock_flask`` package.
 
