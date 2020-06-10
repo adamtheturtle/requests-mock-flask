@@ -1,3 +1,4 @@
 include requirements.txt
 include dev-requirements.txt
 include src/*/py.typed
+include pyproject.toml
