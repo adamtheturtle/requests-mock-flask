@@ -2,7 +2,7 @@ Flask-Negotiate==0.1.0
 Sphinx-Substitution-Extensions==2020.5.30.0
 autoflake==1.3.1
 check-manifest==0.42
-codecov==2.1.4
+codecov==2.1.7
 doc8==0.8.1
 flake8-commas==2.0.0
 flake8-quotes==3.2.0
