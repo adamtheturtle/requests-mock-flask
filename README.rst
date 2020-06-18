@@ -73,7 +73,7 @@ Usage example
    def test_requests_mock_context_manager() -> None:
        """
        It is possible to use the helper with a ``requests_mock`` context
-   manager.
+       manager.
        """
        with requests_mock.Mocker() as resp_m:
            add_flask_app_to_mock(
