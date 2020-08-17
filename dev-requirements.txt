@@ -13,7 +13,7 @@ pydocstyle==5.0.2
 pygithub==1.52
 pylint==2.5.3
 pyroma==2.6
-pytest-cov==2.10.0  # Measure code coverage
+pytest-cov==2.10.1  # Measure code coverage
 pytest==6.0.1
 responses==0.10.16
 sphinx-autodoc-typehints==1.11.0
