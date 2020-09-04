@@ -701,13 +701,16 @@ def test_multiple_http_verbs() -> None:
         responses_post_response = requests.post('http://www.example.com/')
 
     assert responses_get_response.status_code == expected_status_code
-    assert responses_get_response.headers['Content-Type'
-                                          ] == expected_content_type
+    assert (
+        responses_get_response.headers['Content-Type'] == expected_content_type
+    )
     assert responses_get_response.text == expected_data.decode()
 
     assert responses_post_response.status_code == expected_status_code
-    assert responses_post_response.headers['Content-Type'
-                                           ] == expected_content_type
+    assert (
+        responses_post_response.headers['Content-Type']
+        == expected_content_type
+    )
     assert responses_post_response.text == expected_data.decode()
 
     with requests_mock.Mocker() as resp_m:
@@ -721,13 +724,15 @@ def test_multiple_http_verbs() -> None:
         req_mock_post_response = requests.post('http://www.example.com/')
 
     assert req_mock_get_response.status_code == expected_status_code
-    assert req_mock_get_response.headers['Content-Type'
-                                         ] == expected_content_type
+    assert (
+        req_mock_get_response.headers['Content-Type'] == expected_content_type
+    )
     assert req_mock_get_response.text == expected_data.decode()
 
     assert req_mock_post_response.status_code == expected_status_code
-    assert req_mock_post_response.headers['Content-Type'
-                                          ] == expected_content_type
+    assert (
+        req_mock_post_response.headers['Content-Type'] == expected_content_type
+    )
     assert req_mock_post_response.text == expected_data.decode()
 
 
@@ -1071,7 +1076,7 @@ def test_cookies() -> None:
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'Hello, World!'
 
-    (new_cookie, ) = set(test_client.cookie_jar) - original_cookies
+    (new_cookie,) = set(test_client.cookie_jar) - original_cookies
     assert new_cookie.name == 'frasier_set'
     assert new_cookie.value == 'crane_set'
     assert response.status_code == expected_status_code
