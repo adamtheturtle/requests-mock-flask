@@ -7,6 +7,7 @@ from functools import partial
 from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import urljoin
 
+import werkzeug
 from flask import Flask
 from requests import PreparedRequest
 from requests_mock.request import _RequestObjectProxy
@@ -80,12 +81,17 @@ def _responses_callback(
             value=value,
         )
 
-    response = test_client.open(
+    environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
-        method=request.method,
-        headers=dict(request.headers),
+        method=str(request.method),
         data=request.body,
+        headers=dict(request.headers),
     )
+    environ = environ_builder.get_environ()  # type: ignore
+    request.headers.get('Content-Length')
+    if 'Content-Length' in request.headers:
+        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
+    response = test_client.open(environ)
 
     result = (response.status_code, dict(response.headers), response.data)
     return result
@@ -127,12 +133,16 @@ def _requests_mock_callback(
             value=value,
         )
 
-    response = test_client.open(
+    environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=request.method,
         headers=dict(request.headers),
         data=request.body,
     )
+    environ = environ_builder.get_environ()  # type: ignore
+    if 'Content-Length' in request.headers:
+        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
+    response = test_client.open(environ)
 
     context.headers = response.headers
     context.status_code = response.status_code

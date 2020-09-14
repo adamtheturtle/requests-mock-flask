@@ -14,6 +14,7 @@ import pytest
 import requests
 import requests_mock
 import responses
+import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
 
@@ -662,6 +663,61 @@ def test_post_verb() -> None:
     assert req_mock_response.status_code == expected_status_code
     assert req_mock_response.headers['Content-Type'] == expected_content_type
     assert req_mock_response.text == expected_data.decode()
+
+
+def test_incorrect_content_length() -> None:
+    """
+    Custom content length headers are passed through to the Flask endpoint.
+    """
+    app = Flask(__name__)
+    custom_content_length = '15'
+
+    @app.route('/', methods=['POST'])
+    def _() -> str:
+        assert request.headers['Content-Length'] == custom_content_length
+        return ''
+
+    test_client = app.test_client()
+    environ_builder = werkzeug.test.EnvironBuilder(
+        path='/',
+        method='POST',
+        data=b'12345',
+    )
+    environ = environ_builder.get_environ()  # type: ignore
+    environ['CONTENT_LENGTH'] = custom_content_length
+    response = test_client.open(environ)
+
+    expected_status_code = 200
+
+    assert response.status_code == expected_status_code
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.post(
+            'http://www.example.com/',
+            headers={'Content-Length': custom_content_length},
+        )
+
+    assert responses_response.status_code == expected_status_code
+
+    with requests_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        req_mock_response = requests.post(
+            'http://www.example.com/',
+            headers={'Content-Length': custom_content_length},
+        )
+
+    assert req_mock_response.status_code == expected_status_code
 
 
 def test_multiple_http_verbs() -> None:
