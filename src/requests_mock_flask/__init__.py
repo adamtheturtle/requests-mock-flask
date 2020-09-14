@@ -83,11 +83,11 @@ def _responses_callback(
 
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
-        method=request.method,
+        method=str(request.method),
         data=request.body,
         headers=dict(request.headers),
     )
-    environ = environ_builder.get_environ()
+    environ = environ_builder.get_environ()  # type: ignore
     request.headers.get('Content-Length')
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
@@ -139,7 +139,7 @@ def _requests_mock_callback(
         headers=dict(request.headers),
         data=request.body,
     )
-    environ = environ_builder.get_environ()
+    environ = environ_builder.get_environ()  # type: ignore
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
     response = test_client.open(environ)

@@ -683,7 +683,7 @@ def test_incorrect_content_length() -> None:
         method='POST',
         data=b'12345',
     )
-    environ = environ_builder.get_environ()
+    environ = environ_builder.get_environ()  # type: ignore
     environ['CONTENT_LENGTH'] = custom_content_length
     response = test_client.open(environ)
 
