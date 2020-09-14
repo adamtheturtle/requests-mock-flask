@@ -16,6 +16,7 @@ import requests_mock
 import responses
 from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
+import werkzeug
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -665,7 +666,7 @@ def test_post_verb() -> None:
 
 def test_incorrect_content_length() -> None:
     """
-    TODO
+    Custom content length headers are 
     """
     app = Flask(__name__)
 
@@ -675,21 +676,14 @@ def test_incorrect_content_length() -> None:
         return ''
 
     test_client = app.test_client()
-    import pdb; pdb.set_trace()
-    response = test_client.open(
-        {
-            'path': '/',
-            'data': b'12345',
-            'HTTP_HOST': 'localhost',
-            'wsgi.url_scheme': 'https',
-            'REQUEST_METHOD': 'POST',
-            'CONTENT_LENGTH': '15',
-        }
-        # path='/',
-        # method='POST',
-        # data=b'12345',
-        # headers={'Content-Length': 15},
+    environ_builder = werkzeug.test.EnvironBuilder(
+        path='/',
+        method='POST',
+        data=b'12345',
     )
+    environ = environ_builder.get_environ()
+    environ['CONTENT_LENGTH'] = '15'
+    response = test_client.open(environ)
 
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
@@ -699,18 +693,18 @@ def test_incorrect_content_length() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    # with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
-    #     add_flask_app_to_mock(
-    #         mock_obj=resp_m,
-    #         flask_app=app,
-    #         base_url='http://www.example.com',
-    #     )
-    #
-    #     responses_response = requests.post('http://www.example.com/')
-    #
-    # assert responses_response.status_code == expected_status_code
-    # assert responses_response.headers['Content-Type'] == expected_content_type
-    # assert responses_response.text == expected_data.decode()
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url='http://www.example.com',
+        )
+
+        responses_response = requests.post('http://www.example.com/')
+
+    assert responses_response.status_code == expected_status_code
+    assert responses_response.headers['Content-Type'] == expected_content_type
+    assert responses_response.text == expected_data.decode()
 
     # with requests_mock.Mocker() as resp_m:
     #     add_flask_app_to_mock(
