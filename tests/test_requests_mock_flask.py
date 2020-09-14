@@ -663,6 +663,60 @@ def test_post_verb() -> None:
     assert req_mock_response.headers['Content-Type'] == expected_content_type
     assert req_mock_response.text == expected_data.decode()
 
+def test_incorrect_content_length() -> None:
+    """
+    TODO
+    """
+    app = Flask(__name__)
+
+    @app.route('/', methods=['POST'])
+    def _() -> str:
+        assert request.headers['Content-Length'] == '1'
+        return ''
+
+    test_client = app.test_client()
+    response = test_client.open(
+        path='/',
+        method='POST',
+        data=b'12345',
+        headers={'Content-Length': 15},
+        # content_length=1,
+    )
+
+    expected_status_code = 200
+    expected_content_type = 'text/html; charset=utf-8'
+    expected_data = b''
+
+    assert response.status_code == expected_status_code
+    assert response.headers['Content-Type'] == expected_content_type
+    assert response.data == expected_data
+
+    # with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    #     add_flask_app_to_mock(
+    #         mock_obj=resp_m,
+    #         flask_app=app,
+    #         base_url='http://www.example.com',
+    #     )
+    #
+    #     responses_response = requests.post('http://www.example.com/')
+    #
+    # assert responses_response.status_code == expected_status_code
+    # assert responses_response.headers['Content-Type'] == expected_content_type
+    # assert responses_response.text == expected_data.decode()
+
+    # with requests_mock.Mocker() as resp_m:
+    #     add_flask_app_to_mock(
+    #         mock_obj=resp_m,
+    #         flask_app=app,
+    #         base_url='http://www.example.com',
+    #     )
+    #
+    #     req_mock_response = requests.post('http://www.example.com/')
+    #
+    # assert req_mock_response.status_code == expected_status_code
+    # assert req_mock_response.headers['Content-Type'] == expected_content_type
+    # assert req_mock_response.text == expected_data.decode()
+
 
 def test_multiple_http_verbs() -> None:
     """
