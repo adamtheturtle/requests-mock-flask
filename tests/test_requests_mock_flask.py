@@ -671,16 +671,25 @@ def test_incorrect_content_length() -> None:
 
     @app.route('/', methods=['POST'])
     def _() -> str:
-        assert request.headers['Content-Length'] == '1'
+        assert request.headers['Content-Length'] == '15'
         return ''
 
     test_client = app.test_client()
+    import pdb; pdb.set_trace()
     response = test_client.open(
-        path='/',
-        method='POST',
-        data=b'12345',
-        headers={'Content-Length': 15},
-        # content_length=1,
+        {
+            'path': '/',
+            'method': 'POST',
+            'data': b'12345',
+            'HTTP_HOST': 'localhost',
+            'wsgi.url_scheme': 'https',
+            'REQUEST_METHOD': 'POST',
+            'CONTENT_LENGTH': '15',
+        }
+        # path='/',
+        # method='POST',
+        # data=b'12345',
+        # headers={'Content-Length': 15},
     )
 
     expected_status_code = 200
