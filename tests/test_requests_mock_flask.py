@@ -679,7 +679,6 @@ def test_incorrect_content_length() -> None:
     response = test_client.open(
         {
             'path': '/',
-            'method': 'POST',
             'data': b'12345',
             'HTTP_HOST': 'localhost',
             'wsgi.url_scheme': 'https',
