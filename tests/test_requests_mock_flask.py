@@ -665,12 +665,16 @@ def test_post_verb() -> None:
     assert req_mock_response.text == expected_data.decode()
 
 
-def test_incorrect_content_length() -> None:
+@pytest.mark.parametrize(
+    'custom_content_length',
+    ['1', '100'],
+)
+def test_incorrect_content_length(custom_content_length: str) -> None:
     """
     Custom content length headers are passed through to the Flask endpoint.
     """
     app = Flask(__name__)
-    custom_content_length = '15'
+    data = b'12345'
 
     @app.route('/', methods=['POST'])
     def _() -> str:
@@ -691,6 +695,14 @@ def test_incorrect_content_length() -> None:
 
     assert response.status_code == expected_status_code
 
+    requests_request = requests.Request(
+        method='POST',
+        url='http://www.example.com/',
+        data=data,
+        headers={'Content-Length': custom_content_length, 'foo': 'bar'},
+    ).prepare()
+    requests_request.headers['Content-Length'] = custom_content_length
+
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
@@ -698,9 +710,9 @@ def test_incorrect_content_length() -> None:
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.post(
-            'http://www.example.com/',
-            headers={'Content-Length': custom_content_length},
+        session = requests.Session()
+        responses_response = session.send(  # type: ignore
+            request=requests_request,
         )
 
     assert responses_response.status_code == expected_status_code
@@ -712,9 +724,9 @@ def test_incorrect_content_length() -> None:
             base_url='http://www.example.com',
         )
 
-        req_mock_response = requests.post(
-            'http://www.example.com/',
-            headers={'Content-Length': custom_content_length},
+        session = requests.Session()
+        req_mock_response = session.send(  # type: ignore
+            request=requests_request,
         )
 
     assert req_mock_response.status_code == expected_status_code

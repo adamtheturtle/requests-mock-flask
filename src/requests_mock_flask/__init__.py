@@ -88,7 +88,6 @@ def _responses_callback(
         headers=dict(request.headers),
     )
     environ = environ_builder.get_environ()  # type: ignore
-    request.headers.get('Content-Length')
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
     response = test_client.open(environ)
