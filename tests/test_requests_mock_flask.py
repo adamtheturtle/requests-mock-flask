@@ -701,7 +701,6 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         method='POST',
         url='http://www.example.com/',
         data=data,
-        headers={'Content-Length': custom_content_length, 'foo': 'bar'},
     ).prepare()
     requests_request.headers['Content-Length'] = custom_content_length
 
