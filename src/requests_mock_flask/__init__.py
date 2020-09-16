@@ -90,6 +90,7 @@ def _responses_callback(
     environ = environ_builder.get_environ()  # type: ignore
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
+        environ['wsgi.input_terminated'] = True
     response = test_client.open(environ)
 
     result = (response.status_code, dict(response.headers), response.data)
@@ -141,6 +142,7 @@ def _requests_mock_callback(
     environ = environ_builder.get_environ()  # type: ignore
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
+        environ['wsgi.input_terminated'] = True
     response = test_client.open(environ)
 
     context.headers = response.headers

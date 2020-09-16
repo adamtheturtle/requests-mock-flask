@@ -678,6 +678,7 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
 
     @app.route('/', methods=['POST'])
     def _() -> str:
+        assert len(data) == len(request.data)
         assert request.headers['Content-Length'] == custom_content_length
         return ''
 
@@ -689,6 +690,7 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
     )
     environ = environ_builder.get_environ()  # type: ignore
     environ['CONTENT_LENGTH'] = custom_content_length
+    environ['wsgi.input_terminated'] = True
     response = test_client.open(environ)
 
     expected_status_code = 200
