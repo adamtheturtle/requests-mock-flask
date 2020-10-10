@@ -712,9 +712,7 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         )
 
         session = requests.Session()
-        responses_response = session.send(  # type: ignore
-            request=requests_request,
-        )
+        responses_response = session.send(request=requests_request)
 
     assert responses_response.status_code == expected_status_code
 
@@ -726,9 +724,7 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         )
 
         session = requests.Session()
-        req_mock_response = session.send(  # type: ignore
-            request=requests_request,
-        )
+        req_mock_response = session.send(request=requests_request)
 
     assert req_mock_response.status_code == expected_status_code
 
