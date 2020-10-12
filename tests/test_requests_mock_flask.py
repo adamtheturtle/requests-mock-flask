@@ -689,6 +689,8 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         method='POST',
         data=b'12345',
     )
+    # See https://github.com/python/typeshed/pull/4653 for removing this type
+    # ignore comment.
     environ = environ_builder.get_environ()  # type: ignore
     environ['CONTENT_LENGTH'] = custom_content_length
     response = test_client.open(environ)

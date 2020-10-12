@@ -87,6 +87,8 @@ def _responses_callback(
         data=request.body,
         headers=dict(request.headers),
     )
+    # See https://github.com/python/typeshed/pull/4653 for removing this type
+    # ignore comment.
     environ = environ_builder.get_environ()  # type: ignore
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
@@ -138,6 +140,8 @@ def _requests_mock_callback(
         headers=dict(request.headers),
         data=request.body,
     )
+    # See https://github.com/python/typeshed/pull/4653 for removing this type
+    # ignore comment.
     environ = environ_builder.get_environ()  # type: ignore
     if 'Content-Length' in request.headers:
         environ['CONTENT_LENGTH'] = request.headers['Content-Length']
