@@ -2,9 +2,11 @@
 Package for ``requests_mock_flask``.
 """
 
+from __future__ import annotations
+
 import re
 from functools import partial
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Tuple
 from urllib.parse import urljoin
 
 import werkzeug
@@ -51,7 +53,7 @@ def add_flask_app_to_mock(
 def _responses_callback(
     request: PreparedRequest,
     flask_app: Flask,
-) -> Tuple[int, Dict[str, Optional[Union[str, int, bool]]], bytes]:
+) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the flask app, send an equivalent request to an in
     memory fake of the flask app and return some key details of the
