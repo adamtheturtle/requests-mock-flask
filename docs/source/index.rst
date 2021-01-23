@@ -9,7 +9,7 @@
 Installation
 ------------
 
-Requires Python 3.8+.
+Requires Python 3.9+.
 
 .. code:: sh
 
