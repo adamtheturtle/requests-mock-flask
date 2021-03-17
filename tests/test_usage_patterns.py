@@ -25,7 +25,9 @@ class TestResponses:
         def _() -> str:
             return 'Hello, World!'
 
-        with responses.RequestsMock(
+        # See https://github.com/getsentry/responses/issues/377 regarding the
+        # type error ignore.
+        with responses.RequestsMock(  # type: ignore
             assert_all_requests_are_fired=False,
         ) as resp_m:
             add_flask_app_to_mock(

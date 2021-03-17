@@ -42,7 +42,11 @@ def test_simple_route() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -92,7 +96,11 @@ def test_headers() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -146,7 +154,11 @@ def test_route_with_json() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.json == expected_json
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -194,7 +206,11 @@ def test_route_with_variable_no_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -242,7 +258,11 @@ def test_route_with_string_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -290,7 +310,11 @@ def test_route_with_int_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -338,7 +362,11 @@ def test_route_with_float_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -386,7 +414,11 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -433,7 +465,11 @@ def test_route_with_string_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -482,7 +518,11 @@ def test_route_with_uuid_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -534,7 +574,11 @@ def test_nested_path() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -586,7 +630,11 @@ def test_route_with_multiple_variables() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -638,7 +686,11 @@ def test_post_verb() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -705,7 +757,11 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
     ).prepare()
     requests_request.headers['Content-Length'] = custom_content_length
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -756,7 +812,11 @@ def test_multiple_http_verbs() -> None:
     assert post_response.headers['Content-Type'] == expected_content_type
     assert post_response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -822,7 +882,11 @@ def test_wrong_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -869,7 +933,11 @@ def test_404_no_such_method() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -912,7 +980,11 @@ def test_request_needs_content_type() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -971,7 +1043,11 @@ def test_request_needs_data() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -1036,7 +1112,11 @@ def test_multiple_functions_same_path_different_type() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -1085,7 +1165,11 @@ def test_query_string() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
@@ -1149,7 +1233,11 @@ def test_cookies() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    # See https://github.com/getsentry/responses/issues/377 regarding the
+    # type error ignore.
+    with responses.RequestsMock(  # type: ignore
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,
