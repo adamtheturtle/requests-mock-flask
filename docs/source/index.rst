@@ -3,9 +3,6 @@
 
 |project| helps with testing `Flask`_ applications with `responses`_ or `requests-mock`_.
 
-.. contents::
-   :local:
-
 Installation
 ------------
 
