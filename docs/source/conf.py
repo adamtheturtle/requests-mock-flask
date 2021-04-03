@@ -42,16 +42,14 @@ version = get_distribution(project).version
 _month, _day, _year, *_ = version.split('.')
 release = f'{_month}.{_day}.{_year}'
 
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = False
-
-# -- Options for HTML output ----------------------------------------------
-
-# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-html_show_sphinx = False
-
-# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
+html_theme = 'furo'
+html_title = project
 html_show_copyright = False
+html_show_sphinx = False
+html_show_sourcelink = False
+html_theme_options = {
+    'sidebar_hide_name': False,
+}
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'requestsmockflaskdoc'
