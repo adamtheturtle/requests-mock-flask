@@ -6,7 +6,7 @@ check-manifest==0.46
 doc8==0.8.1
 flake8-commas==2.0.0
 flake8-quotes==3.2.0
-flake8==3.9.0
+flake8==3.9.1
 furo==2021.4.11b34
 isort==5.8.0
 mypy==0.812
