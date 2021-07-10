@@ -688,11 +688,10 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         path='/',
         method='POST',
         data=b'12345',
+        environ_overrides={'CONTENT_LENGTH': custom_content_length},
     )
 
-    environ = environ_builder.get_environ()
-    environ['CONTENT_LENGTH'] = custom_content_length
-    response = test_client.open(environ)
+    response = test_client.open(environ_builder.get_request())
 
     expected_status_code = 200
 

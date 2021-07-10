@@ -83,16 +83,19 @@ def _responses_callback(
             value=value,
         )
 
+    environ_overrides = {}
+    if 'Content-Length' in request.headers:
+        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=str(request.method),
         data=request.body,
         headers=dict(request.headers),
+        environ_overrides=environ_overrides,
     )
-    environ = environ_builder.get_environ()
-    if 'Content-Length' in request.headers:
-        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
-    response = test_client.open(environ)
+
+    response = test_client.open(environ_builder.get_request())
 
     result = (response.status_code, dict(response.headers), response.data)
     return result
@@ -134,16 +137,17 @@ def _requests_mock_callback(
             value=value,
         )
 
+    environ_overrides = {}
+    if 'Content-Length' in request.headers:
+        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=request.method,
         headers=dict(request.headers),
         data=request.body,
+        environ_overrides=environ_overrides,
     )
-    environ = environ_builder.get_environ()
-    if 'Content-Length' in request.headers:
-        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
-    response = test_client.open(environ)
+    response = test_client.open(environ_builder.get_request())
 
     context.headers = response.headers
     context.status_code = response.status_code

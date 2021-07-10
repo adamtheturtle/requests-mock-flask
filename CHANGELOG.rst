@@ -4,6 +4,10 @@ Changelog
 Next
 ----
 
+Support Flask 2 and greater.
+Drop support for Flask < 2.
+Please use an older version of this package if you wish to use an older version of Flask.
+
 2020.09.25.0
 ------------
 
