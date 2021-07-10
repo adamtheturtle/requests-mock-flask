@@ -46,6 +46,7 @@ def add_flask_app_to_mock(
         pattern = urljoin(base_url, path_to_match)
         url = re.compile(pattern)
 
+        assert rule.methods is not None
         for method in rule.methods:
             register_method(method=method, url=url)
 
@@ -87,11 +88,12 @@ def _responses_callback(
     if 'Content-Length' in request.headers:
         environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
 
+    headers_dict = dict(request.headers).items()
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=str(request.method),
         data=request.body,
-        headers=dict(request.headers),
+        headers=headers_dict,
         environ_overrides=environ_overrides,
     )
 
