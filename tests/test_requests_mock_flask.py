@@ -896,7 +896,7 @@ def test_request_needs_content_type() -> None:
     app = Flask(__name__)
 
     @app.route('/')
-    @consumes('application/json')
+    @consumes('application/json')  # type: ignore
     def _() -> str:
         return 'Hello, World!'
 
@@ -951,7 +951,7 @@ def test_request_needs_data() -> None:
     app = Flask(__name__)
 
     @app.route('/')
-    @consumes('application/json')
+    @consumes('application/json')  # type: ignore
     def _() -> str:
         request_json = request.get_json()
         assert isinstance(request_json, dict)
