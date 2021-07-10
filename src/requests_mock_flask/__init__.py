@@ -99,7 +99,9 @@ def _responses_callback(
 
     response = test_client.open(environ_builder.get_request())
 
-    result_headers: Dict[str, Union[str, int, bool, None]] = dict(response.headers)
+    result_headers: Dict[str, Union[str, int, bool, None]] = dict(
+        response.headers,
+    )
     result = (response.status_code, result_headers, bytes(response.data))
     return result
 
