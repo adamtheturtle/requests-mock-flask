@@ -1136,14 +1136,16 @@ def test_cookies() -> None:
     test_client = app.test_client()
     test_client.set_cookie(server_name='', key='frasier', value='crane')
     test_client.set_cookie(server_name='', key='frasier2', value='crane2')
-    original_cookies = set(test_client.cookie_jar)
+    test_client_cookie_jar = test_client.cookie_jar
+    assert test_client_cookie_jar is not None
+    original_cookies = set(test_client_cookie_jar)
     response = test_client.post('/')
 
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'Hello, World!'
 
-    (new_cookie,) = set(test_client.cookie_jar) - original_cookies
+    (new_cookie,) = set(test_client_cookie_jar) - original_cookies
     assert new_cookie.name == 'frasier_set'
     assert new_cookie.value == 'crane_set'
     assert response.status_code == expected_status_code
