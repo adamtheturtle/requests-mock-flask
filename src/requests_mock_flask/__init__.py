@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from functools import partial
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 from urllib.parse import urljoin
 
 import werkzeug
@@ -46,6 +46,7 @@ def add_flask_app_to_mock(
         pattern = urljoin(base_url, path_to_match)
         url = re.compile(pattern)
 
+        assert rule.methods is not None
         for method in rule.methods:
             register_method(method=method, url=url)
 
@@ -83,18 +84,25 @@ def _responses_callback(
             value=value,
         )
 
+    environ_overrides = {}
+    if 'Content-Length' in request.headers:
+        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+
+    headers_dict = dict(request.headers).items()
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=str(request.method),
         data=request.body,
-        headers=dict(request.headers),
+        headers=headers_dict,
+        environ_overrides=environ_overrides,
     )
-    environ = environ_builder.get_environ()
-    if 'Content-Length' in request.headers:
-        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
-    response = test_client.open(environ)
 
-    result = (response.status_code, dict(response.headers), response.data)
+    response = test_client.open(environ_builder.get_request())
+
+    result_headers: Dict[str, Union[str, int, bool, None]] = dict(
+        response.headers,
+    )
+    result = (response.status_code, result_headers, bytes(response.data))
     return result
 
 
@@ -134,16 +142,17 @@ def _requests_mock_callback(
             value=value,
         )
 
+    environ_overrides = {}
+    if 'Content-Length' in request.headers:
+        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=request.method,
         headers=dict(request.headers),
         data=request.body,
+        environ_overrides=environ_overrides,
     )
-    environ = environ_builder.get_environ()
-    if 'Content-Length' in request.headers:
-        environ['CONTENT_LENGTH'] = request.headers['Content-Length']
-    response = test_client.open(environ)
+    response = test_client.open(environ_builder.get_request())
 
     context.headers = response.headers
     context.status_code = response.status_code

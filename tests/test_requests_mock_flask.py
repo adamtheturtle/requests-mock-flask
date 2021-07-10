@@ -688,11 +688,10 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
         path='/',
         method='POST',
         data=b'12345',
+        environ_overrides={'CONTENT_LENGTH': custom_content_length},
     )
 
-    environ = environ_builder.get_environ()
-    environ['CONTENT_LENGTH'] = custom_content_length
-    response = test_client.open(environ)
+    response = test_client.open(environ_builder.get_request())
 
     expected_status_code = 200
 
@@ -954,7 +953,9 @@ def test_request_needs_data() -> None:
     @app.route('/')
     @consumes('application/json')
     def _() -> str:
-        return str(request.get_json()['hello'])
+        request_json = request.get_json()
+        assert isinstance(request_json, dict)
+        return str(request_json['hello'])
 
     test_client = app.test_client()
     response = test_client.get(
@@ -1135,14 +1136,16 @@ def test_cookies() -> None:
     test_client = app.test_client()
     test_client.set_cookie(server_name='', key='frasier', value='crane')
     test_client.set_cookie(server_name='', key='frasier2', value='crane2')
-    original_cookies = set(test_client.cookie_jar)
+    test_client_cookie_jar = test_client.cookie_jar
+    assert test_client_cookie_jar is not None
+    original_cookies = set(test_client_cookie_jar)
     response = test_client.post('/')
 
     expected_status_code = 200
     expected_content_type = 'text/html; charset=utf-8'
     expected_data = b'Hello, World!'
 
-    (new_cookie,) = set(test_client.cookie_jar) - original_cookies
+    (new_cookie,) = set(test_client_cookie_jar) - original_cookies
     assert new_cookie.name == 'frasier_set'
     assert new_cookie.value == 'crane_set'
     assert response.status_code == expected_status_code
