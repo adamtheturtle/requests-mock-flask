@@ -953,7 +953,9 @@ def test_request_needs_data() -> None:
     @app.route('/')
     @consumes('application/json')
     def _() -> str:
-        return str(request.get_json()['hello'])
+        request_json = request.get_json()
+        assert isinstance(request_json, dict)
+        return str(request_json['hello'])
 
     test_client = app.test_client()
     response = test_client.get(

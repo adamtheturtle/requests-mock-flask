@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from functools import partial
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Union
 from urllib.parse import urljoin
 
 import werkzeug
@@ -99,7 +99,8 @@ def _responses_callback(
 
     response = test_client.open(environ_builder.get_request())
 
-    result = (response.status_code, dict(response.headers), response.data)
+    result_headers: Dict[str, Union[str, int, bool, None]] = dict(response.headers)
+    result = (response.status_code, result_headers, bytes(response.data))
     return result
 
 
