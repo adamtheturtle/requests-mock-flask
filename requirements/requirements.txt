@@ -1,4 +1,4 @@
-Flask>=2
+Flask>=2.0.1
 Werkzeug
 requests-mock
 requests
