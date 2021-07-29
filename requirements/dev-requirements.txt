@@ -7,7 +7,7 @@ doc8==0.9.0
 flake8-commas==2.0.0
 flake8-quotes==3.2.0
 flake8==3.9.2
-furo==2021.7.28b39
+furo==2021.7.28b40
 isort==5.9.2
 mypy==0.910
 pip_check_reqs==2.3.0
