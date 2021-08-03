@@ -4,6 +4,8 @@
 Configuration for Sphinx.
 """
 
+import datetime
+
 from pkg_resources import get_distribution
 
 # pylint: disable=invalid-name
@@ -29,8 +31,9 @@ templates_path = ['_templates']
 
 # General information about the project.
 project = 'Requests-Mock-Flask'
-copyright = '2020, Adam Dangoor'  # pylint: disable=redefined-builtin
+year = datetime.datetime.now().year
 author = 'Adam Dangoor'
+project_copyright = f'{year}, {author}'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
