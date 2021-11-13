@@ -3,7 +3,7 @@ Sphinx-Substitution-Extensions==2020.9.30.0
 autoflake==1.4
 black==21.10b0
 check-manifest==0.47
-doc8==0.9.1
+doc8==0.10.1
 flake8-commas==2.1.0
 flake8-quotes==3.3.1
 flake8==4.0.1
