@@ -20,7 +20,7 @@ pytest==6.2.5
 responses==0.16.0
 sphinx-autodoc-typehints==1.12.0
 sphinxcontrib.spelling==7.2.1
-twine==3.7.0
+twine==3.7.1
 types-requests==2.26.1
 types-setuptools==57.4.4
 vulture==2.3
