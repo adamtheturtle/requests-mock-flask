@@ -18,7 +18,6 @@ lint: \
     pip-extra-reqs \
     pip-missing-reqs \
     pyroma \
-    shellcheck \
     spelling \
     vulture \
     pylint \
