@@ -119,8 +119,6 @@ ignore = [
   "readthedocs.yaml",
   ".style.yapf",
   ".travis.yml",
-  "admin",
-  "admin/**",
   "CHANGELOG.rst",
   "CODE_OF_CONDUCT.rst",
   "CONTRIBUTING.rst",
