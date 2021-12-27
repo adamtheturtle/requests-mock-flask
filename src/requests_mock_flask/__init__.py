@@ -14,7 +14,7 @@ import werkzeug
 from werkzeug.http import parse_cookie
 
 if TYPE_CHECKING:
-    from ._type_check_imports import flask, requests, requests_mock
+    from ._type_check_imports import flask, httpretty, requests, requests_mock
 
 
 class _MockObjTypes(Enum):
@@ -23,6 +23,7 @@ class _MockObjTypes(Enum):
     REQUESTS_MOCK = auto()
     # A ``responses.RequestsMock``, or the ``responses`` module.
     RESPONSES = auto()
+    HTTPRETTY = auto()
 
 
 def add_flask_app_to_mock(
@@ -41,10 +42,12 @@ def add_flask_app_to_mock(
         mock_obj_type = _MockObjTypes.RESPONSES
     elif hasattr(mock_obj, 'request_history'):
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
+    elif hasattr(mock_obj, 'HTTPretty'):
+        mock_obj_type = _MockObjTypes.HTTPRETTY
     else:  # pragma: no cover
         raise TypeError(
-            'Expected a ``requests_mock``, or ``responses`` object, '
-            f'got {type(mock_obj)}.',
+            'Expected a HTTPretty, ``requests_mock``, or ``responses`` '
+            f'object, got {type(mock_obj)}.',
         )
 
     for rule in flask_app.url_map.iter_rules():
@@ -67,6 +70,12 @@ def add_flask_app_to_mock(
                     method=method,
                     url=url,
                     text=partial(_requests_mock_callback, flask_app=flask_app),
+                )
+            elif mock_obj_type == _MockObjTypes.HTTPRETTY:
+                mock_obj.register_uri(
+                    method=method,
+                    uri=url,
+                    body=partial(_httpretty_callback, flask_app=flask_app),
                 )
             else:  # pragma: no cover
                 pass
@@ -124,6 +133,54 @@ def _responses_callback(
         response.headers,
     )
     result = (response.status_code, result_headers, bytes(response.data))
+    return result
+
+
+def _httpretty_callback(
+    request: 'httpretty.HTTPrettyRequest',
+    uri: str,
+    headers: Dict,
+    flask_app: 'flask.Flask',
+) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+    # We make this assertion to satisfy linters.
+    # The parameters are given to httpretty callbacks, but we do not use them.
+    assert [uri, headers]
+
+    test_client = flask_app.test_client()
+    # See parameters at
+    # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
+    cookie_string = request.headers.get('Cookie', '')
+    cookie_list = cookie_string.split(';')
+    cookie_list_no_empty = [item for item in cookie_list if item]
+    request_cookies = [
+        list(parse_cookie(cookie).items())[0]
+        for cookie in cookie_list_no_empty
+    ]
+    cookies_dict = dict(request_cookies)
+
+    for key, value in cookies_dict.items():
+        test_client.set_cookie(
+            server_name='',
+            key=key,
+            value=value,
+        )
+
+    environ_overrides = {}
+    if 'Content-Length' in request.headers:
+        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+    environ_builder = werkzeug.test.EnvironBuilder(
+        path=request.path,
+        method=request.method,
+        headers=dict(request.headers),
+        data=request.body,
+        environ_overrides=environ_overrides,
+    )
+    response = test_client.open(environ_builder.get_request())
+
+    result_headers: Dict[str, Union[str, int, bool, None]] = dict(
+        response.headers,
+    )
+    result = (response.status_code, result_headers, response.data)
     return result
 
 

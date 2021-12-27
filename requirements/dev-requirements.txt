@@ -9,6 +9,7 @@ flake8-commas==2.1.0
 flake8-quotes==3.3.1
 flake8==4.0.1
 furo==2021.11.23
+httpretty==1.1.4
 isort==5.10.1
 mypy==0.930
 pip_check_reqs==2.3.2
@@ -17,8 +18,8 @@ pylint==2.12.2
 pyroma==3.2
 pytest-cov==3.0.0  # Measure code coverage
 pytest==6.2.5
-requests==2.26.0
 requests-mock==1.8.0
+requests==2.26.0
 responses==0.16.0
 sphinx-autodoc-typehints==1.12.0
 sphinxcontrib.spelling==7.3.0

@@ -7,9 +7,11 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 
 import json
 import uuid
+from contextlib import contextmanager
 from functools import partial
-from typing import Any, Tuple
+from typing import Any, Iterator, Tuple
 
+import httpretty
 import pytest
 import requests
 import requests_mock
@@ -20,9 +22,22 @@ from flask_negotiate import consumes
 
 from requests_mock_flask import add_flask_app_to_mock
 
+
+@contextmanager
+def httpretty_context_manager() -> Iterator:
+    """
+    Context manager for httpretty.
+    """
+    httpretty.enable()
+    yield httpretty
+    httpretty.disable()
+    httpretty.reset()
+
+
 _MOCK_CTXS = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
+    httpretty_context_manager,
 ]
 
 
@@ -671,6 +686,7 @@ def test_404_no_such_method(mock_ctx: Any) -> None:
             (
                 requests.exceptions.ConnectionError,
                 requests_mock.exceptions.NoMockAddress,
+                ValueError,
             ),
         ):
             requests.post('http://www.example.com/')
