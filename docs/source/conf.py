@@ -10,11 +10,6 @@ from pkg_resources import get_distribution
 
 # pylint: disable=invalid-name
 
-# -- General configuration ------------------------------------------------
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
@@ -67,3 +62,15 @@ rst_prolog = f"""
 """
 
 always_document_param_types = True
+
+set_type_checking_flag = True
+# * We want to use types from packages which are not install dependencies of
+#   this package.
+# * To achieve that, we wrap imports in ``if typing.TYPE_CHECKING``.
+# * To get those imports in sphinx-autodoc-typehints, we must use
+#   ``set_type_checking_flag = True``.
+# * If we use that option, we set ``typing.TYPE_CHECKING`` true in our imported
+#   packages.
+# * Some packages cannot be imported when we use `typing.TYPE_CHECKING``, so
+#   we mock them out.
+autodoc_mock_imports = ['werkzeug', 'flask']

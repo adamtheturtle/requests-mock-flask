@@ -6,15 +6,14 @@ from __future__ import annotations
 
 import re
 from functools import partial
-from typing import Any, Dict, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 from urllib.parse import urljoin
 
 import werkzeug
-from flask import Flask
-from requests import PreparedRequest
-from requests_mock.request import _RequestObjectProxy
-from requests_mock.response import _Context
 from werkzeug.http import parse_cookie
+
+if TYPE_CHECKING:
+    from ._type_check_imports import flask, requests, requests_mock
 
 
 def add_flask_app_to_mock(
@@ -22,13 +21,16 @@ def add_flask_app_to_mock(
     # ``requests_mock.Mocker, ``responses.RequestsMock`` and the ``responses``
     # module.
     mock_obj: Any,
-    flask_app: Flask,
+    flask_app: 'flask.Flask',
     base_url: str,
 ) -> None:
     """
     Make it so that requests sent to the ``base_url`` are forwarded to the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
+    # We use hasattr here rather than checking the type of ``mock_obj``.
+    #
+    # This is so that we do not need to add responses etc. as requirements.
     if hasattr(mock_obj, 'add_callback'):
         resp_callback = partial(_responses_callback, flask_app=flask_app)
         register_method = partial(
@@ -36,6 +38,9 @@ def add_flask_app_to_mock(
             callback=resp_callback,
         )
     else:
+        # We expect that the ``mock_obj`` type is a ``requests_mock.Mocker``
+        # or a ``requests_mock.Adapter``.
+        assert hasattr(mock_obj, 'request_history')
         req_m_callback = partial(_requests_mock_callback, flask_app=flask_app)
         register_method = partial(mock_obj.register_uri, text=req_m_callback)
 
@@ -52,8 +57,8 @@ def add_flask_app_to_mock(
 
 
 def _responses_callback(
-    request: PreparedRequest,
-    flask_app: Flask,
+    request: 'requests.PreparedRequest',
+    flask_app: 'flask.Flask',
 ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the flask app, send an equivalent request to an in
@@ -107,9 +112,9 @@ def _responses_callback(
 
 
 def _requests_mock_callback(
-    request: _RequestObjectProxy,
-    context: _Context,
-    flask_app: Flask,
+    request: 'requests_mock.request._RequestObjectProxy',
+    context: 'requests_mock.response._Context',
+    flask_app: 'flask.Flask',
 ) -> str:
     """
     Given a request to the flask app, send an equivalent request to an in
