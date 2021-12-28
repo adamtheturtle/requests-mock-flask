@@ -1,4 +1,3 @@
-# pylint: disable=too-many-lines
 """
 Tests for the ``requests_mock_flask`` package.
 
@@ -8,7 +7,8 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 
 import json
 import uuid
-from typing import Tuple
+from functools import partial
+from typing import Any, Tuple
 
 import pytest
 import requests
@@ -20,8 +20,14 @@ from flask_negotiate import consumes
 
 from requests_mock_flask import add_flask_app_to_mock
 
+_MOCK_CTXS = [
+    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
+    requests_mock.Mocker,
+]
 
-def test_simple_route() -> None:
+
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_simple_route(mock_ctx: Any) -> None:
     """
     A simple GET route works.
     """
@@ -42,34 +48,22 @@ def test_simple_route() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com')
+        mock_response = requests.get('http://www.example.com')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_headers() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_headers(mock_ctx: Any) -> None:
     """
     Request headers are sent.
     """
@@ -92,40 +86,25 @@ def test_headers() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com',
             headers={'hello': 'world'},
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com',
-            headers={'hello': 'world'},
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_json() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_json(mock_ctx: Any) -> None:
     """
     A route that returns JSON data works.
     """
@@ -146,34 +125,22 @@ def test_route_with_json() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.json == expected_json
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com')
+        mock_response = requests.get('http://www.example.com')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.json() == expected_json
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.json() == expected_json
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.json() == expected_json
 
 
-def test_route_with_variable_no_type_given() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_variable_no_type_given(mock_ctx: Any) -> None:
     """
     A route with a variable works.
     """
@@ -194,34 +161,22 @@ def test_route_with_variable_no_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/Frasier')
+        mock_response = requests.get('http://www.example.com/Frasier')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/Frasier')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_string_variable() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_string_variable(mock_ctx: Any) -> None:
     """
     A route with a string variable works.
     """
@@ -242,34 +197,22 @@ def test_route_with_string_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/Frasier')
+        mock_response = requests.get('http://www.example.com/Frasier')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/Frasier')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_int_variable() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_int_variable(mock_ctx: Any) -> None:
     """
     A route with an int variable works.
     """
@@ -290,34 +233,22 @@ def test_route_with_int_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/4')
+        mock_response = requests.get('http://www.example.com/4')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/4')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_float_variable() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_float_variable(mock_ctx: Any) -> None:
     """
     A route with a float variable works.
     """
@@ -338,34 +269,22 @@ def test_route_with_float_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/4.0')
+        mock_response = requests.get('http://www.example.com/4.0')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/4.0')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_path_variable_with_slash() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_path_variable_with_slash(mock_ctx: Any) -> None:
     """
     A route with a path variable works.
     """
@@ -386,34 +305,22 @@ def test_route_with_path_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/foo/bar')
+        mock_response = requests.get('http://www.example.com/foo/bar')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/foo/bar')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_string_variable_with_slash() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
     """
     A route with a string variable when given a slash works.
     """
@@ -433,34 +340,22 @@ def test_route_with_string_variable_with_slash() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/foo/bar')
+        mock_response = requests.get('http://www.example.com/foo/bar')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert 'not found on the server' in responses_response.text
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/foo/bar')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert 'not found on the server' in req_mock_response.text
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert 'not found on the server' in mock_response.text
 
 
-def test_route_with_uuid_variable() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_uuid_variable(mock_ctx: Any) -> None:
     """
     A route with a uuid variable works.
     """
@@ -482,38 +377,24 @@ def test_route_with_uuid_variable() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             f'http://www.example.com/{random_uuid}',
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            f'http://www.example.com/{random_uuid}',
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_nested_path() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_nested_path(mock_ctx: Any) -> None:
     """
     A route with a variable nested in a path works.
     """
@@ -534,38 +415,24 @@ def test_nested_path() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com/users/4/posts',
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com/users/4/posts',
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_route_with_multiple_variables() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_route_with_multiple_variables(mock_ctx: Any) -> None:
     """
     A route with multiple variables works.
     """
@@ -586,38 +453,24 @@ def test_route_with_multiple_variables() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com/users/cranes/frasier/posts',
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com/users/cranes/frasier/posts',
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_post_verb() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_post_verb(mock_ctx: Any) -> None:
     """
     A route with the POST verb works.
     """
@@ -638,38 +491,26 @@ def test_post_verb() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.post('http://www.example.com/')
+        mock_response = requests.post('http://www.example.com/')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.post('http://www.example.com/')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize(
-    'custom_content_length',
-    ['1', '100'],
-)
-def test_incorrect_content_length(custom_content_length: str) -> None:
+@pytest.mark.parametrize('custom_content_length', ['1', '100'])
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_incorrect_content_length(
+    custom_content_length: str,
+    mock_ctx: Any,
+) -> None:
     """
     Custom content length headers are passed through to the Flask endpoint.
     """
@@ -704,32 +545,21 @@ def test_incorrect_content_length(custom_content_length: str) -> None:
     ).prepare()
     requests_request.headers['Content-Length'] = custom_content_length
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
         session = requests.Session()
-        responses_response = session.send(request=requests_request)
+        mock_response = session.send(request=requests_request)
 
-    assert responses_response.status_code == expected_status_code
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        session = requests.Session()
-        req_mock_response = session.send(request=requests_request)
-
-    assert req_mock_response.status_code == expected_status_code
+    assert mock_response.status_code == expected_status_code
 
 
-def test_multiple_http_verbs() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_multiple_http_verbs(mock_ctx: Any) -> None:
     """
     A route with multiple verbs works.
     """
@@ -755,53 +585,27 @@ def test_multiple_http_verbs() -> None:
     assert post_response.headers['Content-Type'] == expected_content_type
     assert post_response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_get_response = requests.get('http://www.example.com/')
-        responses_post_response = requests.post('http://www.example.com/')
+        mock_get_response = requests.get('http://www.example.com/')
+        mock_post_response = requests.post('http://www.example.com/')
 
-    assert responses_get_response.status_code == expected_status_code
-    assert (
-        responses_get_response.headers['Content-Type'] == expected_content_type
-    )
-    assert responses_get_response.text == expected_data.decode()
+    assert mock_get_response.status_code == expected_status_code
+    assert mock_get_response.headers['Content-Type'] == expected_content_type
+    assert mock_get_response.text == expected_data.decode()
 
-    assert responses_post_response.status_code == expected_status_code
-    assert (
-        responses_post_response.headers['Content-Type']
-        == expected_content_type
-    )
-    assert responses_post_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_get_response = requests.get('http://www.example.com/')
-        req_mock_post_response = requests.post('http://www.example.com/')
-
-    assert req_mock_get_response.status_code == expected_status_code
-    assert (
-        req_mock_get_response.headers['Content-Type'] == expected_content_type
-    )
-    assert req_mock_get_response.text == expected_data.decode()
-
-    assert req_mock_post_response.status_code == expected_status_code
-    assert (
-        req_mock_post_response.headers['Content-Type'] == expected_content_type
-    )
-    assert req_mock_post_response.text == expected_data.decode()
+    assert mock_post_response.status_code == expected_status_code
+    assert mock_post_response.headers['Content-Type'] == expected_content_type
+    assert mock_post_response.text == expected_data.decode()
 
 
-def test_wrong_type_given() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_wrong_type_given(mock_ctx: Any) -> None:
     """
     A route with the wrong type given works.
     """
@@ -821,34 +625,22 @@ def test_wrong_type_given() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not found on the server' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/a')
+        mock_response = requests.get('http://www.example.com/a')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert 'not found on the server' in responses_response.text
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/a')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert 'not found on the server' in req_mock_response.text
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert 'not found on the server' in mock_response.text
 
 
-def test_404_no_such_method() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_404_no_such_method(mock_ctx: Any) -> None:
     """
     A route with the wrong method given works.
     """
@@ -868,28 +660,24 @@ def test_404_no_such_method() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert b'not allowed for the requested URL.' in response.data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        with pytest.raises(requests.exceptions.ConnectionError):
-            requests.post('http://www.example.com/')
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        with pytest.raises(requests_mock.exceptions.NoMockAddress):
+        with pytest.raises(
+            (
+                requests.exceptions.ConnectionError,
+                requests_mock.exceptions.NoMockAddress,
+            ),
+        ):
             requests.post('http://www.example.com/')
 
 
-def test_request_needs_content_type() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_request_needs_content_type(mock_ctx: Any) -> None:
     """
     Routes which require a content type are supported.
     """
@@ -911,40 +699,25 @@ def test_request_needs_content_type() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com',
             headers={'Content-Type': 'application/json'},
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com',
-            headers={'Content-Type': 'application/json'},
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_request_needs_data() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_request_needs_data(mock_ctx: Any) -> None:
     """
     Routes which require data are supported.
     """
@@ -972,42 +745,26 @@ def test_request_needs_data() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com',
             headers={'Content-Type': 'application/json'},
             data=json.dumps({'hello': 'world'}),
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com',
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps({'hello': 'world'}),
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_multiple_functions_same_path_different_type() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
     """
     When multiple functions exist with the same path but have a different type,
     the mock matches them just the same.
@@ -1037,34 +794,22 @@ def test_multiple_functions_same_path_different_type() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get('http://www.example.com/4')
+        mock_response = requests.get('http://www.example.com/4')
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get('http://www.example.com/4')
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_query_string() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_query_string(mock_ctx: Any) -> None:
     """
     Query strings work.
     """
@@ -1086,38 +831,24 @@ def test_query_string() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.get(
+        mock_response = requests.get(
             'http://www.example.com?frasier=crane',
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.get(
-            'http://www.example.com?frasier=crane',
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
 
 
-def test_cookies() -> None:
+@pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
+def test_cookies(mock_ctx: Any) -> None:
     """
     Cookies work.
     """
@@ -1152,14 +883,14 @@ def test_cookies() -> None:
     assert response.headers['Content-Type'] == expected_content_type
     assert response.data == expected_data
 
-    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
+    with mock_ctx() as mock_obj:
         add_flask_app_to_mock(
-            mock_obj=resp_m,
+            mock_obj=mock_obj,
             flask_app=app,
             base_url='http://www.example.com',
         )
 
-        responses_response = requests.post(
+        mock_response = requests.post(
             'http://www.example.com',
             cookies={
                 'frasier': 'crane',
@@ -1167,27 +898,7 @@ def test_cookies() -> None:
             },
         )
 
-    assert responses_response.status_code == expected_status_code
-    assert responses_response.headers['Content-Type'] == expected_content_type
-    assert responses_response.text == expected_data.decode()
-    assert responses_response.cookies['frasier_set'] == 'crane_set'
-
-    with requests_mock.Mocker() as resp_m:
-        add_flask_app_to_mock(
-            mock_obj=resp_m,
-            flask_app=app,
-            base_url='http://www.example.com',
-        )
-
-        req_mock_response = requests.post(
-            'http://www.example.com',
-            cookies={
-                'frasier': 'crane',
-                'frasier2': 'crane2',
-            },
-        )
-
-    assert req_mock_response.status_code == expected_status_code
-    assert req_mock_response.headers['Content-Type'] == expected_content_type
-    assert req_mock_response.text == expected_data.decode()
-    assert req_mock_response.cookies['frasier_set'] == 'crane_set'
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers['Content-Type'] == expected_content_type
+    assert mock_response.text == expected_data.decode()
+    assert mock_response.cookies['frasier_set'] == 'crane_set'
