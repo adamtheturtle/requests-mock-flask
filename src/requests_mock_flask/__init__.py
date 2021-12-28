@@ -5,6 +5,7 @@ Package for ``requests_mock_flask``.
 from __future__ import annotations
 
 import re
+from enum import Enum, auto
 from functools import partial
 from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 from urllib.parse import urljoin
@@ -14,6 +15,14 @@ from werkzeug.http import parse_cookie
 
 if TYPE_CHECKING:
     from ._type_check_imports import flask, requests, requests_mock
+
+
+class _MockObjTypes(Enum):
+
+    # A ``requests_mock.Mocker`` or a ``requests_mock.Adapter``.
+    REQUESTS_MOCK = auto()
+    # A ``responses.RequestsMock``, or the ``responses`` module.
+    RESPONSES = auto()
 
 
 def add_flask_app_to_mock(
@@ -29,18 +38,9 @@ def add_flask_app_to_mock(
     #
     # This is so that we do not need to add responses etc. as requirements.
     if hasattr(mock_obj, 'add_callback'):
-        # We expect that the ``mock_obj`` type is a ``requests_mock.Mocker``,
-        # a ``responses.RequestsMock``, or the ``responses`` module.
-        resp_callback = partial(_responses_callback, flask_app=flask_app)
-        register_method = partial(
-            mock_obj.add_callback,
-            callback=resp_callback,
-        )
+        mock_obj_type = _MockObjTypes.RESPONSES
     elif hasattr(mock_obj, 'request_history'):
-        # We expect that the ``mock_obj`` type is a ``requests_mock.Mocker``
-        # or a ``requests_mock.Adapter``.
-        req_m_callback = partial(_requests_mock_callback, flask_app=flask_app)
-        register_method = partial(mock_obj.register_uri, text=req_m_callback)
+        mock_obj_type = _MockObjTypes.REQUESTS_MOCK
     else:  # pragma: no cover
         raise TypeError(
             'Expected a ``requests_mock``, or ``responses`` object, '
@@ -56,7 +56,20 @@ def add_flask_app_to_mock(
 
         assert rule.methods is not None
         for method in rule.methods:
-            register_method(method=method, url=url)
+            if mock_obj_type == _MockObjTypes.RESPONSES:
+                mock_obj.add_callback(
+                    method=method,
+                    url=url,
+                    callback=partial(_responses_callback, flask_app=flask_app),
+                )
+            elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
+                mock_obj.register_uri(
+                    method=method,
+                    url=url,
+                    text=partial(_requests_mock_callback, flask_app=flask_app),
+                )
+            else:  # pragma: no cover
+                pass
 
 
 def _responses_callback(
