@@ -17,9 +17,6 @@ if TYPE_CHECKING:
 
 
 def add_flask_app_to_mock(
-    # We use the ``Any`` type to support:
-    # ``requests_mock.Mocker, ``responses.RequestsMock`` and the ``responses``
-    # module.
     mock_obj: Any,
     flask_app: 'flask.Flask',
     base_url: str,
@@ -32,17 +29,23 @@ def add_flask_app_to_mock(
     #
     # This is so that we do not need to add responses etc. as requirements.
     if hasattr(mock_obj, 'add_callback'):
+        # We expect that the ``mock_obj`` type is a ``requests_mock.Mocker``,
+        # a ``responses.RequestsMock``, or the ``responses`` module.
         resp_callback = partial(_responses_callback, flask_app=flask_app)
         register_method = partial(
             mock_obj.add_callback,
             callback=resp_callback,
         )
-    else:
+    elif hasattr(mock_obj, 'request_history'):
         # We expect that the ``mock_obj`` type is a ``requests_mock.Mocker``
         # or a ``requests_mock.Adapter``.
-        assert hasattr(mock_obj, 'request_history')
         req_m_callback = partial(_requests_mock_callback, flask_app=flask_app)
         register_method = partial(mock_obj.register_uri, text=req_m_callback)
+    else:  # pragma: no cover
+        raise TypeError(
+            'Expected a ``requests_mock``, or ``responses`` object, '
+            f'got {type(mock_obj)}.',
+        )
 
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any

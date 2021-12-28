@@ -115,7 +115,7 @@ class TestRequestsMock:
 
     def test_adapter(self) -> None:
         """
-        It is possible to use the helper with a ``requests_mock`` fixture.
+        It is possible to use the helper with a ``requests_mock`` adapter.
         """
         app = Flask(__name__)
 
