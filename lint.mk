@@ -40,7 +40,10 @@ pip-extra-reqs:
 
 .PHONY: pip-missing-reqs
 pip-missing-reqs:
-	pip-missing-reqs --requirements-file=requirements/requirements.txt src/
+	pip-missing-reqs \
+		--requirements-file=requirements/requirements.txt \
+		--ignore-file=src/requests_mock_flask/_type_check_imports/__init__.py \
+		src/
 
 .PHONY: pylint
 pylint:

@@ -4,6 +4,8 @@ Changelog
 Next
 ----
 
+Remove ``Flask``, ``requests`` and ``requests_mock`` as dependencies.
+
 2021.12.13
 ------------
 
