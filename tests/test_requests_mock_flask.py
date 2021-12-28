@@ -683,7 +683,9 @@ def test_404_no_such_method(mock_ctx: Any) -> None:
         )
 
         with pytest.raises(
-            (
+            # Ignoring what I believe is
+            # https://github.com/python/mypy/issues/9003.
+            expected_exception=(  # type: ignore
                 requests.exceptions.ConnectionError,
                 requests_mock.exceptions.NoMockAddress,
                 ValueError,
