@@ -3,7 +3,7 @@
 requests-mock-flask
 ===================
 
-``requests-mock-flask`` helps with testing `Flask`_ applications with `responses`_ or `requests-mock`_.
+``requests-mock-flask`` helps with testing `Flask`_ applications with `httpretty`_, `responses`_ or `requests-mock`_.
 
 .. contents::
    :local:
@@ -89,7 +89,7 @@ Usage example
 
    def test_requests_mock_adapter() -> None:
        """
-       It is possible to use the helper with a ``requests_mock`` fixture.
+       It is possible to use the helper with a ``requests_mock`` adapter.
        """
        session = requests.Session()
        adapter = requests_mock.Adapter()
@@ -106,11 +106,27 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
+   @httpretty.activate
+   def test_httpretty_decorator() -> None:
+       """
+       It is possible to use the helper with HTTPretty.
+       """
+       add_flask_app_to_mock(
+           mock_obj=httpretty,
+           flask_app=app,
+           base_url='http://www.example.com',
+       )
+
+       response = requests.get('http://www.example.com')
+
+       assert response.status_code == 200
+       assert response.text == 'Hello, World!'
+
 
 Use cases
 ---------
 
-* Use the ``requests`` API for testing applications.
+* Use ``requests`` or other Python APIs for testing Flask applications.
 * Create a test suite which can test a Flask application as well as a live web application, to make a verified fake.
 * Test a service which calls a Flask application that you have the source code for.
 
@@ -123,6 +139,7 @@ See the `full documentation <https://requests-mock-flask.readthedocs.io/en/lates
 .. _Flask: https://flask.palletsprojects.com/
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
 .. _responses: https://github.com/getsentry/responses
+.. _httpretty: https://httpretty.readthedocs.io
 
 .. |Build Status| image:: https://github.com/adamtheturtle/requests-mock-flask/workflows/CI/badge.svg
    :target: https://github.com/adamtheturtle/requests-mock-flask/actions

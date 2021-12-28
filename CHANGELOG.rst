@@ -4,6 +4,8 @@ Changelog
 Next
 ----
 
+Add support for ``httpretty``.
+
 2021.12.28
 ------------
 

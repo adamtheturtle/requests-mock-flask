@@ -2,6 +2,7 @@
 Tests for ways the helper can be used.
 """
 
+import httpretty
 import requests
 import requests_mock
 import responses
@@ -134,6 +135,37 @@ class TestRequestsMock:
         )
 
         response = session.get('mock://www.example.com')
+
+        assert response.status_code == 200
+        assert response.text == 'Hello, World!'
+
+
+class TestHTTPretty:
+    """
+    Tests for using the helper with HTTPretty.
+
+    We only test one way of using the helper with HTTPretty, because the other
+    ways also pass in the HTTPretty module.
+    """
+
+    def test_use(self) -> None:
+        """
+        It is possible to use the helper with HTTPretty.
+        """
+        app = Flask(__name__)
+
+        @app.route('/')
+        def _() -> str:
+            return 'Hello, World!'
+
+        with httpretty.enabled():
+            add_flask_app_to_mock(
+                mock_obj=httpretty,
+                flask_app=app,
+                base_url='http://www.example.com',
+            )
+
+            response = requests.get('http://www.example.com')
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
