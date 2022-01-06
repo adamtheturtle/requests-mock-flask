@@ -21,7 +21,7 @@ pytest==6.2.5
 requests-mock==1.9.3
 requests==2.27.0
 responses==0.16.0
-sphinx-autodoc-typehints==1.13.0
+sphinx-autodoc-typehints==1.13.1
 sphinxcontrib.spelling==7.3.2
 types-requests==2.26.3
 types-setuptools==57.4.5
