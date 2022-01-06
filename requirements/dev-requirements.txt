@@ -19,7 +19,7 @@ pyroma==3.2
 pytest-cov==3.0.0  # Measure code coverage
 pytest==6.2.5
 requests-mock==1.9.3
-requests==2.27.0
+requests==2.27.1
 responses==0.16.0
 sphinx-autodoc-typehints==1.13.1
 sphinxcontrib.spelling==7.3.2
