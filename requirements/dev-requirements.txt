@@ -23,6 +23,6 @@ requests==2.27.1
 responses==0.16.0
 sphinx-autodoc-typehints==1.14.0
 sphinxcontrib.spelling==7.3.2
-types-requests==2.26.3
+types-requests==2.27.5
 types-setuptools==57.4.5
 vulture==2.3
