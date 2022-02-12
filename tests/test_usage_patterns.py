@@ -40,7 +40,7 @@ class TestResponses:
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
 
-    @responses.activate  # type: ignore
+    @responses.activate
     def test_decorator(self) -> None:
         """
         It is possible to use the helper with a ``responses`` decorator.
