@@ -17,7 +17,7 @@ pydocstyle==6.1.1
 pylint==2.12.2
 pyroma==3.2
 pytest-cov==3.0.0  # Measure code coverage
-pytest==7.0.0
+pytest==7.0.1
 requests-mock==1.9.3
 requests==2.27.1
 responses==0.18.0
