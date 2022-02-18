@@ -1,6 +1,6 @@
 Flask-Negotiate==0.1.0
 Flask==2.0.3
-Sphinx-Substitution-Extensions==2020.9.30.0
+Sphinx-Substitution-Extensions==2022.2.16
 autoflake==1.4
 black==22.1.0
 check-manifest==0.47
