@@ -1,6 +1,6 @@
 Flask-Negotiate==0.1.0
 Flask==2.0.3
-Sphinx-Substitution-Extensions==2020.9.30.0
+Sphinx-Substitution-Extensions==2022.2.16
 autoflake==1.4
 black==22.1.0
 check-manifest==0.47
@@ -22,6 +22,7 @@ requests-mock==1.9.3
 requests==2.27.1
 responses==0.18.0
 sphinx-autodoc-typehints==1.17.0
+sphinx-prompt==1.5.0
 sphinxcontrib.spelling==7.3.2
 types-requests==2.27.11
 types-setuptools==57.4.9
