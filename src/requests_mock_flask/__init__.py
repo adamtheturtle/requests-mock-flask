@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import re
 from enum import Enum, auto
-from functools import partial
 from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
 from urllib.parse import urljoin
 
@@ -40,10 +39,40 @@ def add_flask_app_to_mock(
     # This is so that we do not need to add responses etc. as requirements.
     if hasattr(mock_obj, 'add_callback'):
         mock_obj_type = _MockObjTypes.RESPONSES
+
+        def responses_callback(
+            request: 'requests.PreparedRequest',
+        ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+            return _responses_callback(request=request, flask_app=flask_app)
+
     elif hasattr(mock_obj, 'request_history'):
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
+
+        def requests_mock_callback(
+            request: 'requests_mock.request._RequestObjectProxy',
+            context: 'requests_mock.response._Context',
+        ) -> str:
+            return _requests_mock_callback(
+                request=request,
+                context=context,
+                flask_app=flask_app,
+            )
+
     elif hasattr(mock_obj, 'HTTPretty'):
         mock_obj_type = _MockObjTypes.HTTPRETTY
+
+        def httpretty_callback(
+            request: 'httpretty.HTTPrettyRequest',
+            uri: str,
+            headers: Dict,
+        ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+            return _httpretty_callback(
+                request=request,
+                uri=uri,
+                headers=headers,
+                flask_app=flask_app,
+            )
+
     else:  # pragma: no cover
         raise TypeError(
             'Expected a HTTPretty, ``requests_mock``, or ``responses`` '
@@ -63,19 +92,19 @@ def add_flask_app_to_mock(
                 mock_obj.add_callback(
                     method=method,
                     url=url,
-                    callback=partial(_responses_callback, flask_app=flask_app),
+                    callback=responses_callback,
                 )
             elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
                 mock_obj.register_uri(
                     method=method,
                     url=url,
-                    text=partial(_requests_mock_callback, flask_app=flask_app),
+                    text=requests_mock_callback,
                 )
             elif mock_obj_type == _MockObjTypes.HTTPRETTY:
                 mock_obj.register_uri(
                     method=method,
                     uri=url,
-                    body=partial(_httpretty_callback, flask_app=flask_app),
+                    body=httpretty_callback,
                 )
             else:  # pragma: no cover
                 pass
