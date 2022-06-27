@@ -25,5 +25,5 @@ sphinx-autodoc-typehints==1.18.3
 sphinx-prompt==1.5.0
 sphinxcontrib.spelling==7.5.1
 types-requests==2.27.30
-types-setuptools==57.4.17
+types-setuptools==57.4.18
 vulture==2.4
