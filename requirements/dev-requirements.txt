@@ -1,5 +1,5 @@
 Flask-Negotiate==0.1.0
-Flask==2.2.0
+Flask==2.2.1
 Sphinx-Substitution-Extensions==2022.2.16
 autoflake==1.4
 black==22.6.0
