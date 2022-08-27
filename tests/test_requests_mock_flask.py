@@ -70,7 +70,7 @@ def test_simple_route(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com')
+        mock_response = requests.get('http://www.example.com', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -111,6 +111,7 @@ def test_headers(mock_ctx: Any) -> None:
         mock_response = requests.get(
             'http://www.example.com',
             headers={'hello': 'world'},
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -147,7 +148,7 @@ def test_route_with_json(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com')
+        mock_response = requests.get('http://www.example.com', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -183,7 +184,10 @@ def test_route_with_variable_no_type_given(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/Frasier')
+        mock_response = requests.get(
+            'http://www.example.com/Frasier',
+            timeout=1,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -219,7 +223,10 @@ def test_route_with_string_variable(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/Frasier')
+        mock_response = requests.get(
+            'http://www.example.com/Frasier',
+            timeout=1,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -255,7 +262,7 @@ def test_route_with_int_variable(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/4')
+        mock_response = requests.get('http://www.example.com/4', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -291,7 +298,7 @@ def test_route_with_float_variable(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/4.0')
+        mock_response = requests.get('http://www.example.com/4.0', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -327,7 +334,10 @@ def test_route_with_path_variable_with_slash(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/foo/bar')
+        mock_response = requests.get(
+            'http://www.example.com/foo/bar',
+            timeout=1,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -362,7 +372,10 @@ def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/foo/bar')
+        mock_response = requests.get(
+            'http://www.example.com/foo/bar',
+            timeout=1,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -401,6 +414,7 @@ def test_route_with_uuid_variable(mock_ctx: Any) -> None:
 
         mock_response = requests.get(
             f'http://www.example.com/{random_uuid}',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -439,6 +453,7 @@ def test_nested_path(mock_ctx: Any) -> None:
 
         mock_response = requests.get(
             'http://www.example.com/users/4/posts',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -477,6 +492,7 @@ def test_route_with_multiple_variables(mock_ctx: Any) -> None:
 
         mock_response = requests.get(
             'http://www.example.com/users/cranes/frasier/posts',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -513,7 +529,7 @@ def test_post_verb(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.post('http://www.example.com/')
+        mock_response = requests.post('http://www.example.com/', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -607,8 +623,11 @@ def test_multiple_http_verbs(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_get_response = requests.get('http://www.example.com/')
-        mock_post_response = requests.post('http://www.example.com/')
+        mock_get_response = requests.get('http://www.example.com/', timeout=1)
+        mock_post_response = requests.post(
+            'http://www.example.com/',
+            timeout=1,
+        )
 
     assert mock_get_response.status_code == expected_status_code
     assert mock_get_response.headers['Content-Type'] == expected_content_type
@@ -647,7 +666,7 @@ def test_wrong_type_given(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/a')
+        mock_response = requests.get('http://www.example.com/a', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -689,7 +708,7 @@ def test_404_no_such_method(mock_ctx: Any) -> None:
                 ValueError,
             ),
         ):
-            requests.post('http://www.example.com/')
+            requests.post('http://www.example.com/', timeout=1)
 
 
 @pytest.mark.parametrize('mock_ctx', _MOCK_CTXS)
@@ -725,6 +744,7 @@ def test_request_needs_content_type(mock_ctx: Any) -> None:
         mock_response = requests.get(
             'http://www.example.com',
             headers={'Content-Type': 'application/json'},
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -772,6 +792,7 @@ def test_request_needs_data(mock_ctx: Any) -> None:
             'http://www.example.com',
             headers={'Content-Type': 'application/json'},
             data=json.dumps({'hello': 'world'}),
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -817,7 +838,7 @@ def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
             base_url='http://www.example.com',
         )
 
-        mock_response = requests.get('http://www.example.com/4')
+        mock_response = requests.get('http://www.example.com/4', timeout=1)
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers['Content-Type'] == expected_content_type
@@ -856,6 +877,7 @@ def test_query_string(mock_ctx: Any) -> None:
 
         mock_response = requests.get(
             'http://www.example.com?frasier=crane',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -912,6 +934,7 @@ def test_cookies(mock_ctx: Any) -> None:
                 'frasier': 'crane',
                 'frasier2': 'crane2',
             },
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code

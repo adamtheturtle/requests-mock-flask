@@ -16,7 +16,8 @@ class TestResponses:
     Tests for using the helper with ``responses``.
     """
 
-    def test_context_manager(self) -> None:
+    @staticmethod
+    def test_context_manager() -> None:
         """
         It is possible to use the helper with a ``responses`` context manager.
         """
@@ -35,13 +36,14 @@ class TestResponses:
                 base_url='http://www.example.com',
             )
 
-            response = requests.get('http://www.example.com')
+            response = requests.get('http://www.example.com', timeout=1)
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
 
+    @staticmethod
     @responses.activate
-    def test_decorator(self) -> None:
+    def test_decorator() -> None:
         """
         It is possible to use the helper with a ``responses`` decorator.
         """
@@ -57,7 +59,7 @@ class TestResponses:
             base_url='http://www.example.com',
         )
 
-        response = requests.get('http://www.example.com')
+        response = requests.get('http://www.example.com', timeout=1)
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
@@ -68,7 +70,8 @@ class TestRequestsMock:
     Tests for using the helper with ``requests_mock``.
     """
 
-    def test_context_manager(self) -> None:
+    @staticmethod
+    def test_context_manager() -> None:
         """
         It is possible to use the helper with a ``requests_mock`` context
         manager.
@@ -86,13 +89,13 @@ class TestRequestsMock:
                 base_url='http://www.example.com',
             )
 
-            response = requests.get('http://www.example.com')
+            response = requests.get('http://www.example.com', timeout=1)
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
 
+    @staticmethod
     def test_fixture(  # pylint: disable=redefined-outer-name
-        self,
         requests_mock: requests_mock.Mocker,
     ) -> None:
         """
@@ -110,11 +113,12 @@ class TestRequestsMock:
             base_url='http://www.example.com',
         )
 
-        response = requests.get('http://www.example.com')
+        response = requests.get('http://www.example.com', timeout=1)
 
         assert response.status_code == 200
 
-    def test_adapter(self) -> None:
+    @staticmethod
+    def test_adapter() -> None:
         """
         It is possible to use the helper with a ``requests_mock`` adapter.
         """
@@ -148,7 +152,8 @@ class TestHTTPretty:
     ways also pass in the HTTPretty module.
     """
 
-    def test_use(self) -> None:
+    @staticmethod
+    def test_use() -> None:
         """
         It is possible to use the helper with HTTPretty.
         """
@@ -165,7 +170,7 @@ class TestHTTPretty:
                 base_url='http://www.example.com',
             )
 
-            response = requests.get('http://www.example.com')
+            response = requests.get('http://www.example.com', timeout=1)
 
         assert response.status_code == 200
         assert response.text == 'Hello, World!'
