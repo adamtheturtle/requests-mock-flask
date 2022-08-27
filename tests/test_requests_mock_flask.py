@@ -185,7 +185,8 @@ def test_route_with_variable_no_type_given(mock_ctx: Any) -> None:
         )
 
         mock_response = requests.get(
-            'http://www.example.com/Frasier', timeout=1
+            'http://www.example.com/Frasier',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -223,7 +224,8 @@ def test_route_with_string_variable(mock_ctx: Any) -> None:
         )
 
         mock_response = requests.get(
-            'http://www.example.com/Frasier', timeout=1
+            'http://www.example.com/Frasier',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -333,7 +335,8 @@ def test_route_with_path_variable_with_slash(mock_ctx: Any) -> None:
         )
 
         mock_response = requests.get(
-            'http://www.example.com/foo/bar', timeout=1
+            'http://www.example.com/foo/bar',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -370,7 +373,8 @@ def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
         )
 
         mock_response = requests.get(
-            'http://www.example.com/foo/bar', timeout=1
+            'http://www.example.com/foo/bar',
+            timeout=1,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -621,7 +625,8 @@ def test_multiple_http_verbs(mock_ctx: Any) -> None:
 
         mock_get_response = requests.get('http://www.example.com/', timeout=1)
         mock_post_response = requests.post(
-            'http://www.example.com/', timeout=1
+            'http://www.example.com/',
+            timeout=1,
         )
 
     assert mock_get_response.status_code == expected_status_code
