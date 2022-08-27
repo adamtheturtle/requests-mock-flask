@@ -25,6 +25,7 @@ lint: \
 
 .PHONY: fix-lint
 fix-lint: \
+    add-trailing-comma \
     autoflake \
     fix-black \
     fix-isort
