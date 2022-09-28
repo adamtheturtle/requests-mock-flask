@@ -1,7 +1,7 @@
 Flask-Negotiate==0.1.0
 Flask==2.2.2
 Sphinx-Substitution-Extensions==2022.2.16
-add-trailing-comma==2.2.3
+add-trailing-comma==2.3.0
 autoflake==1.6.1
 black==22.8.0
 check-manifest==0.48
