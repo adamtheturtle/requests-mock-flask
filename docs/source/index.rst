@@ -6,7 +6,7 @@
 Installation
 ------------
 
-Requires Python 3.9+.
+Requires Python 3.11+.
 
 .. code:: sh
 
