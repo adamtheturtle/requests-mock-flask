@@ -13,7 +13,7 @@ furo==2022.9.29
 httpretty==1.1.4
 isort==5.10.1
 mypy==0.982
-pip_check_reqs==2.4.0
+pip_check_reqs==2.4.2
 pydocstyle==6.1.1
 pylint==2.15.5
 pyroma==4.0
