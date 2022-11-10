@@ -353,7 +353,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
 
     @app.route('/<string:my_variable>')
     def _(_: str) -> str:
-        ...  # pragma: no cover
+        return ''  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.get('/foo/bar')
@@ -647,7 +647,7 @@ def test_wrong_type_given(mock_ctx: Any) -> None:
 
     @app.route('/<int:my_variable>')
     def _(_: int) -> str:
-        ...  # pragma: no cover
+        return ''  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.get('/a')
@@ -682,7 +682,7 @@ def test_404_no_such_method(mock_ctx: Any) -> None:
 
     @app.route('/')
     def _() -> str:
-        ...  # pragma: no cover
+        return ''  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.post('/')
@@ -810,7 +810,7 @@ def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
 
     @app.route('/<my_variable>')
     def _(_: float) -> str:
-        ...  # pragma: no cover
+        return ''  # pragma: no cover
 
     @app.route('/<int:my_variable>')
     def ___(my_variable: int) -> str:
@@ -818,7 +818,7 @@ def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
 
     @app.route('/<string:my_variable>')
     def ____(_: str) -> str:
-        ...  # pragma: no cover
+        return ''  # pragma: no cover
 
     test_client = app.test_client()
     response = test_client.get('/4')
