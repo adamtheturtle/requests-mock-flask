@@ -24,7 +24,7 @@ from requests_mock_flask import add_flask_app_to_mock
 
 
 @contextmanager
-def httpretty_context_manager() -> Iterator:
+def httpretty_context_manager() -> Iterator[type[httpretty]]:
     """
     Context manager for httpretty.
     """
