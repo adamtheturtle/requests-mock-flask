@@ -64,7 +64,7 @@ def add_flask_app_to_mock(
         def httpretty_callback(
             request: 'httpretty.HTTPrettyRequest',
             uri: str,
-            headers: Dict,
+            headers: Dict[str, Any],
         ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
             return _httpretty_callback(
                 request=request,
@@ -168,7 +168,7 @@ def _responses_callback(
 def _httpretty_callback(
     request: 'httpretty.HTTPrettyRequest',
     uri: str,
-    headers: Dict,
+    headers: Dict[str, Any],
     flask_app: 'flask.Flask',
 ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
     # We make this assertion to satisfy linters.
