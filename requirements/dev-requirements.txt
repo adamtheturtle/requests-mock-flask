@@ -8,7 +8,7 @@ check-manifest==0.48
 doc8==1.0.0
 flake8-commas==2.1.0
 flake8-quotes==3.3.1
-flake8==5.0.4
+flake8==6.0.0
 furo==2022.9.29
 httpretty==1.1.4
 isort==5.10.1
