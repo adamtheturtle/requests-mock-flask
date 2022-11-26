@@ -12,8 +12,8 @@ import requests  # pragma: no cover
 import requests_mock  # pragma: no cover
 
 __all__ = [  # pragma: no cover
-    'flask',
-    'httpretty',
-    'requests',
-    'requests_mock',
+    "flask",
+    "httpretty",
+    "requests",
+    "requests_mock",
 ]

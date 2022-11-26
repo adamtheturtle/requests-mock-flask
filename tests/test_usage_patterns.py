@@ -23,9 +23,9 @@ class TestResponses:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         with responses.RequestsMock(
             assert_all_requests_are_fired=False,
@@ -33,13 +33,13 @@ class TestResponses:
             add_flask_app_to_mock(
                 mock_obj=resp_m,
                 flask_app=app,
-                base_url='http://www.example.com',
+                base_url="http://www.example.com",
             )
 
-            response = requests.get('http://www.example.com', timeout=1)
+            response = requests.get("http://www.example.com", timeout=1)
 
         assert response.status_code == 200
-        assert response.text == 'Hello, World!'
+        assert response.text == "Hello, World!"
 
     @staticmethod
     @responses.activate
@@ -49,20 +49,20 @@ class TestResponses:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         add_flask_app_to_mock(
             mock_obj=responses,
             flask_app=app,
-            base_url='http://www.example.com',
+            base_url="http://www.example.com",
         )
 
-        response = requests.get('http://www.example.com', timeout=1)
+        response = requests.get("http://www.example.com", timeout=1)
 
         assert response.status_code == 200
-        assert response.text == 'Hello, World!'
+        assert response.text == "Hello, World!"
 
 
 class TestRequestsMock:
@@ -78,21 +78,21 @@ class TestRequestsMock:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         with requests_mock.Mocker() as resp_m:
             add_flask_app_to_mock(
                 mock_obj=resp_m,
                 flask_app=app,
-                base_url='http://www.example.com',
+                base_url="http://www.example.com",
             )
 
-            response = requests.get('http://www.example.com', timeout=1)
+            response = requests.get("http://www.example.com", timeout=1)
 
         assert response.status_code == 200
-        assert response.text == 'Hello, World!'
+        assert response.text == "Hello, World!"
 
     @staticmethod
     def test_fixture(  # pylint: disable=redefined-outer-name
@@ -103,17 +103,17 @@ class TestRequestsMock:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         add_flask_app_to_mock(
             mock_obj=requests_mock,
             flask_app=app,
-            base_url='http://www.example.com',
+            base_url="http://www.example.com",
         )
 
-        response = requests.get('http://www.example.com', timeout=1)
+        response = requests.get("http://www.example.com", timeout=1)
 
         assert response.status_code == 200
 
@@ -124,24 +124,24 @@ class TestRequestsMock:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         session = requests.Session()
         adapter = requests_mock.Adapter()
-        session.mount('mock', adapter)
+        session.mount("mock", adapter)
 
         add_flask_app_to_mock(
             mock_obj=adapter,
             flask_app=app,
-            base_url='mock://www.example.com',
+            base_url="mock://www.example.com",
         )
 
-        response = session.get('mock://www.example.com')
+        response = session.get("mock://www.example.com")
 
         assert response.status_code == 200
-        assert response.text == 'Hello, World!'
+        assert response.text == "Hello, World!"
 
 
 class TestHTTPretty:
@@ -159,18 +159,18 @@ class TestHTTPretty:
         """
         app = Flask(__name__)
 
-        @app.route('/')
+        @app.route("/")
         def _() -> str:
-            return 'Hello, World!'
+            return "Hello, World!"
 
         with httpretty.enabled():
             add_flask_app_to_mock(
                 mock_obj=httpretty,
                 flask_app=app,
-                base_url='http://www.example.com',
+                base_url="http://www.example.com",
             )
 
-            response = requests.get('http://www.example.com', timeout=1)
+            response = requests.get("http://www.example.com", timeout=1)
 
         assert response.status_code == 200
-        assert response.text == 'Hello, World!'
+        assert response.text == "Hello, World!"

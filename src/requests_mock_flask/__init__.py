@@ -27,7 +27,7 @@ class _MockObjTypes(Enum):
 
 def add_flask_app_to_mock(
     mock_obj: Any,
-    flask_app: 'flask.Flask',
+    flask_app: "flask.Flask",
     base_url: str,
 ) -> None:
     """
@@ -37,20 +37,20 @@ def add_flask_app_to_mock(
     # We use hasattr here rather than checking the type of ``mock_obj``.
     #
     # This is so that we do not need to add responses etc. as requirements.
-    if hasattr(mock_obj, 'add_callback'):
+    if hasattr(mock_obj, "add_callback"):
         mock_obj_type = _MockObjTypes.RESPONSES
 
         def responses_callback(
-            request: 'requests.PreparedRequest',
+            request: "requests.PreparedRequest",
         ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
             return _responses_callback(request=request, flask_app=flask_app)
 
-    elif hasattr(mock_obj, 'request_history'):
+    elif hasattr(mock_obj, "request_history"):
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
 
         def requests_mock_callback(
-            request: 'requests_mock.request._RequestObjectProxy',
-            context: 'requests_mock.response._Context',
+            request: "requests_mock.request._RequestObjectProxy",
+            context: "requests_mock.response._Context",
         ) -> str:
             return _requests_mock_callback(
                 request=request,
@@ -58,11 +58,11 @@ def add_flask_app_to_mock(
                 flask_app=flask_app,
             )
 
-    elif hasattr(mock_obj, 'HTTPretty'):
+    elif hasattr(mock_obj, "HTTPretty"):
         mock_obj_type = _MockObjTypes.HTTPRETTY
 
         def httpretty_callback(
-            request: 'httpretty.HTTPrettyRequest',
+            request: "httpretty.HTTPrettyRequest",
             uri: str,
             headers: Dict[str, Any],
         ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
@@ -75,14 +75,14 @@ def add_flask_app_to_mock(
 
     else:  # pragma: no cover
         raise TypeError(
-            'Expected a HTTPretty, ``requests_mock``, or ``responses`` '
-            f'object, got {type(mock_obj)}.',
+            "Expected a HTTPretty, ``requests_mock``, or ``responses`` "
+            f"object, got {type(mock_obj)}.",
         )
 
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any
         # string of characters of length > 0.
-        path_to_match = re.sub(pattern='<.+>', repl='.+', string=rule.rule)
+        path_to_match = re.sub(pattern="<.+>", repl=".+", string=rule.rule)
         pattern = urljoin(base_url, path_to_match)
         url = re.compile(pattern)
 
@@ -111,8 +111,8 @@ def add_flask_app_to_mock(
 
 
 def _responses_callback(
-    request: 'requests.PreparedRequest',
-    flask_app: 'flask.Flask',
+    request: "requests.PreparedRequest",
+    flask_app: "flask.Flask",
 ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the flask app, send an equivalent request to an in
@@ -127,8 +127,8 @@ def _responses_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get('Cookie', '')
-    cookie_list = cookie_string.split(';')
+    cookie_string = request.headers.get("Cookie", "")
+    cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
         list(parse_cookie(cookie).items())[0]
@@ -138,14 +138,14 @@ def _responses_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name='',
+            server_name="",
             key=key,
             value=value,
         )
 
     environ_overrides = {}
-    if 'Content-Length' in request.headers:
-        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+    if "Content-Length" in request.headers:
+        environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
     headers_dict = dict(request.headers).items()
     environ_builder = werkzeug.test.EnvironBuilder(
@@ -166,10 +166,10 @@ def _responses_callback(
 
 
 def _httpretty_callback(
-    request: 'httpretty.HTTPrettyRequest',
+    request: "httpretty.HTTPrettyRequest",
     uri: str,
     headers: Dict[str, Any],
-    flask_app: 'flask.Flask',
+    flask_app: "flask.Flask",
 ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
     # We make this assertion to satisfy linters.
     # The parameters are given to httpretty callbacks, but we do not use them.
@@ -178,8 +178,8 @@ def _httpretty_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get('Cookie', '')
-    cookie_list = cookie_string.split(';')
+    cookie_string = request.headers.get("Cookie", "")
+    cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
         list(parse_cookie(cookie).items())[0]
@@ -189,14 +189,14 @@ def _httpretty_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name='',
+            server_name="",
             key=key,
             value=value,
         )
 
     environ_overrides = {}
-    if 'Content-Length' in request.headers:
-        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+    if "Content-Length" in request.headers:
+        environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path,
         method=request.method,
@@ -214,9 +214,9 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: 'requests_mock.request._RequestObjectProxy',
-    context: 'requests_mock.response._Context',
-    flask_app: 'flask.Flask',
+    request: "requests_mock.request._RequestObjectProxy",
+    context: "requests_mock.response._Context",
+    flask_app: "flask.Flask",
 ) -> str:
     """
     Given a request to the flask app, send an equivalent request to an in
@@ -233,8 +233,8 @@ def _requests_mock_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get('Cookie', '')
-    cookie_list = cookie_string.split(';')
+    cookie_string = request.headers.get("Cookie", "")
+    cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
         list(parse_cookie(cookie).items())[0]
@@ -244,14 +244,14 @@ def _requests_mock_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name='',
+            server_name="",
             key=key,
             value=value,
         )
 
     environ_overrides = {}
-    if 'Content-Length' in request.headers:
-        environ_overrides['CONTENT_LENGTH'] = request.headers['Content-Length']
+    if "Content-Length" in request.headers:
+        environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=request.method,
