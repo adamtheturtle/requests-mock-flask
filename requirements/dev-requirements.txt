@@ -7,7 +7,7 @@ black==22.10.0
 check-manifest==0.48
 doc8==1.0.0
 flake8==6.0.0
-furo==2022.9.29
+furo==2022.12.7
 httpretty==1.1.4
 isort==5.10.1
 mypy==0.991
