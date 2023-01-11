@@ -21,7 +21,7 @@ lint: \
     spelling \
     vulture \
     pylint \
-    pydocstyle \
+    pydocstyle
 
 .PHONY: fix-lint
 fix-lint: \
