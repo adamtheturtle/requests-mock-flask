@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 
 
 class _MockObjTypes(Enum):
-
     # A ``requests_mock.Mocker`` or a ``requests_mock.Adapter``.
     REQUESTS_MOCK = auto()
     # A ``responses.RequestsMock``, or the ``responses`` module.
