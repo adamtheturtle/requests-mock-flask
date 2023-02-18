@@ -10,7 +10,7 @@ flake8==6.0.0
 furo==2022.12.7
 httpretty==1.1.4
 isort==5.12.0
-mypy==1.0.0
+mypy==1.0.1
 pip_check_reqs==2.4.3
 pydocstyle==6.3.0
 pylint==2.16.2
