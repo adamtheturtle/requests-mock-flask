@@ -2,12 +2,13 @@
 Tests for ways the helper can be used.
 """
 
+from http import HTTPStatus
+
 import httpretty
 import requests
 import requests_mock
 import responses
 from flask import Flask
-
 from requests_mock_flask import add_flask_app_to_mock
 
 
@@ -38,7 +39,7 @@ class TestResponses:
 
             response = requests.get("http://www.example.com", timeout=1)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
 
     @staticmethod
@@ -61,7 +62,7 @@ class TestResponses:
 
         response = requests.get("http://www.example.com", timeout=1)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
 
 
@@ -91,7 +92,7 @@ class TestRequestsMock:
 
             response = requests.get("http://www.example.com", timeout=1)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
 
     @staticmethod
@@ -115,7 +116,7 @@ class TestRequestsMock:
 
         response = requests.get("http://www.example.com", timeout=1)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
 
     @staticmethod
     def test_adapter() -> None:
@@ -140,7 +141,7 @@ class TestRequestsMock:
 
         response = session.get("mock://www.example.com")
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
 
 
@@ -172,5 +173,5 @@ class TestHTTPretty:
 
             response = requests.get("http://www.example.com", timeout=1)
 
-        assert response.status_code == 200
+        assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"

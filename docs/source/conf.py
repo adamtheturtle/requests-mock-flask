@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Configuration for Sphinx.
 """
@@ -26,7 +25,7 @@ templates_path = ["_templates"]
 
 # General information about the project.
 project = "Requests-Mock-Flask"
-year = datetime.datetime.now().year
+year = datetime.datetime.now(tz=datetime.UTC).year
 author = "Adam Dangoor"
 project_copyright = f"{year}, {author}"
 

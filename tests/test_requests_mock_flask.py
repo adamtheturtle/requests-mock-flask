@@ -7,9 +7,9 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 
 import json
 import uuid
+from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
-from typing import Any, Iterator, Tuple
 
 import httpretty
 import pytest
@@ -19,7 +19,6 @@ import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
-
 from requests_mock_flask import add_flask_app_to_mock
 
 
@@ -40,9 +39,13 @@ _MOCK_CTXS = [
     httpretty_context_manager,
 ]
 
+_MockCtxType = (
+    type[responses.RequestsMock] | type[requests_mock.Mocker] | type[httpretty]
+)
+
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_simple_route(mock_ctx: Any) -> None:
+def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """
     A simple GET route works.
     """
@@ -78,7 +81,7 @@ def test_simple_route(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_headers(mock_ctx: Any) -> None:
+def test_headers(mock_ctx: _MockCtxType) -> None:
     """
     Request headers are sent.
     """
@@ -120,14 +123,14 @@ def test_headers(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_json(mock_ctx: Any) -> None:
+def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     """
     A route that returns JSON data works.
     """
     app = Flask(__name__)
 
     @app.route("/")
-    def _() -> Tuple[Response, int]:
+    def _() -> tuple[Response, int]:
         return jsonify({"hello": "world"}), 201
 
     test_client = app.test_client()
@@ -156,7 +159,7 @@ def test_route_with_json(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_variable_no_type_given(mock_ctx: Any) -> None:
+def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable works.
     """
@@ -195,7 +198,7 @@ def test_route_with_variable_no_type_given(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_string_variable(mock_ctx: Any) -> None:
+def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable works.
     """
@@ -234,7 +237,7 @@ def test_route_with_string_variable(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_int_variable(mock_ctx: Any) -> None:
+def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with an int variable works.
     """
@@ -270,7 +273,7 @@ def test_route_with_int_variable(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_float_variable(mock_ctx: Any) -> None:
+def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a float variable works.
     """
@@ -306,7 +309,7 @@ def test_route_with_float_variable(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_path_variable_with_slash(mock_ctx: Any) -> None:
+def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a path variable works.
     """
@@ -345,7 +348,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
+def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable when given a slash works.
     """
@@ -383,7 +386,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_uuid_variable(mock_ctx: Any) -> None:
+def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a uuid variable works.
     """
@@ -423,7 +426,7 @@ def test_route_with_uuid_variable(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_nested_path(mock_ctx: Any) -> None:
+def test_nested_path(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable nested in a path works.
     """
@@ -462,7 +465,7 @@ def test_nested_path(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_route_with_multiple_variables(mock_ctx: Any) -> None:
+def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple variables works.
     """
@@ -501,7 +504,7 @@ def test_route_with_multiple_variables(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_post_verb(mock_ctx: Any) -> None:
+def test_post_verb(mock_ctx: _MockCtxType) -> None:
     """
     A route with the POST verb works.
     """
@@ -540,7 +543,7 @@ def test_post_verb(mock_ctx: Any) -> None:
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
 def test_incorrect_content_length(
     custom_content_length: str,
-    mock_ctx: Any,
+    mock_ctx: _MockCtxType,
 ) -> None:
     """
     Custom content length headers are passed through to the Flask endpoint.
@@ -590,7 +593,7 @@ def test_incorrect_content_length(
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_multiple_http_verbs(mock_ctx: Any) -> None:
+def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple verbs works.
     """
@@ -639,7 +642,7 @@ def test_multiple_http_verbs(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_wrong_type_given(mock_ctx: Any) -> None:
+def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong type given works.
     """
@@ -674,7 +677,7 @@ def test_wrong_type_given(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_404_no_such_method(mock_ctx: Any) -> None:
+def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong method given works.
     """
@@ -712,14 +715,14 @@ def test_404_no_such_method(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_request_needs_content_type(mock_ctx: Any) -> None:
+def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require a content type are supported.
     """
     app = Flask(__name__)
 
     @app.route("/")
-    @consumes("application/json")  # type: ignore
+    @consumes("application/json")  # type: ignore[misc]
     def _() -> str:
         return "Hello, World!"
 
@@ -753,14 +756,14 @@ def test_request_needs_content_type(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_request_needs_data(mock_ctx: Any) -> None:
+def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require data are supported.
     """
     app = Flask(__name__)
 
     @app.route("/")
-    @consumes("application/json")  # type: ignore
+    @consumes("application/json")  # type: ignore[misc]
     def _() -> str:
         request_json = request.get_json()
         assert isinstance(request_json, dict)
@@ -801,7 +804,9 @@ def test_request_needs_data(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
+def test_multiple_functions_same_path_different_type(
+    mock_ctx: _MockCtxType,
+) -> None:
     """
     When multiple functions exist with the same path but have a different type,
     the mock matches them just the same.
@@ -809,15 +814,15 @@ def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
     app = Flask(__name__)
 
     @app.route("/<my_variable>")
-    def _(_: float) -> str:
+    def _route_1(_: float) -> str:
         return ""  # pragma: no cover
 
     @app.route("/<int:my_variable>")
-    def ___(my_variable: int) -> str:
+    def _route_2(my_variable: int) -> str:
         return "Is int: " + str(my_variable)
 
     @app.route("/<string:my_variable>")
-    def ____(_: str) -> str:
+    def _route_3(_: str) -> str:
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -846,7 +851,7 @@ def test_multiple_functions_same_path_different_type(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_query_string(mock_ctx: Any) -> None:
+def test_query_string(mock_ctx: _MockCtxType) -> None:
     """
     Query strings work.
     """
@@ -886,7 +891,7 @@ def test_query_string(mock_ctx: Any) -> None:
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
-def test_cookies(mock_ctx: Any) -> None:
+def test_cookies(mock_ctx: _MockCtxType) -> None:
     """
     Cookies work.
     """
