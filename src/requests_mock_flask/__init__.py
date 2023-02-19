@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import werkzeug
@@ -25,7 +25,9 @@ class _MockObjTypes(Enum):
 
 
 def add_flask_app_to_mock(
-    mock_obj: Any,
+    # We allow an `Any` type here, as we do not want to add all mocker types
+    # as requirements.
+    mock_obj: Any,  # noqa: ANN401
     flask_app: "flask.Flask",
     base_url: str,
 ) -> None:
@@ -41,15 +43,17 @@ def add_flask_app_to_mock(
 
         def responses_callback(
             request: "requests.PreparedRequest",
-        ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+        ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
             return _responses_callback(request=request, flask_app=flask_app)
 
     elif hasattr(mock_obj, "request_history"):
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
 
         def requests_mock_callback(
-            request: "requests_mock.request._RequestObjectProxy",
-            context: "requests_mock.response._Context",
+            # We ignore SLF001 here, as we prefer to have this typed with
+            # private types than to have it untyped.
+            request: "requests_mock.request._RequestObjectProxy",  # noqa: SLF001
+            context: "requests_mock.response._Context",  # noqa: SLF001
         ) -> str:
             return _requests_mock_callback(
                 request=request,
@@ -63,8 +67,8 @@ def add_flask_app_to_mock(
         def httpretty_callback(
             request: "httpretty.HTTPrettyRequest",
             uri: str,
-            headers: Dict[str, Any],
-        ) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+            headers: dict[str, Any],
+        ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
             return _httpretty_callback(
                 request=request,
                 uri=uri,
@@ -73,10 +77,11 @@ def add_flask_app_to_mock(
             )
 
     else:  # pragma: no cover
-        raise TypeError(
+        message = (
             "Expected a HTTPretty, ``requests_mock``, or ``responses`` "
-            f"object, got {type(mock_obj)}.",
+            f"object, got {type(mock_obj)}."
         )
+        raise TypeError(message)
 
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any
@@ -112,7 +117,7 @@ def add_flask_app_to_mock(
 def _responses_callback(
     request: "requests.PreparedRequest",
     flask_app: "flask.Flask",
-) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+) -> tuple[int, dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the flask app, send an equivalent request to an in
     memory fake of the flask app and return some key details of the
@@ -157,19 +162,18 @@ def _responses_callback(
 
     response = test_client.open(environ_builder.get_request())
 
-    result_headers: Dict[str, Union[str, int, bool, None]] = dict(
+    result_headers: dict[str, str | int | bool | None] = dict(
         response.headers,
     )
-    result = (response.status_code, result_headers, bytes(response.data))
-    return result
+    return (response.status_code, result_headers, bytes(response.data))
 
 
 def _httpretty_callback(
     request: "httpretty.HTTPrettyRequest",
     uri: str,
-    headers: Dict[str, Any],
+    headers: dict[str, Any],
     flask_app: "flask.Flask",
-) -> Tuple[int, Dict[str, str | int | bool | None], bytes]:
+) -> tuple[int, dict[str, str | int | bool | None], bytes]:
     # We make this assertion to satisfy linters.
     # The parameters are given to httpretty callbacks, but we do not use them.
     assert [uri, headers]
@@ -205,16 +209,17 @@ def _httpretty_callback(
     )
     response = test_client.open(environ_builder.get_request())
 
-    result_headers: Dict[str, Union[str, int, bool, None]] = dict(
+    result_headers: dict[str, str | int | bool | None] = dict(
         response.headers,
     )
-    result = (response.status_code, result_headers, response.data)
-    return result
+    return (response.status_code, result_headers, response.data)
 
 
 def _requests_mock_callback(
-    request: "requests_mock.request._RequestObjectProxy",
-    context: "requests_mock.response._Context",
+    # We ignore SLF001 here, as we prefer to have this typed with
+    # private types than to have it untyped.
+    request: "requests_mock.request._RequestObjectProxy",  # noqa: SLF001
+    context: "requests_mock.response._Context",  # noqa: SLF001
     flask_app: "flask.Flask",
 ) -> str:
     """
