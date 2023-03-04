@@ -8,7 +8,7 @@ furo==2022.12.7
 httpretty==1.1.4
 mypy==1.0.1
 pip_check_reqs==2.4.4
-pylint==2.16.2
+pylint==2.16.3
 pyroma==4.2
 pytest-cov==4.0.0  # Measure code coverage
 pytest==7.2.1
