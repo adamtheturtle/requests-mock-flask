@@ -236,3 +236,4 @@ where = ["src"]
 [tool.setuptools.package-data]
 requests_mock_flask = ["py.typed"]
 
+[tool.setuptools_scm]
