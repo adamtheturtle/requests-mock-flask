@@ -202,3 +202,37 @@ ignore = [
     # Do not require tests to have a one-line summary.
     "D205",
 ]
+
+[tool.distutils.bdist_wheel]
+universal = true
+
+[project]
+authors = [ { name = "Adam Dangoor", email = "adamdangoor@gmail.com"} ]
+classifiers = [
+    "Operating System :: POSIX",
+    "Environment :: Web Environment",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Pytest",
+]
+description = "Helpers to use requests_mock and responses with a Flask test client."
+dynamic = ["version"]
+keywords = ["requests", "mock", "flask"]
+license = { file = "LICENSE" }
+name = "requests-mock-flask"
+readme = { file = "README.rst", content-type = "text/x-rst"}
+requires-python = ">=3.10"
+
+[project.urls]
+Source = "https://github.com/adamtheturtle/requests-mock-flask"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+requests_mock_flask = ["py.typed"]
+
