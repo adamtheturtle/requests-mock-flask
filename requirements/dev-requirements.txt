@@ -6,7 +6,7 @@ check-manifest==0.49
 doc8==1.1.1
 furo==2022.12.7
 httpretty==1.1.4
-mypy==1.0.1
+mypy==1.1.1
 pip_check_reqs==2.4.4
 pylint==2.16.4
 pyroma==4.2
