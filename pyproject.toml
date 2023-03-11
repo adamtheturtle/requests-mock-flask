@@ -153,7 +153,13 @@ ignore_path = [
 ]
 
 [build-system]
-requires = ["setuptools", "pip", "wheel"]
+requires = [
+     "pip",
+     "setuptools",
+     "setuptools-scm-git-archive==1.4",
+     "setuptools_scm[toml]==7.1.0",
+     "wheel",
+ ]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
