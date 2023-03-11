@@ -32,12 +32,12 @@ fix-ruff:
 
 .PHONY: pip-extra-reqs
 pip-extra-reqs:
-	pdm export --pyproject | pip-extra-reqs --requirements-file=/dev/fd/0 src/
+	pip-extra-reqs --requirements-file=<(pdm export --pyproject) src/
 
 .PHONY: pip-missing-reqs
 pip-missing-reqs:
 	pip-missing-reqs \
-		--requirements-file=requirements/requirements.txt \
+		--requirements-file=<(pdm export --pyproject) \
 		--ignore-file=src/requests_mock_flask/_type_check_imports/__init__.py \
 		src/
 
