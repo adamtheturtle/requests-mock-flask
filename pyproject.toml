@@ -106,6 +106,7 @@ log_cli = true
 
 ignore = [
   "*.enc",
+  ".vscode/*.json",
   "readthedocs.yaml",
   "CHANGELOG.rst",
   "CODE_OF_CONDUCT.rst",
