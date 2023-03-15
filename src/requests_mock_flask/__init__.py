@@ -76,7 +76,7 @@ def add_flask_app_to_mock(
                 flask_app=flask_app,
             )
 
-    else:  # pragma: no cover
+    else:
         message = (
             "Expected a HTTPretty, ``requests_mock``, or ``responses`` "
             f"object, got {type(mock_obj)}."

@@ -951,3 +951,19 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert mock_response.headers["Content-Type"] == expected_content_type
     assert mock_response.text == expected_data.decode()
     assert mock_response.cookies["frasier_set"] == "crane_set"
+
+
+def test_unknown_mock_type() -> None:
+    """
+    When an unknown mock type is passed in, an error is raised.
+    """
+    expected_error = (
+        "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
+        "got <class 'object'>."
+    )
+    with pytest.raises(expected_exception=TypeError, match=expected_error):
+        add_flask_app_to_mock(
+            mock_obj=object(),
+            flask_app=Flask(__name__),
+            base_url="http://www.example.com",
+        )
