@@ -186,19 +186,8 @@ ignore = [
     # docstrings.
     "D406",
     "D407",
-    # We have an existing interface to support and so we do not want to change
-    # exception names.
-    "N818",
-    # Ignore "too-many-*" errors as they seem to get in the way more than
-    # helping.
-    "PLR0912",
-    "PLR0913",
     # Allow 'assert' as we use it for tests.
     "S101",
-    # Allow imports which are only used for type checking to be outside type
-    # checking blocks.
-    "TCH002",
-    "TCH003",
     # We use quoted annotations so that we can use types from packages which
     # may not be installed.
     "UP037",
