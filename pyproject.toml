@@ -188,9 +188,6 @@ ignore = [
     "D407",
     # Allow 'assert' as we use it for tests.
     "S101",
-    # We use quoted annotations so that we can use types from packages which
-    # may not be installed.
-    "UP037",
 ]
 
 [tool.ruff.per-file-ignores]
