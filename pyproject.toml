@@ -188,10 +188,6 @@ ignore = [
     "D407",
     # Allow 'assert' as we use it for tests.
     "S101",
-    # Allow imports which are only used for type checking to be outside type
-    # checking blocks.
-    "TCH002",
-    "TCH003",
     # We use quoted annotations so that we can use types from packages which
     # may not be installed.
     "UP037",

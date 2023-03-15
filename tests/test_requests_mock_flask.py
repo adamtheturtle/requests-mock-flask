@@ -5,11 +5,13 @@ Test with a bunch of route types as per:
 https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 """
 
+from __future__ import annotations
+
 import json
 import uuid
-from collections.abc import Iterator
 from contextlib import contextmanager
 from functools import partial
+from typing import TYPE_CHECKING
 
 import httpretty
 import pytest
@@ -20,6 +22,9 @@ import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from flask_negotiate import consumes
 from requests_mock_flask import add_flask_app_to_mock
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @contextmanager
