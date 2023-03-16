@@ -229,7 +229,7 @@ dev = [
     "furo==2022.12.7",
     "httpretty==1.1.4",
     "mypy==1.1.1",
-    "pdm==2.4.8",
+    "pdm==2.4.9",
     "pip_check_reqs==2.4.4",
     "pylint==2.17.0",
     "pyroma==4.2",
