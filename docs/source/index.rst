@@ -25,7 +25,7 @@ Usage example
 
    from requests_mock_flask import add_flask_app_to_mock
 
-   app = flask.Flask(__name__)
+   app = flask.Flask("test_app")
 
    @app.route('/')
    def _() -> str:
@@ -68,7 +68,7 @@ Usage example
    def test_requests_mock_context_manager() -> None:
        """
        It is possible to use the helper with a ``requests_mock`` context
-   manager.
+       manager.
        """
        with requests_mock.Mocker() as resp_m:
            add_flask_app_to_mock(
@@ -101,6 +101,20 @@ Usage example
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
 
+.. -> test_src
+
+.. invisible-code-block: python
+
+   import pathlib
+   import subprocess
+   import tempfile
+
+   import pytest
+
+   with tempfile.TemporaryDirectory() as tmp_dir:
+       test_file = pathlib.Path(tmp_dir) / 'test_src.py'
+       test_file.write_text(test_src)
+       subprocess.check_output(["python", "-m", "pytest", test_file, "--basetemp", test_file.parent])
 
 Use cases
 ---------
