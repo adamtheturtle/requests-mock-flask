@@ -20,7 +20,6 @@ import requests_mock
 import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
-from flask_negotiate import consumes
 from requests_mock_flask import add_flask_app_to_mock
 
 if TYPE_CHECKING:
@@ -727,8 +726,8 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     app = Flask(__name__)
 
     @app.route("/")
-    @consumes("application/json")  # type: ignore[misc]
     def _() -> str:
+        assert request.mimetype == "application/json"
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -768,8 +767,8 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     app = Flask(__name__)
 
     @app.route("/")
-    @consumes("application/json")  # type: ignore[misc]
     def _() -> str:
+        assert request.mimetype == "application/json"
         request_json = request.get_json()
         assert isinstance(request_json, dict)
         return str(request_json["hello"])
