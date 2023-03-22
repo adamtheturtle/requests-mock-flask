@@ -221,7 +221,6 @@ dependencies = ["Werkzeug"]
 
 [project.optional-dependencies]
 dev = [
-    "Flask-Negotiate==0.1.0",
     "Flask==2.2.3",
     "Sphinx-Substitution-Extensions==2022.2.16",
     "black==23.1.0",
