@@ -230,7 +230,7 @@ dev = [
     "black==23.1.0",
     "check-manifest==0.49",
     "doc8==1.1.1",
-    "furo==2023.3.23",
+    "furo==2023.3.27",
     "httpretty==1.1.4",
     "mypy==1.1.1",
     "pdm==2.4.9",
