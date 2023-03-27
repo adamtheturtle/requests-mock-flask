@@ -133,7 +133,6 @@ strict = true
 [[tool.mypy.overrides]]
 
 module = [
-    "flask_negotiate",
     "httpretty",
     "sybil",
     "sybil.parsers.rest",
