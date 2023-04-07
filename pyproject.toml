@@ -232,7 +232,7 @@ dev = [
     "doc8==1.1.1",
     "furo==2023.3.27",
     "httpretty==1.1.4",
-    "mypy==1.1.1",
+    "mypy==1.2.0",
     "pdm==2.4.9",
     "pip_check_reqs==2.4.4",
     "pylint==2.17.2",
