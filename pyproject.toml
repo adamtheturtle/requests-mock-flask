@@ -225,7 +225,7 @@ dependencies = ["Werkzeug"]
 
 [project.optional-dependencies]
 dev = [
-    "Flask==2.2.3",
+    "Flask==2.2.4",
     "Sphinx-Substitution-Extensions==2022.2.16",
     "black==23.3.0",
     "check-manifest==0.49",
