@@ -240,7 +240,7 @@ dev = [
     "pytest-cov==4.0.0",
     "pytest==7.3.1",
     "requests-mock==1.10.0",
-    "requests==2.28.2",
+    "requests==2.29.0",
     "responses==0.23.1",
     "ruff==0.0.262",
     "sphinx-autodoc-typehints==1.23.0",
