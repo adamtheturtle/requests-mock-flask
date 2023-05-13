@@ -142,7 +142,7 @@ def _responses_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
@@ -192,7 +192,7 @@ def _httpretty_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
@@ -207,11 +207,14 @@ def _httpretty_callback(
         data=request.body,
         environ_overrides=environ_overrides,
     )
+    breakpoint()
+    
     response = test_client.open(environ_builder.get_request())
 
     result_headers: dict[str, str | int | bool | None] = dict(
         response.headers,
     )
+    breakpoint()
     return (response.status_code, result_headers, response.data)
 
 
@@ -248,7 +251,7 @@ def _requests_mock_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
