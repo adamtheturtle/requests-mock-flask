@@ -940,8 +940,8 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         return response
 
     test_client = app.test_client()
-    test_client.set_cookie(server_name="", key="frasier", value="crane")
-    test_client.set_cookie(server_name="", key="frasier2", value="crane2")
+    test_client.set_cookie(domain="", key="frasier", value="crane")
+    test_client.set_cookie(domain="", key="frasier2", value="crane2")
     test_client_cookie_jar = test_client.cookie_jar
     assert test_client_cookie_jar is not None
     original_cookies = set(test_client_cookie_jar)

@@ -142,7 +142,7 @@ def _responses_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
@@ -192,7 +192,7 @@ def _httpretty_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
@@ -248,7 +248,7 @@ def _requests_mock_callback(
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
-            server_name="",
+            domain="",
             key=key,
             value=value,
         )
