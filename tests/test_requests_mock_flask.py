@@ -11,7 +11,7 @@ import json
 import uuid
 from contextlib import contextmanager
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 import httpretty
 import pytest
@@ -24,6 +24,10 @@ from requests_mock_flask import add_flask_app_to_mock
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+# We use a high timeout to allow interactive debugging while requests are being
+# made.
+_TIMEOUT_SECONDS: Final[int] = 120
 
 
 @contextmanager
@@ -77,7 +81,10 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com", timeout=1)
+        mock_response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -118,7 +125,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
         mock_response = requests.get(
             "http://www.example.com",
             headers={"hello": "world"},
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -155,7 +162,10 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com", timeout=1)
+        mock_response = requests.get(
+            "http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -193,7 +203,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/Frasier",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -232,7 +242,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/Frasier",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -269,7 +279,10 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com/4", timeout=1)
+        mock_response = requests.get(
+            "http://www.example.com/4",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -305,7 +318,10 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com/4.0", timeout=1)
+        mock_response = requests.get(
+            "http://www.example.com/4.0",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -343,7 +359,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/foo/bar",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -381,7 +397,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/foo/bar",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -421,7 +437,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             f"http://www.example.com/{random_uuid}",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -460,7 +476,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/users/4/posts",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -499,7 +515,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com/users/cranes/frasier/posts",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -536,7 +552,10 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.post("http://www.example.com/", timeout=1)
+        mock_response = requests.post(
+            "http://www.example.com/",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -630,10 +649,13 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_get_response = requests.get("http://www.example.com/", timeout=1)
+        mock_get_response = requests.get(
+            "http://www.example.com/",
+            timeout=_TIMEOUT_SECONDS,
+        )
         mock_post_response = requests.post(
             "http://www.example.com/",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_get_response.status_code == expected_status_code
@@ -673,7 +695,10 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com/a", timeout=1)
+        mock_response = requests.get(
+            "http://www.example.com/a",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -715,7 +740,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
                 ValueError,
             ),
         ):
-            requests.post("http://www.example.com/", timeout=1)
+            requests.post("http://www.example.com/", timeout=_TIMEOUT_SECONDS)
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
@@ -751,7 +776,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
         mock_response = requests.get(
             "http://www.example.com",
             headers={"Content-Type": "application/json"},
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -799,7 +824,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
             "http://www.example.com",
             headers={"Content-Type": "application/json"},
             data=json.dumps({"hello": "world"}),
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -847,7 +872,10 @@ def test_multiple_functions_same_path_different_type(
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get("http://www.example.com/4", timeout=1)
+        mock_response = requests.get(
+            "http://www.example.com/4",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -886,7 +914,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
 
         mock_response = requests.get(
             "http://www.example.com?frasier=crane",
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -943,7 +971,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
                 "frasier": "crane",
                 "frasier2": "crane2",
             },
-            timeout=1,
+            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
