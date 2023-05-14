@@ -221,7 +221,7 @@ license = { file = "LICENSE" }
 name = "requests-mock-flask"
 readme = { file = "README.rst", content-type = "text/x-rst"}
 requires-python = ">=3.10"
-dependencies = ["Werkzeug"]
+dependencies = ["Werkzeug<=2.2.3"]
 
 [project.optional-dependencies]
 dev = [
@@ -232,7 +232,7 @@ dev = [
     "doc8==1.1.1",
     "furo==2023.3.27",
     "httpretty==1.1.4",
-    "mypy==1.2.0",
+    "mypy==1.3.0",
     "pdm==2.5.3",
     "pip_check_reqs==2.4.4",
     "pylint==2.17.2",
