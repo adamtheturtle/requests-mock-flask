@@ -3,6 +3,7 @@ Tests for ways the helper can be used.
 """
 
 from http import HTTPStatus
+from typing import Final
 
 import httpretty
 import requests
@@ -10,6 +11,10 @@ import requests_mock
 import responses
 from flask import Flask
 from requests_mock_flask import add_flask_app_to_mock
+
+# We use a high timeout to allow interactive debugging while requests are being
+# made.
+_TIMEOUT_SECONDS: Final[int] = 120
 
 
 class TestResponses:
@@ -37,7 +42,10 @@ class TestResponses:
                 base_url="http://www.example.com",
             )
 
-            response = requests.get("http://www.example.com", timeout=1)
+            response = requests.get(
+                url="http://www.example.com",
+                timeout=_TIMEOUT_SECONDS,
+            )
 
         assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
@@ -60,7 +68,10 @@ class TestResponses:
             base_url="http://www.example.com",
         )
 
-        response = requests.get("http://www.example.com", timeout=1)
+        response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
         assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
@@ -90,7 +101,10 @@ class TestRequestsMock:
                 base_url="http://www.example.com",
             )
 
-            response = requests.get("http://www.example.com", timeout=1)
+            response = requests.get(
+                url="http://www.example.com",
+                timeout=_TIMEOUT_SECONDS,
+            )
 
         assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
@@ -114,7 +128,10 @@ class TestRequestsMock:
             base_url="http://www.example.com",
         )
 
-        response = requests.get("http://www.example.com", timeout=1)
+        response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
         assert response.status_code == HTTPStatus.OK
 
@@ -171,7 +188,10 @@ class TestHTTPretty:
                 base_url="http://www.example.com",
             )
 
-            response = requests.get("http://www.example.com", timeout=1)
+            response = requests.get(
+                "http://www.example.com",
+                timeout=_TIMEOUT_SECONDS,
+            )
 
         assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
