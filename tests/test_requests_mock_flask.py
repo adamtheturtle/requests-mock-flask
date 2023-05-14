@@ -933,6 +933,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     def _() -> Response:
         response = make_response()
         response.set_cookie("frasier_set", "crane_set")
+        assert request.cookies, request
         assert request.cookies["frasier"] == "crane"
         assert request.cookies["frasier2"] == "crane2"
         response.data = "Hello, World!"
@@ -940,15 +941,23 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         return response
 
     test_client = app.test_client()
-    test_client.set_cookie(domain="", key="frasier", value="crane")
-    test_client.set_cookie(domain="", key="frasier2", value="crane2")
+    test_client.set_cookie(
+        domain="localhost",
+        key="frasier",
+        value="crane",
+    )
+    test_client.set_cookie(
+        domain="localhost",
+        key="frasier2",
+        value="crane2",
+    )
     response = test_client.post("/")
 
     expected_status_code = 200
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
-    assert response.status_code == expected_status_code
+    assert response.status_code == expected_status_code, response.data
     assert response.headers["Content-Type"] == expected_content_type
     new_cookie = test_client.get_cookie(key="frasier_set")
     assert new_cookie is not None
