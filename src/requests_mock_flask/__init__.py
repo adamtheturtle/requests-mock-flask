@@ -135,7 +135,7 @@ def _responses_callback(
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
-        list(parse_cookie(cookie).items())[0]
+        next(iter(parse_cookie(cookie).items()))
         for cookie in cookie_list_no_empty
     ]
     cookies_dict = dict(request_cookies)
@@ -185,7 +185,7 @@ def _httpretty_callback(
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
-        list(parse_cookie(cookie).items())[0]
+        next(iter(parse_cookie(cookie).items()))
         for cookie in cookie_list_no_empty
     ]
     cookies_dict = dict(request_cookies)
@@ -241,7 +241,7 @@ def _requests_mock_callback(
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     request_cookies = [
-        list(parse_cookie(cookie).items())[0]
+        next(iter(parse_cookie(cookie).items()))
         for cookie in cookie_list_no_empty
     ]
     cookies_dict = dict(request_cookies)
