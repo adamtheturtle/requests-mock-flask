@@ -47,9 +47,7 @@ _MOCK_CTXS = [
     httpretty_context_manager,
 ]
 
-_MockCtxType = (
-    type[responses.RequestsMock] | type[requests_mock.Mocker] | type[httpretty]
-)
+_MockCtxType = type[responses.RequestsMock | requests_mock.Mocker | httpretty]
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
