@@ -226,7 +226,7 @@ dependencies = ["Werkzeug>=2.3.0"]
 dev = [
     "Flask==3.0.0",
     "Sphinx-Substitution-Extensions==2022.2.16",
-    "black==23.9.1",
+    "black==23.10.0",
     "check-manifest==0.49",
     "doc8==1.1.1",
     "furo==2023.9.10",
