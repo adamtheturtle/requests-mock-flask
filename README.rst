@@ -11,7 +11,7 @@ requests-mock-flask
 Installation
 ------------
 
-Requires Python 3.11+.
+Requires Python 3.12+.
 
 .. code:: sh
 
