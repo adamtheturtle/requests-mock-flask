@@ -208,7 +208,7 @@ authors = [ { name = "Adam Dangoor", email = "adamdangoor@gmail.com"} ]
 classifiers = [
     "Operating System :: POSIX",
     "Environment :: Web Environment",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Development Status :: 5 - Production/Stable",
     "Framework :: Pytest",
@@ -219,7 +219,7 @@ keywords = ["requests", "mock", "flask"]
 license = { file = "LICENSE" }
 name = "requests-mock-flask"
 readme = { file = "README.rst", content-type = "text/x-rst"}
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = ["Werkzeug>=2.3.0"]
 
 [project.optional-dependencies]
