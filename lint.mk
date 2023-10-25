@@ -47,6 +47,14 @@ pyroma:
 vulture:
 	vulture --min-confidence 100 --exclude _vendor --exclude .eggs .
 
+.PHONY: pyproject-fmt
+ pyproject-fmt:
+	pyproject-fmt --check --indent=4 pyproject.toml
+
+ .PHONY: fix-pyproject-fmt
+ fix-pyproject-fmt:
+	pyproject-fmt --indent=4 pyproject.toml
+
 .PHONY: linkcheck
 linkcheck:
 	$(MAKE) -C docs/ linkcheck SPHINXOPTS=$(SPHINXOPTS)
