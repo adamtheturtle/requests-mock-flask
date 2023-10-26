@@ -234,7 +234,7 @@ dev = [
     "furo==2023.9.10",
     "httpretty==1.1.4",
     "mypy==1.6.1",
-    "pdm==2.9.3",
+    "pdm==2.10.0",
     "pip_check_reqs==2.5.3",
     "pylint==3.0.2",
     "pyproject-fmt==1.3",
