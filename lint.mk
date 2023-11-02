@@ -49,11 +49,11 @@ vulture:
 
 .PHONY: pyproject-fmt
  pyproject-fmt:
-	pyproject-fmt --check --indent=4 pyproject.toml
+	pyproject-fmt --keep-full-version --check --indent=4 pyproject.toml
 
  .PHONY: fix-pyproject-fmt
  fix-pyproject-fmt:
-	pyproject-fmt --indent=4 pyproject.toml
+	pyproject-fmt --keep-full-version --indent=4 pyproject.toml
 
 .PHONY: linkcheck
 linkcheck:
