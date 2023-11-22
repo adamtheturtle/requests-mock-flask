@@ -130,8 +130,6 @@ strict = true
 
 module = [
     "httpretty",
-    "sybil",
-    "sybil.parsers.rest",
 ]
 
 ignore_missing_imports = true
