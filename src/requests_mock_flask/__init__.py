@@ -50,10 +50,8 @@ def add_flask_app_to_mock(
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
 
         def requests_mock_callback(
-            # We ignore SLF001 here, as we prefer to have this typed with
-            # private types than to have it untyped.
-            request: requests_mock.request._RequestObjectProxy,  # noqa: SLF001
-            context: requests_mock.response._Context,  # noqa: SLF001
+            request: requests_mock.request._RequestObjectProxy,
+            context: requests_mock.response._Context,
         ) -> str:
             return _requests_mock_callback(
                 request=request,
@@ -216,10 +214,8 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    # We ignore SLF001 here, as we prefer to have this typed with
-    # private types than to have it untyped.
-    request: requests_mock.request._RequestObjectProxy,  # noqa: SLF001
-    context: requests_mock.response._Context,  # noqa: SLF001
+    request: requests_mock.request._RequestObjectProxy,
+    context: requests_mock.response._Context,
     flask_app: flask.Flask,
 ) -> str:
     """
