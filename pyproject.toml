@@ -237,7 +237,7 @@ dev = [
     "pylint==3.0.3",
     "pyproject-fmt==1.5.3",
     "pyroma==4.2",
-    "pytest==7.4.3",
+    "pytest==7.4.4",
     "pytest-cov==4.1",
     "requests==2.31",
     "requests-mock==1.11",
