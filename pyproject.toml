@@ -271,5 +271,4 @@ indent = 4
 keep_full_version = true
 
 [tool.pyright]
-# We should switch to strict once we have type hints for everything.
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
