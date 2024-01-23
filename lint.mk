@@ -39,6 +39,10 @@ pip-missing-reqs:
 pylint:
 	pylint *.py src/ tests/ docs/
 
+.PHONY: pyright
+pyright:
+	pyright .
+
 .PHONY: pyroma
 pyroma:
 	pyroma --min 10 .

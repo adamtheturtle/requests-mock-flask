@@ -236,6 +236,7 @@ dev = [
     "pip_check_reqs==2.5.3",
     "pylint==3.0.3",
     "pyproject-fmt==1.7.0",
+    "pyright==1.1.348",
     "pyroma==4.2",
     "pytest==7.4.4",
     "pytest-cov==4.1",
@@ -268,3 +269,7 @@ requests_mock_flask = ["py.typed"]
 [tool.pyproject-fmt]
 indent = 4
 keep_full_version = true
+
+[tool.pyright]
+# We should switch to strict once we have type hints for everything.
+typeCheckingMode = "basic"
