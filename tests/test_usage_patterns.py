@@ -33,6 +33,8 @@ class TestResponses:
         def _() -> str:
             return "Hello, World!"
 
+        response = requests.Response()
+
         with responses.RequestsMock(
             assert_all_requests_are_fired=False,
         ) as resp_m:

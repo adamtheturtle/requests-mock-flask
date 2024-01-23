@@ -13,7 +13,13 @@ import werkzeug
 from werkzeug.http import parse_cookie
 
 if TYPE_CHECKING:
-    from ._type_check_imports import flask, httpretty, requests, requests_mock
+    from ._type_check_imports import (
+        _Context,
+        _RequestObjectProxy,
+        flask,
+        httpretty,
+        requests,
+    )
 
 
 class _MockObjTypes(Enum):
@@ -35,45 +41,43 @@ def add_flask_app_to_mock(
     Make it so that requests sent to the ``base_url`` are forwarded to the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
+
+    def responses_callback(
+        request: requests.PreparedRequest,
+    ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+        return _responses_callback(request=request, flask_app=flask_app)
+
+    def requests_mock_callback(
+        request: _RequestObjectProxy,
+        context: _Context,
+    ) -> str:
+        return _requests_mock_callback(
+            request=request,
+            context=context,
+            flask_app=flask_app,
+        )
+
+    def httpretty_callback(
+        request: httpretty.core.HTTPrettyRequest,
+        uri: str,
+        headers: dict[str, Any],
+    ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+        return _httpretty_callback(
+            request=request,
+            uri=uri,
+            headers=headers,
+            flask_app=flask_app,
+        )
+
     # We use hasattr here rather than checking the type of ``mock_obj``.
     #
     # This is so that we do not need to add responses etc. as requirements.
     if hasattr(mock_obj, "add_callback"):
         mock_obj_type = _MockObjTypes.RESPONSES
-
-        def responses_callback(
-            request: requests.PreparedRequest,
-        ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-            return _responses_callback(request=request, flask_app=flask_app)
-
     elif hasattr(mock_obj, "request_history"):
         mock_obj_type = _MockObjTypes.REQUESTS_MOCK
-
-        def requests_mock_callback(
-            request: requests_mock.request._RequestObjectProxy,
-            context: requests_mock.response._Context,
-        ) -> str:
-            return _requests_mock_callback(
-                request=request,
-                context=context,
-                flask_app=flask_app,
-            )
-
     elif hasattr(mock_obj, "HTTPretty"):
         mock_obj_type = _MockObjTypes.HTTPRETTY
-
-        def httpretty_callback(
-            request: httpretty.HTTPrettyRequest,
-            uri: str,
-            headers: dict[str, Any],
-        ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-            return _httpretty_callback(
-                request=request,
-                uri=uri,
-                headers=headers,
-                flask_app=flask_app,
-            )
-
     else:
         message = (
             "Expected a HTTPretty, ``requests_mock``, or ``responses`` "
@@ -145,7 +149,7 @@ def _responses_callback(
             value=value,
         )
 
-    environ_overrides = {}
+    environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
@@ -167,7 +171,7 @@ def _responses_callback(
 
 
 def _httpretty_callback(
-    request: httpretty.HTTPrettyRequest,
+    request: httpretty.core.HTTPrettyRequest,
     uri: str,
     headers: dict[str, Any],
     flask_app: flask.Flask,
@@ -198,10 +202,11 @@ def _httpretty_callback(
     environ_overrides = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
+
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path,
         method=request.method,
-        headers=dict(request.headers),
+        headers=request.headers.items(),
         data=request.body,
         environ_overrides=environ_overrides,
     )
@@ -214,8 +219,8 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: requests_mock.request._RequestObjectProxy,
-    context: requests_mock.response._Context,
+    request: _RequestObjectProxy,
+    context: _Context,
     flask_app: flask.Flask,
 ) -> str:
     """
@@ -249,7 +254,7 @@ def _requests_mock_callback(
             value=value,
         )
 
-    environ_overrides = {}
+    environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
     environ_builder = werkzeug.test.EnvironBuilder(

@@ -9,11 +9,13 @@ install requirements.
 import flask  # pragma: no cover
 import httpretty  # pragma: no cover
 import requests  # pragma: no cover
-import requests_mock  # pragma: no cover
+from requests_mock.request import _RequestObjectProxy  # pragma: no cover
+from requests_mock.response import _Context  # pragma: no cover
 
 __all__ = [  # pragma: no cover
     "flask",
     "httpretty",
     "requests",
-    "requests_mock",
+    "_RequestObjectProxy",
+    "_Context",
 ]

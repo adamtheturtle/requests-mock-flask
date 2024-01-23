@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import json
 import uuid
-from contextlib import contextmanager
 from functools import partial
-from typing import TYPE_CHECKING, Final
+from typing import Final
 
 import httpretty
 import pytest
@@ -20,35 +19,24 @@ import requests_mock
 import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
+from requests_mock.exceptions import NoMockAddress
 from requests_mock_flask import add_flask_app_to_mock
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
 
 # We use a high timeout to allow interactive debugging while requests are being
 # made.
 _TIMEOUT_SECONDS: Final[int] = 120
 
 
-@contextmanager
-def httpretty_context_manager() -> Iterator[type[httpretty]]:
-    """
-    Context manager for httpretty.
-    """
-    httpretty.enable()
-    yield httpretty
-    httpretty.disable()
-    httpretty.reset()
-
-
 _MOCK_CTXS = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
-    httpretty_context_manager,
+    httpretty.httprettized,
 ]
 
 _MockCtxType = (
-    type[responses.RequestsMock] | type[requests_mock.Mocker] | type[httpretty]
+    type[responses.RequestsMock]
+    | type[requests_mock.Mocker]
+    | type[httpretty.httprettized]
 )
 
 
@@ -75,8 +63,13 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -116,8 +109,13 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -156,8 +154,13 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     assert response.json == expected_json
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -195,8 +198,13 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -234,8 +242,13 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -273,8 +286,13 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -312,8 +330,13 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -351,8 +374,13 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -389,8 +417,13 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -429,8 +462,13 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -468,8 +506,13 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -507,8 +550,13 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -546,8 +594,13 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -603,8 +656,13 @@ def test_incorrect_content_length(
     requests_request.headers["Content-Length"] = custom_content_length
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -643,8 +701,13 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     assert post_response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -689,8 +752,13 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -727,8 +795,13 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     assert b"not allowed for the requested URL." in response.data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -736,7 +809,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
         with pytest.raises(
             expected_exception=(
                 requests.exceptions.ConnectionError,
-                requests_mock.exceptions.NoMockAddress,
+                NoMockAddress,
                 ValueError,
             ),
         ):
@@ -767,8 +840,13 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -814,8 +892,13 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -866,8 +949,13 @@ def test_multiple_functions_same_path_different_type(
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -906,8 +994,13 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
@@ -966,8 +1059,13 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )

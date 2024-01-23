@@ -14,12 +14,13 @@ lint: \
     mypy \
     pip-extra-reqs \
     pip-missing-reqs \
+    pylint \
+    pyright \
     pyproject-fmt \
     pyroma \
     ruff \
     spelling \
-    vulture \
-    pylint
+    vulture
 
 .PHONY: fix-lint
 fix-lint: \
