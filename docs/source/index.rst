@@ -19,6 +19,7 @@ Usage example
 .. code:: python
 
    import flask
+   import httpretty
    import requests
    import responses
    import requests_mock
@@ -97,6 +98,23 @@ Usage example
        )
 
        response = session.get('mock://www.example.com')
+
+       assert response.status_code == 200
+       assert response.text == 'Hello, World!'
+
+   def test_httpretty_context_manager() -> None:
+       """
+       It is possible to use the helper with a ``httpretty`` context
+       manager.
+       """
+       with httpretty.core.httprettized():
+           add_flask_app_to_mock(
+               mock_obj=httpretty,
+               flask_app=app,
+               base_url='http://www.example.com',
+           )
+
+           response = requests.get('http://www.example.com')
 
        assert response.status_code == 200
        assert response.text == 'Hello, World!'
