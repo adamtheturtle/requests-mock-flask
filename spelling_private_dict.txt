@@ -16,6 +16,7 @@ todo
 tuple
 typehints
 ubuntu
+pyright
 untyped
 uuid
 

@@ -8,15 +8,12 @@ install requirements.
 
 
 import flask  # pragma: no cover
-import httpretty  # pragma: no cover
+import httpretty  # pyright: ignore[reportMissingTypeStubs], pragma: no cover
 import requests  # pragma: no cover
 from requests_mock import request as requests_mock_request  # pragma: no cover
 from requests_mock import (
     response as requests_mock_response,  # pragma: no cover
 )
-
-# from requests_mock.request import Request  # pragma: no cover
-# from requests_mock.response import Context  # pragma: no cover
 
 __all__ = [  # pragma: no cover
     "flask",

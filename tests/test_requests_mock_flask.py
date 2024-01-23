@@ -12,7 +12,7 @@ import uuid
 from functools import partial
 from typing import Final
 
-import httpretty
+import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import pytest
 import requests
 import requests_mock

@@ -6,11 +6,11 @@ from __future__ import annotations
 
 import re
 from enum import Enum, auto
+from http.cookies import SimpleCookie
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import werkzeug
-from werkzeug.http import parse_cookie
 
 if TYPE_CHECKING:
     from ._type_check_imports import (
@@ -136,11 +136,11 @@ def _responses_callback(
     cookie_string = request.headers.get("Cookie", "")
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
-    request_cookies = [
-        next(iter(parse_cookie(cookie).items()))
-        for cookie in cookie_list_no_empty
-    ]
-    cookies_dict = dict(request_cookies)
+    simple_cookie: SimpleCookie = SimpleCookie()
+    for cookie in cookie_list_no_empty:
+        simple_cookie.load(cookie)
+
+    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
@@ -186,11 +186,11 @@ def _httpretty_callback(
     cookie_string = request.headers.get("Cookie", "")
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
-    request_cookies = [
-        next(iter(parse_cookie(cookie).items()))
-        for cookie in cookie_list_no_empty
-    ]
-    cookies_dict = dict(request_cookies)
+    simple_cookie: SimpleCookie = SimpleCookie()
+    for cookie in cookie_list_no_empty:
+        simple_cookie.load(cookie)
+
+    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
@@ -199,7 +199,7 @@ def _httpretty_callback(
             value=value,
         )
 
-    environ_overrides = {}
+    environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
@@ -241,11 +241,11 @@ def _requests_mock_callback(
     cookie_string = request.headers.get("Cookie", "")
     cookie_list = cookie_string.split(";")
     cookie_list_no_empty = [item for item in cookie_list if item]
-    request_cookies = [
-        next(iter(parse_cookie(cookie).items()))
-        for cookie in cookie_list_no_empty
-    ]
-    cookies_dict = dict(request_cookies)
+    simple_cookie: SimpleCookie = SimpleCookie()
+    for cookie in cookie_list_no_empty:
+        simple_cookie.load(cookie)
+
+    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
     for key, value in cookies_dict.items():
         test_client.set_cookie(
