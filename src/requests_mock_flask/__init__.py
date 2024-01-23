@@ -14,11 +14,11 @@ from werkzeug.http import parse_cookie
 
 if TYPE_CHECKING:
     from ._type_check_imports import (
-        _Context,
-        _RequestObjectProxy,
         flask,
         httpretty,
         requests,
+        requests_mock_request,
+        requests_mock_response,
     )
 
 
@@ -48,8 +48,8 @@ def add_flask_app_to_mock(
         return _responses_callback(request=request, flask_app=flask_app)
 
     def requests_mock_callback(
-        request: _RequestObjectProxy,
-        context: _Context,
+        request: requests_mock_request.Request,
+        context: requests_mock_response.Context,
     ) -> str:
         return _requests_mock_callback(
             request=request,
@@ -219,8 +219,8 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: _RequestObjectProxy,
-    context: _Context,
+    request: requests_mock_request.Request,
+    context: requests_mock_response.Context,
     flask_app: flask.Flask,
 ) -> str:
     """
