@@ -925,24 +925,19 @@ def test_multiple_functions_same_path_different_type(
     """
     app = Flask(__name__)
 
-    @app.route("/<my_variable>")
-    def _route_1(_: float) -> str:
-        return ""  # pragma: no cover
+    def show_type(variable: float | str) -> str:
+        return f"{variable}, {type(variable)}"
 
-    @app.route("/<int:my_variable>")
-    def _route_2(my_variable: int) -> str:
-        return "Is int: " + str(my_variable)
-
-    @app.route("/<string:my_variable>")
-    def _route_3(_: str) -> str:
-        return ""  # pragma: no cover
+    app.add_url_rule(rule="/<variable>", view_func=show_type)
+    app.add_url_rule(rule="/<int:variable>", view_func=show_type)
+    app.add_url_rule(rule="/<string:variable>", view_func=show_type)
 
     test_client = app.test_client()
     response = test_client.get("/4")
 
     expected_status_code = 200
     expected_content_type = "text/html; charset=utf-8"
-    expected_data = b"Is int: 4"
+    expected_data = b"4, <class 'int'>"
 
     assert response.status_code == expected_status_code
     assert response.headers["Content-Type"] == expected_content_type
