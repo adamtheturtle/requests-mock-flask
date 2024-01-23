@@ -264,3 +264,7 @@ where = ["src"]
 requests_mock_flask = ["py.typed"]
 
 [tool.setuptools_scm]
+
+[tool.pyproject-fmt]
+indent = 4
+keep_full_version = true
