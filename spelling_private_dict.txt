@@ -15,6 +15,7 @@ reqs
 todo
 tuple
 typehints
+reportMissingTypeStubs
 ubuntu
 pyright
 untyped
