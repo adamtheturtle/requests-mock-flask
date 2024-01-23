@@ -872,7 +872,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     @app.route("/")
     def _() -> str:
         assert request.mimetype == "application/json"
-        request_json = request.get_json()
+        request_json: dict[str, str] = request.get_json()
         assert isinstance(request_json, dict)
         return str(request_json["hello"])
 
