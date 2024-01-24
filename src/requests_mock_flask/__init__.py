@@ -13,7 +13,11 @@ from urllib.parse import urljoin
 import werkzeug
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
     from ._type_check_imports import (
+        RequestsMockMocker,
+        ResponsesRequestsMock,
         flask,
         httpretty,
         requests,
@@ -31,9 +35,7 @@ class _MockObjTypes(Enum):
 
 
 def add_flask_app_to_mock(
-    # We allow an `Any` type here, as we do not want to add all mocker types
-    # as requirements.
-    mock_obj: Any,  # noqa: ANN401
+    mock_obj: ModuleType | ResponsesRequestsMock | RequestsMockMocker,
     flask_app: flask.Flask,
     base_url: str,
 ) -> None:

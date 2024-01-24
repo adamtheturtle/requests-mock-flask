@@ -10,9 +10,13 @@ install requirements.
 import flask  # pragma: no cover
 import httpretty  # pyright: ignore[reportMissingTypeStubs], pragma: no cover
 import requests  # pragma: no cover
+from requests_mock import Mocker as RequestsMockMocker  # pragma: no cover
 from requests_mock import request as requests_mock_request  # pragma: no cover
 from requests_mock import (
     response as requests_mock_response,  # pragma: no cover
+)
+from responses import (
+    RequestsMock as ResponsesRequestsMock,  # pragma: no cover
 )
 
 __all__ = [  # pragma: no cover
@@ -21,4 +25,6 @@ __all__ = [  # pragma: no cover
     "requests",
     "requests_mock_response",
     "requests_mock_request",
+    "RequestsMockMocker",
+    "ResponsesRequestsMock",
 ]
