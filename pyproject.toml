@@ -244,7 +244,7 @@ dev = [
     "requests-mock==1.11",
     "responses==0.24.1",
     "ruff==0.1.14",
-    "sphinx-autodoc-typehints==1.25.2",
+    "sphinx-autodoc-typehints==1.25.3",
     "sphinx-prompt==1.8",
     "Sphinx-Substitution-Extensions==2022.2.16",
     "sphinxcontrib.spelling==8",
