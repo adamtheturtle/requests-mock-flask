@@ -179,6 +179,7 @@ ignore = [
     # docstrings.
     "D406",
     "D407",
+    "D413",
     # Allow 'assert' as we use it for tests.
     "S101",
 ]
