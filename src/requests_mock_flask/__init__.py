@@ -30,6 +30,28 @@ class _MockObjTypes(Enum):
     HTTPRETTY = auto()
 
 
+def _get_mock_obj_type(
+    # We allow an `Any` type here, as we do not want to add all mocker types
+    # as requirements.
+    mock_obj: Any,  # noqa: ANN401
+) -> _MockObjTypes:
+    """
+    Get the type of the mock object.
+    """
+    if hasattr(mock_obj, "add_callback"):
+        return _MockObjTypes.RESPONSES
+    if hasattr(mock_obj, "request_history"):
+        return _MockObjTypes.REQUESTS_MOCK
+    if hasattr(mock_obj, "HTTPretty"):
+        return _MockObjTypes.HTTPRETTY
+
+    message = (
+        "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
+        f"got {type(mock_obj)}."
+    )
+    raise TypeError(message)
+
+
 def add_flask_app_to_mock(
     # We allow an `Any` type here, as we do not want to add all mocker types
     # as requirements.
@@ -69,21 +91,7 @@ def add_flask_app_to_mock(
             flask_app=flask_app,
         )
 
-    # We use hasattr here rather than checking the type of ``mock_obj``.
-    #
-    # This is so that we do not need to add responses etc. as requirements.
-    if hasattr(mock_obj, "add_callback"):
-        mock_obj_type = _MockObjTypes.RESPONSES
-    elif hasattr(mock_obj, "request_history"):
-        mock_obj_type = _MockObjTypes.REQUESTS_MOCK
-    elif hasattr(mock_obj, "HTTPretty"):
-        mock_obj_type = _MockObjTypes.HTTPRETTY
-    else:
-        message = (
-            "Expected a HTTPretty, ``requests_mock``, or ``responses`` "
-            f"object, got {type(mock_obj)}."
-        )
-        raise TypeError(message)
+    mock_obj_type = _get_mock_obj_type(mock_obj=mock_obj)
 
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any
