@@ -7,7 +7,7 @@ from typing import Final
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import requests
-import requests_mock
+import requests_mock as req_mock
 import responses
 from flask import Flask
 from requests_mock_flask import add_flask_app_to_mock
@@ -96,7 +96,7 @@ class TestRequestsMock:
         def _() -> str:
             return "Hello, World!"
 
-        with requests_mock.Mocker() as resp_m:
+        with req_mock.Mocker() as resp_m:
             add_flask_app_to_mock(
                 mock_obj=resp_m,
                 flask_app=app,
@@ -112,9 +112,7 @@ class TestRequestsMock:
         assert response.text == "Hello, World!"
 
     @staticmethod
-    def test_fixture(  # pylint: disable=redefined-outer-name
-        requests_mock: requests_mock.Mocker,
-    ) -> None:
+    def test_fixture(requests_mock: req_mock.Mocker) -> None:
         """
         It is possible to use the helper with a ``requests_mock`` fixture.
         """
@@ -149,7 +147,7 @@ class TestRequestsMock:
             return "Hello, World!"
 
         session = requests.Session()
-        adapter = requests_mock.Adapter()
+        adapter = req_mock.Adapter()
         session.mount("mock", adapter)
 
         add_flask_app_to_mock(
