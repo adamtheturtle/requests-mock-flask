@@ -256,7 +256,7 @@ dev = [
     "actionlint-py==1.6.26.11",
     "check-manifest==0.49",
     "doc8==1.1.1",
-    "Flask==3.0.1",
+    "Flask==3.0.2",
     "furo==2024.1.29",
     "httpretty==1.1.4",
     "mypy==1.8.0",
