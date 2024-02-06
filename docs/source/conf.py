@@ -57,6 +57,4 @@ rst_prolog = f"""
 .. |github-repository| replace:: requests-mock-flask
 """
 
-always_document_param_types = True
-
 set_type_checking_flag = True
