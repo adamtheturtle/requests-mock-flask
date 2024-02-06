@@ -11,7 +11,6 @@ import importlib.metadata
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx_autodoc_typehints",
     "sphinxcontrib.spelling",
     "sphinx-prompt",
     "sphinx_substitution_extensions",
@@ -58,16 +57,4 @@ rst_prolog = f"""
 .. |github-repository| replace:: requests-mock-flask
 """
 
-always_document_param_types = True
-
 set_type_checking_flag = True
-# * We want to use types from packages which are not install dependencies of
-#   this package.
-# * To achieve that, we wrap imports in ``if typing.TYPE_CHECKING``.
-# * To get those imports in sphinx-autodoc-typehints, we must use
-#   ``set_type_checking_flag = True``.
-# * If we use that option, we set ``typing.TYPE_CHECKING`` true in our imported
-#   packages.
-# * Some packages cannot be imported when we use `typing.TYPE_CHECKING``, so
-#   we mock them out.
-autodoc_mock_imports = ["werkzeug", "flask"]
