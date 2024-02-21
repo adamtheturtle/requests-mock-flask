@@ -10,11 +10,10 @@ SPHINXOPTS := -W
 lint: \
     actionlint \
     check-manifest \
+    deptry \
     doc8 \
     linkcheck \
     mypy \
-    pip-extra-reqs \
-    pip-missing-reqs \
     pylint \
     pyright \
     pyproject-fmt \
