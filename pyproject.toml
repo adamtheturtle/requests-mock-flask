@@ -255,12 +255,12 @@ dependencies = [
 dev = [
     "actionlint-py==1.6.26.11",
     "check-manifest==0.49",
+    "deptry==0.12.0",
     "doc8==1.1.1",
     "Flask==3.0.2",
     "furo==2024.1.29",
     "httpretty==1.1.4",
     "mypy==1.8.0",
-    "pip_check_reqs==2.5.3",
     "pylint==3.0.3",
     "pyproject-fmt==1.7.0",
     "pyright==1.1.351",
