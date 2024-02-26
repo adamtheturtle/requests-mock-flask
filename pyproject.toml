@@ -272,7 +272,7 @@ dev = [
     "responses==0.25.0",
     "ruff==0.2.2",
     "sphinx-prompt==1.8",
-    "Sphinx-Substitution-Extensions==2022.2.16",
+    "Sphinx-Substitution-Extensions==2024.2.25",
     "sphinxcontrib.spelling==8",
     "sybil==6.0.3",
     "types-requests==2.31.0.20240218",
