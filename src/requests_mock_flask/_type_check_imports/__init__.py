@@ -6,7 +6,6 @@ pip-missing-reqs, as we want to have type hints for modules which are not
 install requirements.
 """
 
-
 import flask  # pragma: no cover
 import httpretty  # pyright: ignore[reportMissingTypeStubs] # pragma: no cover
 import requests  # pragma: no cover
