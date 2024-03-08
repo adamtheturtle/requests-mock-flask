@@ -260,7 +260,7 @@ dev = [
     "Flask==3.0.2",
     "furo==2024.1.29",
     "httpretty==1.1.4",
-    "mypy==1.8.0",
+    "mypy==1.9.0",
     "pylint==3.1.0",
     "pyproject-fmt==1.7.0",
     "pyright==1.1.352",
