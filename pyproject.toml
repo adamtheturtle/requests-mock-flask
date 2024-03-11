@@ -265,7 +265,7 @@ dev = [
     "pyproject-fmt==1.7.0",
     "pyright==1.1.353",
     "pyroma==4.2",
-    "pytest==8.0.2",
+    "pytest==8.1.1",
     "pytest-cov==4.1",
     "requests==2.31",
     "requests-mock==1.11",
