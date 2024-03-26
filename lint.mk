@@ -28,16 +28,9 @@ fix-ruff:
 	ruff check --fix .
 	ruff format .
 
-TEMPFILE:= $(shell mktemp)
-
 .PHONY: deptry
 deptry:
-	uv pip compile --no-deps pyproject.toml > $(TEMPFILE)
-	mv pyproject.toml pyproject.bak.toml
-	deptry \
-		--requirements-txt=$(TEMPFILE) src/ \
-		--exclude src/requests_mock_flask/_type_check_imports/__init__.py || (mv pyproject.bak.toml pyproject.toml && exit 1)
-	mv pyproject.bak.toml pyproject.toml
+	deptry src/
 
 .PHONY: pylint
 pylint:

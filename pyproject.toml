@@ -276,7 +276,6 @@ dev = [
     "sphinxcontrib.spelling==8",
     "sybil==6.0.3",
     "types-requests==2.31.0.20240311",
-    "uv==0.1.24",
     "vulture==2.11",
 ]
 [project.urls]
@@ -300,3 +299,9 @@ keep_full_version = true
 [tool.pyright]
 reportUnnecessaryTypeIgnoreComment = true
 typeCheckingMode = "strict"
+
+[tool.deptry]
+pep621_dev_dependency_groups = ["dev"]
+
+[tool.deptry.per_rule_ignores]
+DEP004 = ["requests_mock", "flask", "httpretty", "requests"]
