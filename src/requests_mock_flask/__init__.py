@@ -13,15 +13,11 @@ from urllib.parse import urljoin
 import werkzeug
 
 if TYPE_CHECKING:
-    import flask  # pragma: no cover
-    import httpretty  # pyright: ignore[reportMissingTypeStubs] # pragma: no cover
-    import requests  # pragma: no cover
-    from requests_mock import (
-        request as requests_mock_request,  # pragma: no cover
-    )
-    from requests_mock import (
-        response as requests_mock_response,  # pragma: no cover
-    )
+    import flask
+    import httpretty  # pyright: ignore[reportMissingTypeStubs]
+    import requests
+    from requests_mock import request as requests_mock_request
+    from requests_mock import response as requests_mock_response
 
 
 class _MockObjTypes(Enum):
