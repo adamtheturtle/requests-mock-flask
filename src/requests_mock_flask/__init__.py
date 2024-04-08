@@ -13,13 +13,11 @@ from urllib.parse import urljoin
 import werkzeug
 
 if TYPE_CHECKING:
-    from ._type_check_imports import (
-        flask,
-        httpretty,
-        requests,
-        requests_mock_request,
-        requests_mock_response,
-    )
+    import flask
+    import httpretty  # pyright: ignore[reportMissingTypeStubs]
+    import requests
+    from requests_mock import request as requests_mock_request
+    from requests_mock import response as requests_mock_response
 
 
 class _MockObjTypes(Enum):
