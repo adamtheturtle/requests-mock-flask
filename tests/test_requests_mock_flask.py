@@ -872,8 +872,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     @app.route("/")
     def _() -> str:
         assert request.mimetype == "application/json"
-        request_json: dict[str, str] = request.get_json()
-        assert isinstance(request_json, dict)
+        request_json = request.get_json()
         return str(request_json["hello"])
 
     test_client = app.test_client()
@@ -1025,7 +1024,6 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         assert request.cookies["frasier"] == "crane"
         assert request.cookies["frasier2"] == "crane2"
         response.data = "Hello, World!"
-        assert isinstance(response, Response)
         return response
 
     test_client = app.test_client()
