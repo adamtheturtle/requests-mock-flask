@@ -170,10 +170,7 @@ def _responses_callback(
 
     response = test_client.open(environ_builder.get_request())
 
-    result_headers: dict[str, str | int | bool | None] = dict(
-        response.headers,
-    )
-    return (response.status_code, result_headers, bytes(response.data))
+    return (response.status_code, dict(response.headers), bytes(response.data))
 
 
 def _httpretty_callback(
