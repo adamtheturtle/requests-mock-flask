@@ -20,4 +20,3 @@ ubuntu
 pyright
 untyped
 uuid
-
