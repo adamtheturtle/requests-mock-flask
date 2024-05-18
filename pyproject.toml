@@ -231,6 +231,7 @@ spelling-store-unknown-words = 'no'
 
 ignore = [
     "*.enc",
+    ".pre-commit-config.yaml",
     ".vscode/*.json",
     "readthedocs.yaml",
     "conftest.py",
