@@ -1,31 +1,7 @@
-
 SHELL := /bin/bash -euxo pipefail
-
-include lint.mk
 
 # Treat Sphinx warnings as errors
 SPHINXOPTS := -W
-
-.PHONY: lint
-lint: \
-    actionlint \
-    check-manifest \
-    deptry \
-    doc8 \
-    linkcheck \
-    mypy \
-    pylint \
-    pyright \
-    pyproject-fmt \
-    pyroma \
-    ruff \
-    spelling \
-    vulture
-
-.PHONY: fix-lint
-fix-lint: \
-    fix-pyproject-fmt \
-    fix-ruff
 
 .PHONY: docs
 docs:
