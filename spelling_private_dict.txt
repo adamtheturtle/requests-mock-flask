@@ -10,13 +10,13 @@ linters
 linting
 macOS
 pragma
+pyright
 pytest
+reportMissingTypeStubs
 reqs
 todo
 tuple
 typehints
-reportMissingTypeStubs
 ubuntu
-pyright
 untyped
 uuid
