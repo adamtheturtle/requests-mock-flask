@@ -49,6 +49,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -93,6 +94,10 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """
+        Check that the headers includes {"hello": "world"}
+        and no Content-Type.
+        """
         assert "Content-Type" not in request.headers
         assert request.headers["hello"] == "world"
         return "Hello, World!"
@@ -140,6 +145,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> tuple[Response, int]:
+        """Return a simple JSON message."""
         return jsonify({"hello": "world"}), 201
 
     test_client = app.test_client()
@@ -184,6 +190,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<my_variable>")
     def _(my_variable: str) -> str:
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -228,6 +235,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<string:my_variable>")
     def _(my_variable: str) -> str:
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -272,6 +280,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<int:my_variable>")
     def _(my_variable: int) -> str:
+        """Return a simple message which includes the route variable."""
         return "Hello: " + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -316,6 +325,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<float:my_variable>")
     def _(my_variable: float) -> str:
+        """Return a simple message which includes the route variable."""
         return "Hello: " + str(my_variable + 5)
 
     test_client = app.test_client()
@@ -360,6 +370,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<path:my_variable>")
     def _(my_variable: str) -> str:
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -404,6 +415,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<string:my_variable>")
     def _(_: str) -> str:
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -447,6 +459,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<uuid:my_variable>")
     def _(my_variable: uuid.UUID) -> str:
+        """Return a simple message which includes the route variables."""
         return "Hello: " + my_variable.hex
 
     test_client = app.test_client()
@@ -492,6 +505,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/users/<int:my_variable>/posts")
     def _(my_variable: int) -> str:
+        """Return a simple message which includes the route variable."""
         return "Posts for: " + str(my_variable)
 
     test_client = app.test_client()
@@ -536,6 +550,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
+        """Return a simple message which includes the route variables."""
         return "Posts for: " + my_org + "/" + my_user
 
     test_client = app.test_client()
@@ -580,6 +595,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/", methods=["POST"])
     def _() -> str:
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -629,6 +645,7 @@ def test_incorrect_content_length(
 
     @app.route("/", methods=["POST"])
     def _() -> str:
+        """Check some features of the request."""
         request.environ["wsgi.input_terminated"] = True
         assert len(data) == len(request.data)
         assert request.headers["Content-Length"] == custom_content_length
@@ -682,6 +699,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/", methods=["GET", "POST"])
     def _() -> str:
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -739,6 +757,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/<int:my_variable>")
     def _(_: int) -> str:
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -782,6 +801,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -825,6 +845,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """Check the mimetype and return a simple message."""
         assert request.mimetype == "application/json"
         return "Hello, World!"
 
@@ -871,6 +892,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """Check the mimetype and return some given data."""
         assert request.mimetype == "application/json"
         request_json = request.get_json()
         return str(request_json["hello"])
@@ -925,6 +947,7 @@ def test_multiple_functions_same_path_different_type(
     app = Flask(__name__)
 
     def show_type(variable: float | str) -> str:
+        """Return a string which includes the type of the variable."""
         return f"{variable}, {type(variable)}"
 
     app.add_url_rule(rule="/<variable>", view_func=show_type)
@@ -973,6 +996,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
+        """Return a simple message which includes a request query parameter."""
         result = request.args["frasier"]
         return "Hello: " + str(result)
 
@@ -1018,6 +1042,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/", methods=["POST"])
     def _() -> Response:
+        """Set cookies and return a simple message."""
         response = make_response()
         response.set_cookie("frasier_set", "crane_set")
         assert request.cookies, request

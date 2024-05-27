@@ -35,6 +35,7 @@ Usage example
 
    @app.route('/')
    def _() -> str:
+        """Return a simple message."""
        return 'Hello, World!'
 
    @responses.activate
