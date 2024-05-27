@@ -845,7 +845,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
-        """Check the mimetype and return a simple message."""
+        """Check the MIME type and return a simple message."""
         assert request.mimetype == "application/json"
         return "Hello, World!"
 
@@ -892,7 +892,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
 
     @app.route("/")
     def _() -> str:
-        """Check the mimetype and return some given data."""
+        """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
         request_json = request.get_json()
         return str(request_json["hello"])
