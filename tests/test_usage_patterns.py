@@ -31,6 +31,7 @@ class TestResponses:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         response = requests.Response()
@@ -62,6 +63,7 @@ class TestResponses:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -94,6 +96,7 @@ class TestRequestsMock:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         with req_mock.Mocker() as resp_m:
@@ -120,6 +123,7 @@ class TestRequestsMock:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -144,6 +148,7 @@ class TestRequestsMock:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         session = requests.Session()
@@ -179,6 +184,7 @@ class TestHTTPretty:
 
         @app.route("/")
         def _() -> str:
+            """Return a simple message."""
             return "Hello, World!"
 
         with httpretty.enabled():
