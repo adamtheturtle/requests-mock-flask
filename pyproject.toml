@@ -56,7 +56,7 @@ optional-dependencies.dev = [
     "pytest-cov==5.0.0",
     "requests==2.32.3",
     "requests-mock==1.12.1",
-    "responses==0.25.2",
+    "responses==0.25.3",
     "ruff==0.4.8",
     "sphinx-prompt==1.8",
     "sphinx-substitution-extensions==2024.2.25",
