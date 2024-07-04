@@ -282,14 +282,6 @@ exclude_also = [
 
 strict = true
 
-[[tool.mypy.overrides]]
-
-module = [
-    "httpretty",
-]
-
-ignore_missing_imports = true
-
 [tool.pyright]
 reportUnnecessaryTypeIgnoreComment = true
 typeCheckingMode = "strict"

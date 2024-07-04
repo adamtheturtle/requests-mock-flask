@@ -14,7 +14,7 @@ import werkzeug
 
 if TYPE_CHECKING:
     import flask
-    import httpretty  # pyright: ignore[reportMissingTypeStubs]
+    import httpretty  # type: ignore[import-untyped]
     import requests
     from requests_mock import request as requests_mock_request
     from requests_mock import response as requests_mock_response
