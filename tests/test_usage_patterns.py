@@ -5,7 +5,7 @@ Tests for ways the helper can be used.
 from http import HTTPStatus
 from typing import Final
 
-import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpretty  # type: ignore[import-untyped]
 import requests
 import requests_mock as req_mock
 import responses
