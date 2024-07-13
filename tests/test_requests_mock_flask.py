@@ -468,7 +468,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
 
     expected_status_code = 200
     expected_content_type = "text/html; charset=utf-8"
-    expected_data = bytes(f"Hello: {random_uuid.hex}", "utf-8")
+    expected_data = f"Hello: {random_uuid.hex}".encode()
 
     assert response.status_code == expected_status_code
     assert response.headers["Content-Type"] == expected_content_type
