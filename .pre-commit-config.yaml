@@ -150,12 +150,6 @@ repos:
     pass_filenames: false
 # We use system Python, with required dependencies specified in pyproject.toml.
 # We therefore cannot use those dependencies in pre-commit CI.
-# We use system Python, with required dependencies specified in pyproject.toml.
-# We therefore cannot use those dependencies in pre-commit CI.
-# We use system Python, with required dependencies specified in pyproject.toml.
-# We therefore cannot use those dependencies in pre-commit CI.
-# We use system Python, with required dependencies specified in pyproject.toml.
-# We therefore cannot use those dependencies in pre-commit CI.
 ci:
   skip:
   - actionlint
