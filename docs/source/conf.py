@@ -9,6 +9,7 @@ import importlib.metadata
 # pylint: disable=invalid-name
 
 extensions = [
+    "sphinx_copybutton",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxcontrib.spelling",
@@ -24,6 +25,10 @@ templates_path = ["_templates"]
 year = datetime.datetime.now(tz=datetime.UTC).year
 author = "Adam Dangoor"
 project_copyright = f"{year}, {author}"
+
+# Exclude the prompt from copied code with sphinx_copybutton.
+# https://sphinx-copybutton.readthedocs.io/en/latest/use.html#automatic-exclusion-of-prompts-from-the-copies.
+copybutton_exclude = ".linenos, .gp"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
