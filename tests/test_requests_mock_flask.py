@@ -20,6 +20,7 @@ import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
+
 from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being

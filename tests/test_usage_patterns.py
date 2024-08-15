@@ -10,6 +10,7 @@ import requests
 import requests_mock as req_mock
 import responses
 from flask import Flask
+
 from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being
