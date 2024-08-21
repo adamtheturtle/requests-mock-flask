@@ -64,6 +64,7 @@ optional-dependencies.dev = [
     "sybil==6.1.1",
     "types-requests==2.32.0.20240712",
     "vulture==2.11",
+    "typeguard==4.3.0",
 ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
 
@@ -267,6 +268,9 @@ keep_full_version = true
 
 xfail_strict = true
 log_cli = true
+typeguard-packages = """
+tests
+"""
 
 [tool.coverage.run]
 
