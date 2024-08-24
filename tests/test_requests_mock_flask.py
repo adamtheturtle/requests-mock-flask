@@ -28,17 +28,17 @@ from requests_mock_flask import add_flask_app_to_mock
 _TIMEOUT_SECONDS: Final[int] = 120
 
 
-_MOCK_CTXS = [
+_MockCtxType = (
+    partial[responses.RequestsMock]
+    | type[requests_mock.Mocker]
+    | type[httpretty.httprettized]
+)
+
+_MOCK_CTXS: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
     httpretty.httprettized,
 ]
-
-_MockCtxType = (
-    type[responses.RequestsMock]
-    | type[requests_mock.Mocker]
-    | type[httpretty.httprettized]
-)
 
 
 @pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)

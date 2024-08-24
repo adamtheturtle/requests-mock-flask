@@ -62,6 +62,7 @@ optional-dependencies.dev = [
     "sphinx-substitution-extensions==2024.8.6",
     "sphinxcontrib-spelling==8",
     "sybil==6.1.1",
+    "typeguard==4.3.0",
     "types-requests==2.32.0.20240712",
     "vulture==2.11",
 ]
@@ -267,6 +268,9 @@ keep_full_version = true
 
 xfail_strict = true
 log_cli = true
+typeguard-packages = """
+tests
+"""
 
 [tool.coverage.run]
 
