@@ -45,7 +45,7 @@ optional-dependencies.dev = [
     "furo==2024.8.6",
     "httpretty==1.1.4",
     "interrogate==1.7.0",
-    "mypy==1.11.1",
+    "mypy==1.11.2",
     "pre-commit==3.8.0",
     "pylint==3.2.6",
     "pyproject-fmt==2.2.1",
