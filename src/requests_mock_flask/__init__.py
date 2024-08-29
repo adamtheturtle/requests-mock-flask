@@ -2,8 +2,6 @@
 Package for ``requests_mock_flask``.
 """
 
-from __future__ import annotations
-
 import re
 from enum import Enum, auto
 from http.cookies import SimpleCookie
@@ -56,7 +54,7 @@ def add_flask_app_to_mock(
     # We allow an `Any` type here, as we do not want to add all mocker types
     # as requirements.
     mock_obj: Any,  # noqa: ANN401
-    flask_app: flask.Flask,
+    flask_app: "flask.Flask",
     base_url: str,
 ) -> None:
     """
@@ -65,14 +63,14 @@ def add_flask_app_to_mock(
     """
 
     def responses_callback(
-        request: requests.PreparedRequest,
+        request: "requests.PreparedRequest",
     ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
         """Callback for responses."""
         return _responses_callback(request=request, flask_app=flask_app)
 
     def requests_mock_callback(
-        request: requests_mock_request.Request,
-        context: requests_mock_response.Context,
+        request: "requests_mock_request.Request",
+        context: "requests_mock_response.Context",
     ) -> str:
         """Callback for requests_mock."""
         return _requests_mock_callback(
@@ -82,7 +80,7 @@ def add_flask_app_to_mock(
         )
 
     def httpretty_callback(
-        request: httpretty.core.HTTPrettyRequest,
+        request: "httpretty.core.HTTPrettyRequest",
         uri: str,
         headers: dict[str, Any],
     ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
@@ -128,8 +126,8 @@ def add_flask_app_to_mock(
 
 
 def _responses_callback(
-    request: requests.PreparedRequest,
-    flask_app: flask.Flask,
+    request: "requests.PreparedRequest",
+    flask_app: "flask.Flask",
 ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the flask app, send an equivalent request to an in
@@ -179,10 +177,10 @@ def _responses_callback(
 
 
 def _httpretty_callback(
-    request: httpretty.core.HTTPrettyRequest,
+    request: "httpretty.core.HTTPrettyRequest",
     uri: str,
     headers: dict[str, Any],
-    flask_app: flask.Flask,
+    flask_app: "flask.Flask",
 ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
     """
     Given a request to the Flask app, send an equivalent request to an in
@@ -236,9 +234,9 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: requests_mock_request.Request,
-    context: requests_mock_response.Context,
-    flask_app: flask.Flask,
+    request: "requests_mock_request.Request",
+    context: "requests_mock_response.Context",
+    flask_app: "flask.Flask",
 ) -> str:
     """
     Given a request to the Flask app, send an equivalent request to an in

@@ -5,8 +5,6 @@ Test with a bunch of route types as per:
 https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 """
 
-from __future__ import annotations
-
 import json
 import uuid
 from functools import partial
