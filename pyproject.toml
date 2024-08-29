@@ -57,7 +57,7 @@ optional-dependencies.dev = [
     "requests==2.32.3",
     "requests-mock==1.12.1",
     "responses==0.25.3",
-    "ruff==0.6.2",
+    "ruff==0.6.3",
     "sphinx==8.0.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-substitution-extensions==2024.8.6",
