@@ -2,6 +2,7 @@ RequestsMock
 admin
 app
 autodoc
+beartype
 changelog
 hasattr
 httpretty
