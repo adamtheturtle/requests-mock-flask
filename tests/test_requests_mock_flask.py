@@ -1110,11 +1110,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert mock_response.cookies["frasier_set"] == "crane_set"
 
 
-@pytest.mark.parametrize(
-    argnames="mock_ctx",
-    argvalues=_MOCK_CTXS,
-    ids=_MOCK_IDS,
-)
+@_MOCK_CTX_MARKER
 def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     """
     It is possible to get a response without a content type.
