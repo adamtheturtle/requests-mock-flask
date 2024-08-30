@@ -117,10 +117,12 @@ def add_flask_app_to_mock(
                     text=requests_mock_callback,
                 )
             elif mock_obj_type == _MockObjTypes.HTTPRETTY:
+                breakpoint()
                 mock_obj.register_uri(
                     method=method,
                     uri=url,
                     body=httpretty_callback,
+                    adding_headers={"Content-Type": "text/plain2"},
                 )
             else:  # pragma: no cover
                 pass

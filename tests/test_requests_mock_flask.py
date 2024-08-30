@@ -1203,10 +1203,9 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     """
     It is possible to get a response without a content type.
     """
-    app = Flask(__name__)
-    app.config["DEFAULT_MIMETYPE"] = None
+    app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route("/", methods=["GET"])
     def _() -> Response:
         """Return a simple message with no Content-Type."""
         response = make_response()
