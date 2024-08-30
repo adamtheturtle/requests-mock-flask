@@ -1157,6 +1157,88 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
+@_MOCK_CTX_MARKER
+def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
+    """
+    A route with overlap to another route works across multiple requests.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    def base_route() -> str:
+        """Return a simple message."""
+        return "Hello: World"
+
+    def with_variable(my_variable: str) -> str:
+        """Return a simple message which includes the route variable."""
+        return "Hello: " + my_variable
+
+    app.add_url_rule(rule="/base", methods=["GET"], view_func=base_route)
+    app.add_url_rule(
+        rule="/base/<string:my_variable>",
+        methods=["GET"],
+        view_func=with_variable,
+    )
+
+    test_client = app.test_client()
+    response = test_client.get("/base")
+
+    expected_status_code = 200
+    expected_content_type = "text/html; charset=utf-8"
+    expected_base_data = b"Hello: World"
+
+    assert response.status_code == expected_status_code
+    assert response.data == expected_base_data
+
+    test_client = app.test_client()
+    response = test_client.get("/base/Frasier")
+
+    expected_var_data = b"Hello: Frasier"
+
+    assert response.status_code == expected_status_code
+    assert response.data == expected_var_data
+
+    with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response_base = requests.get(
+            "http://www.example.com/base",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+        mock_response_var = requests.get(
+            "http://www.example.com/base/Frasier",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+        mock_response_base_2 = requests.get(
+            "http://www.example.com/base",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert mock_response_base.status_code == expected_status_code
+    assert mock_response_base.headers["Content-Type"] == expected_content_type
+    assert mock_response_base.text == expected_base_data.decode()
+
+    assert mock_response_var.status_code == expected_status_code
+    assert mock_response_var.headers["Content-Type"] == expected_content_type
+    assert mock_response_var.text == expected_var_data.decode()
+
+    assert mock_response_base_2.status_code == expected_status_code
+    assert (
+        mock_response_base_2.headers["Content-Type"] == expected_content_type
+    )
+    assert mock_response_base_2.text == expected_base_data.decode()
+
+
 def test_unknown_mock_type() -> None:
     """
     When an unknown mock type is passed in, an error is raised.
