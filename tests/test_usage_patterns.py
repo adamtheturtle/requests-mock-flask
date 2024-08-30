@@ -28,7 +28,7 @@ class TestResponses:
         """
         It is possible to use the helper with a ``responses`` context manager.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:
@@ -60,7 +60,7 @@ class TestResponses:
         """
         It is possible to use the helper with a ``responses`` decorator.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:
@@ -93,7 +93,7 @@ class TestRequestsMock:
         It is possible to use the helper with a ``requests_mock`` context
         manager.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:
@@ -120,7 +120,7 @@ class TestRequestsMock:
         """
         It is possible to use the helper with a ``requests_mock`` fixture.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:
@@ -145,7 +145,7 @@ class TestRequestsMock:
         """
         It is possible to use the helper with a ``requests_mock`` adapter.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:
@@ -181,7 +181,7 @@ class TestHTTPretty:
         """
         It is possible to use the helper with HTTPretty.
         """
-        app = Flask(import_name=__name__, static_url_path=None)
+        app = Flask(import_name=__name__, static_folder=None)
 
         @app.route("/")
         def _() -> str:

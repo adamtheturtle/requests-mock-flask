@@ -44,7 +44,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """
     A simple GET route works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -89,7 +89,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     """
     Request headers are sent.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -140,7 +140,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     """
     A route that returns JSON data works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> tuple[Response, int]:
@@ -185,7 +185,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<my_variable>")
     def _(my_variable: str) -> str:
@@ -230,7 +230,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<string:my_variable>")
     def _(my_variable: str) -> str:
@@ -275,7 +275,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with an int variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<int:my_variable>")
     def _(my_variable: int) -> str:
@@ -320,7 +320,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a float variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<float:my_variable>")
     def _(my_variable: float) -> str:
@@ -365,7 +365,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a path variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<path:my_variable>")
     def _(my_variable: str) -> str:
@@ -410,7 +410,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable when given a slash works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<string:my_variable>")
     def _(_: str) -> str:
@@ -454,7 +454,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a uuid variable works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<uuid:my_variable>")
     def _(my_variable: uuid.UUID) -> str:
@@ -500,7 +500,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable nested in a path works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/users/<int:my_variable>/posts")
     def _(my_variable: int) -> str:
@@ -545,7 +545,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple variables works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
@@ -590,7 +590,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     """
     A route with the POST verb works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/", methods=["POST"])
     def _() -> str:
@@ -639,7 +639,7 @@ def test_incorrect_content_length(
     """
     Custom content length headers are passed through to the Flask endpoint.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
     data = b"12345"
 
     @app.route("/", methods=["POST"])
@@ -694,7 +694,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple verbs works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/", methods=["GET", "POST"])
     def _() -> str:
@@ -752,7 +752,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong type given works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/<int:my_variable>")
     def _(_: int) -> str:
@@ -796,7 +796,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong method given works.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -840,7 +840,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require a content type are supported.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -887,7 +887,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require data are supported.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -943,7 +943,7 @@ def test_multiple_functions_same_path_different_type(
     When multiple functions exist with the same path but have a different type,
     the mock matches them just the same.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     def show_type(variable: float | str) -> str:
         """Return a string which includes the type of the variable."""
@@ -991,7 +991,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     """
     Query strings work.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/")
     def _() -> str:
@@ -1037,7 +1037,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     """
     Cookies work.
     """
-    app = Flask(import_name=__name__, static_url_path=None)
+    app = Flask(import_name=__name__, static_folder=None)
 
     @app.route("/", methods=["POST"])
     def _() -> Response:
@@ -1113,6 +1113,6 @@ def test_unknown_mock_type() -> None:
     with pytest.raises(expected_exception=TypeError, match=expected_error):
         add_flask_app_to_mock(
             mock_obj=object(),
-            flask_app=Flask(import_name=__name__, static_url_path=None),
+            flask_app=Flask(import_name=__name__, static_folder=None),
             base_url="http://www.example.com",
         )
