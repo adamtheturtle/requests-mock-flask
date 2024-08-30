@@ -38,8 +38,16 @@ _MOCK_CTXS: list[_MockCtxType] = [
     httpretty.httprettized,
 ]
 
+_MOCK_IDS = ["responses", "requests_mock", "httpretty"]
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+_MOCK_CTX_MARKER = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=_MOCK_CTXS,
+    ids=_MOCK_IDS,
+)
+
+
+@_MOCK_CTX_MARKER
 def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """
     A simple GET route works.
@@ -84,7 +92,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_headers(mock_ctx: _MockCtxType) -> None:
     """
     Request headers are sent.
@@ -135,7 +143,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     """
     A route that returns JSON data works.
@@ -180,7 +188,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     assert mock_response.json() == expected_json
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable works.
@@ -225,7 +233,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable works.
@@ -270,7 +278,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with an int variable works.
@@ -315,7 +323,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a float variable works.
@@ -360,7 +368,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a path variable works.
@@ -405,7 +413,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     A route with a string variable when given a slash works.
@@ -449,7 +457,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert "not found on the server" in mock_response.text
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """
     A route with a uuid variable works.
@@ -495,7 +503,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_nested_path(mock_ctx: _MockCtxType) -> None:
     """
     A route with a variable nested in a path works.
@@ -540,7 +548,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple variables works.
@@ -585,7 +593,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_post_verb(mock_ctx: _MockCtxType) -> None:
     """
     A route with the POST verb works.
@@ -631,7 +639,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
 
 
 @pytest.mark.parametrize("custom_content_length", ["1", "100"])
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_incorrect_content_length(
     custom_content_length: str,
     mock_ctx: _MockCtxType,
@@ -689,7 +697,7 @@ def test_incorrect_content_length(
     assert mock_response.status_code == expected_status_code
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     """
     A route with multiple verbs works.
@@ -747,7 +755,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     assert mock_post_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong type given works.
@@ -791,7 +799,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     assert "not found on the server" in mock_response.text
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong method given works.
@@ -835,7 +843,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
             requests.post("http://www.example.com/", timeout=_TIMEOUT_SECONDS)
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require a content type are supported.
@@ -882,7 +890,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     """
     Routes which require data are supported.
@@ -935,7 +943,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_multiple_functions_same_path_different_type(
     mock_ctx: _MockCtxType,
 ) -> None:
@@ -986,7 +994,7 @@ def test_multiple_functions_same_path_different_type(
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_query_string(mock_ctx: _MockCtxType) -> None:
     """
     Query strings work.
@@ -1032,7 +1040,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("mock_ctx", _MOCK_CTXS)
+@_MOCK_CTX_MARKER
 def test_cookies(mock_ctx: _MockCtxType) -> None:
     """
     Cookies work.
