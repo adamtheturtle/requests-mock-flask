@@ -1158,9 +1158,9 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
-def test_overlapping_routes(mock_ctx: _MockCtxType) -> None:
+def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     """
-    A route with overlap to another route works.
+    A route with overlap to another route works across multiple requests.
     """
     app = Flask(import_name=__name__, static_folder=None)
 

@@ -98,33 +98,34 @@ def add_flask_app_to_mock(
         # We replace everything inside angle brackets with a match for any
         # string of characters of length > 0.
         path_to_match = re.sub(pattern="<.+>", repl=".+", string=rule.rule)
-        pattern = urljoin(base_url, path_to_match)
-        url = re.compile(pattern)
+        pattern = urljoin(base=base_url, url=path_to_match)
+        urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
         assert rule.methods is not None
         for method in rule.methods:
-            if mock_obj_type == _MockObjTypes.RESPONSES:
-                mock_obj.add_callback(
-                    method=method,
-                    url=url,
-                    callback=responses_callback,
-                    content_type=None,
-                )
-            elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
-                mock_obj.register_uri(
-                    method=method,
-                    url=url,
-                    text=requests_mock_callback,
-                )
-            elif mock_obj_type == _MockObjTypes.HTTPRETTY:
-                mock_obj.register_uri(
-                    method=method,
-                    uri=url,
-                    body=httpretty_callback,
-                    forcing_headers={"Content-Type": None},
-                )
-            else:  # pragma: no cover
-                pass
+            for url in urls:
+                if mock_obj_type == _MockObjTypes.RESPONSES:
+                    mock_obj.add_callback(
+                        method=method,
+                        url=url,
+                        callback=responses_callback,
+                        content_type=None,
+                    )
+                elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
+                    mock_obj.register_uri(
+                        method=method,
+                        url=url,
+                        text=requests_mock_callback,
+                    )
+                elif mock_obj_type == _MockObjTypes.HTTPRETTY:
+                    mock_obj.register_uri(
+                        method=method,
+                        uri=url,
+                        body=httpretty_callback,
+                        forcing_headers={"Content-Type": None},
+                    )
+                else:  # pragma: no cover
+                    pass
 
 
 def _responses_callback(
