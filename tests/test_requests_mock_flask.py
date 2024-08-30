@@ -1110,6 +1110,53 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert mock_response.cookies["frasier_set"] == "crane_set"
 
 
+@_MOCK_CTX_MARKER
+def test_no_content_type(mock_ctx: _MockCtxType) -> None:
+    """
+    It is possible to get a response without a content type.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route("/", methods=["GET"])
+    def _() -> Response:
+        """Return a simple message with no Content-Type."""
+        response = make_response()
+        response.data = "Hello, World!"
+        del response.headers["Content-Type"]
+        return response
+
+    test_client = app.test_client()
+    response = test_client.get("/")
+
+    expected_status_code = 200
+    expected_data = b"Hello, World!"
+
+    assert response.status_code == expected_status_code
+    assert "Content-Type" not in response.headers
+    assert response.data == expected_data
+
+    with mock_ctx() as mock_obj:
+        if mock_ctx == httpretty.httprettized:
+            mock_obj_to_add = httpretty
+        else:
+            mock_obj_to_add = mock_obj
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert mock_response.status_code == expected_status_code
+    assert "Content-Type" not in mock_response.headers
+    assert mock_response.text == expected_data.decode()
+
+
 def test_unknown_mock_type() -> None:
     """
     When an unknown mock type is passed in, an error is raised.

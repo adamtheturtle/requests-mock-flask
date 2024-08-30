@@ -108,6 +108,7 @@ def add_flask_app_to_mock(
                     method=method,
                     url=url,
                     callback=responses_callback,
+                    content_type=None,
                 )
             elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
                 mock_obj.register_uri(
@@ -120,6 +121,7 @@ def add_flask_app_to_mock(
                     method=method,
                     uri=url,
                     body=httpretty_callback,
+                    forcing_headers={"Content-Type": None},
                 )
             else:  # pragma: no cover
                 pass
