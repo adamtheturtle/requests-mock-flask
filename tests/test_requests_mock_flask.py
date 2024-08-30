@@ -1164,15 +1164,20 @@ def test_overlapping_routes(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/base", methods=["GET"])
-    def _() -> str:
+    def base_route() -> str:
         """Return a simple message."""
         return "Hello: World"
 
-    @app.route("/base/<string:my_variable>", methods=["GET"])
-    def __(my_variable: str) -> str:
+    def with_variable(my_variable: str) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
+
+    app.add_url_rule(rule="/base", methods=["GET"], view_func=base_route)
+    app.add_url_rule(
+        rule="/base/<string:my_variable>",
+        methods=["GET"],
+        view_func=with_variable,
+    )
 
     test_client = app.test_client()
     response = test_client.get("/base")
