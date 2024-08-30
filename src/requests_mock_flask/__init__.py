@@ -102,7 +102,9 @@ def add_flask_app_to_mock(
         url = re.compile(pattern)
 
         assert rule.methods is not None
+        print()
         for method in rule.methods:
+            print(method, rule)
             if mock_obj_type == _MockObjTypes.RESPONSES:
                 mock_obj.add_callback(
                     method=method,

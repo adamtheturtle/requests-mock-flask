@@ -1214,6 +1214,16 @@ def test_overlapping_routes(mock_ctx: _MockCtxType) -> None:
             timeout=_TIMEOUT_SECONDS,
         )
 
+        mock_response_base_2 = requests.get(
+            "http://www.example.com/base",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+        mock_response_var_2 = requests.get(
+            "http://www.example.com/base/Frasier",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
     assert mock_response_base.status_code == expected_status_code
     assert mock_response_base.headers["Content-Type"] == expected_content_type
     assert mock_response_base.text == expected_base_data.decode()
@@ -1221,6 +1231,16 @@ def test_overlapping_routes(mock_ctx: _MockCtxType) -> None:
     assert mock_response_var.status_code == expected_status_code
     assert mock_response_var.headers["Content-Type"] == expected_content_type
     assert mock_response_var.text == expected_var_data.decode()
+
+    assert mock_response_base_2.status_code == expected_status_code
+    assert (
+        mock_response_base_2.headers["Content-Type"] == expected_content_type
+    )
+    assert mock_response_base_2.text == expected_base_data.decode()
+
+    assert mock_response_var_2.status_code == expected_status_code
+    assert mock_response_var_2.headers["Content-Type"] == expected_content_type
+    assert mock_response_var_2.text == expected_var_data.decode()
 
 
 def test_unknown_mock_type() -> None:
