@@ -30,7 +30,7 @@ class TestResponses:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
@@ -62,7 +62,7 @@ class TestResponses:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
@@ -95,7 +95,7 @@ class TestRequestsMock:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
@@ -122,7 +122,7 @@ class TestRequestsMock:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
@@ -147,14 +147,14 @@ class TestRequestsMock:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
 
         session = requests.Session()
         adapter = req_mock.Adapter()
-        session.mount("mock", adapter)
+        session.mount(prefix="mock", adapter=adapter)
 
         add_flask_app_to_mock(
             mock_obj=adapter,
@@ -162,7 +162,7 @@ class TestRequestsMock:
             base_url="mock://www.example.com",
         )
 
-        response = session.get("mock://www.example.com")
+        response = session.get(url="mock://www.example.com")
 
         assert response.status_code == HTTPStatus.OK
         assert response.text == "Hello, World!"
@@ -183,7 +183,7 @@ class TestHTTPretty:
         """
         app = Flask(import_name=__name__, static_folder=None)
 
-        @app.route("/")
+        @app.route(rule="/")
         def _() -> str:
             """Return a simple message."""
             return "Hello, World!"
@@ -196,7 +196,7 @@ class TestHTTPretty:
             )
 
             response = requests.get(
-                "http://www.example.com",
+                url="http://www.example.com",
                 timeout=_TIMEOUT_SECONDS,
             )
 

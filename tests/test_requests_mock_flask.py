@@ -54,7 +54,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """Return a simple message."""
         return "Hello, World!"
@@ -99,7 +99,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """
         Check that the headers includes {"hello": "world"}
@@ -133,7 +133,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com",
+            url="http://www.example.com",
             headers={"hello": "world"},
             timeout=_TIMEOUT_SECONDS,
         )
@@ -150,7 +150,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> tuple[Response, int]:
         """Return a simple JSON message."""
         return jsonify({"hello": "world"}), 201
@@ -179,7 +179,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com",
+            url="http://www.example.com",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -195,7 +195,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<my_variable>")
+    @app.route(rule="/<my_variable>")
     def _(my_variable: str) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
@@ -224,7 +224,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/Frasier",
+            url="http://www.example.com/Frasier",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -240,7 +240,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<string:my_variable>")
+    @app.route(rule="/<string:my_variable>")
     def _(my_variable: str) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
@@ -269,7 +269,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/Frasier",
+            url="http://www.example.com/Frasier",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -285,7 +285,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<int:my_variable>")
+    @app.route(rule="/<int:my_variable>")
     def _(my_variable: int) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + str(my_variable + 5)
@@ -314,7 +314,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/4",
+            url="http://www.example.com/4",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -330,7 +330,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<float:my_variable>")
+    @app.route(rule="/<float:my_variable>")
     def _(my_variable: float) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + str(my_variable + 5)
@@ -359,7 +359,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/4.0",
+            url="http://www.example.com/4.0",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -375,7 +375,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<path:my_variable>")
+    @app.route(rule="/<path:my_variable>")
     def _(my_variable: str) -> str:
         """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
@@ -404,7 +404,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/foo/bar",
+            url="http://www.example.com/foo/bar",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -420,7 +420,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<string:my_variable>")
+    @app.route(rule="/<string:my_variable>")
     def _(_: str) -> str:
         """Return an empty string."""
         return ""  # pragma: no cover
@@ -448,7 +448,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/foo/bar",
+            url="http://www.example.com/foo/bar",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -464,7 +464,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<uuid:my_variable>")
+    @app.route(rule="/<uuid:my_variable>")
     def _(my_variable: uuid.UUID) -> str:
         """Return a simple message which includes the route variables."""
         return "Hello: " + my_variable.hex
@@ -494,7 +494,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            f"http://www.example.com/{random_uuid}",
+            url=f"http://www.example.com/{random_uuid}",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -510,7 +510,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/users/<int:my_variable>/posts")
+    @app.route(rule="/users/<int:my_variable>/posts")
     def _(my_variable: int) -> str:
         """Return a simple message which includes the route variable."""
         return "Posts for: " + str(my_variable)
@@ -539,7 +539,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/users/4/posts",
+            url="http://www.example.com/users/4/posts",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -555,7 +555,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/users/<string:my_org>/<string:my_user>/posts")
+    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
         """Return a simple message which includes the route variables."""
         return "Posts for: " + my_org + "/" + my_user
@@ -584,7 +584,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/users/cranes/frasier/posts",
+            url="http://www.example.com/users/cranes/frasier/posts",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -600,7 +600,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/", methods=["POST"])
+    @app.route(rule="/", methods=["POST"])
     def _() -> str:
         """Return a simple message."""
         return "Hello, World!"
@@ -629,7 +629,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.post(
-            "http://www.example.com/",
+            url="http://www.example.com/",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -650,7 +650,7 @@ def test_incorrect_content_length(
     app = Flask(import_name=__name__, static_folder=None)
     data = b"12345"
 
-    @app.route("/", methods=["POST"])
+    @app.route(rule="/", methods=["POST"])
     def _() -> str:
         """Check some features of the request."""
         request.environ["wsgi.input_terminated"] = True
@@ -704,7 +704,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/", methods=["GET", "POST"])
+    @app.route(rule="/", methods=["GET", "POST"])
     def _() -> str:
         """Return a simple message."""
         return "Hello, World!"
@@ -738,11 +738,11 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_get_response = requests.get(
-            "http://www.example.com/",
+            url="http://www.example.com/",
             timeout=_TIMEOUT_SECONDS,
         )
         mock_post_response = requests.post(
-            "http://www.example.com/",
+            url="http://www.example.com/",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -762,7 +762,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/<int:my_variable>")
+    @app.route(rule="/<int:my_variable>")
     def _(_: int) -> str:
         """Return an empty string."""
         return ""  # pragma: no cover
@@ -790,7 +790,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com/a",
+            url="http://www.example.com/a",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -806,7 +806,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """Return an empty string."""
         return ""  # pragma: no cover
@@ -840,7 +840,10 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
                 ValueError,
             ),
         ):
-            requests.post("http://www.example.com/", timeout=_TIMEOUT_SECONDS)
+            requests.post(
+                url="http://www.example.com/",
+                timeout=_TIMEOUT_SECONDS,
+            )
 
 
 @_MOCK_CTX_MARKER
@@ -850,7 +853,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """Check the MIME type and return a simple message."""
         assert request.mimetype == "application/json"
@@ -880,7 +883,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com",
+            url="http://www.example.com",
             headers={"Content-Type": "application/json"},
             timeout=_TIMEOUT_SECONDS,
         )
@@ -897,7 +900,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
@@ -908,7 +911,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     response = test_client.get(
         "/",
         content_type="application/json",
-        data=json.dumps({"hello": "world"}),
+        data=json.dumps(obj={"hello": "world"}),
     )
 
     expected_status_code = 200
@@ -932,9 +935,9 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com",
+            url="http://www.example.com",
             headers={"Content-Type": "application/json"},
-            data=json.dumps({"hello": "world"}),
+            data=json.dumps(obj={"hello": "world"}),
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -985,7 +988,7 @@ def test_multiple_functions_same_path_different_type(
         )
 
         mock_response = requests.get(
-            "http://www.example.com/4",
+            url="http://www.example.com/4",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -1001,7 +1004,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/")
+    @app.route(rule="/")
     def _() -> str:
         """Return a simple message which includes a request query parameter."""
         result = request.args["frasier"]
@@ -1031,7 +1034,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.get(
-            "http://www.example.com?frasier=crane",
+            url="http://www.example.com?frasier=crane",
             timeout=_TIMEOUT_SECONDS,
         )
 
@@ -1047,7 +1050,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/", methods=["POST"])
+    @app.route(rule="/", methods=["POST"])
     def _() -> Response:
         """Set cookies and return a simple message."""
         response = make_response()
@@ -1096,7 +1099,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = requests.post(
-            "http://www.example.com",
+            url="http://www.example.com",
             cookies={
                 "frasier": "crane",
                 "frasier2": "crane2",
@@ -1117,7 +1120,7 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     """
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route("/", methods=["GET"])
+    @app.route(rule="/", methods=["GET"])
     def _() -> Response:
         """Return a simple message with no Content-Type."""
         response = make_response()
@@ -1210,17 +1213,17 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response_base = requests.get(
-            "http://www.example.com/base",
+            url="http://www.example.com/base",
             timeout=_TIMEOUT_SECONDS,
         )
 
         mock_response_var = requests.get(
-            "http://www.example.com/base/Frasier",
+            url="http://www.example.com/base/Frasier",
             timeout=_TIMEOUT_SECONDS,
         )
 
         mock_response_base_2 = requests.get(
-            "http://www.example.com/base",
+            url="http://www.example.com/base",
             timeout=_TIMEOUT_SECONDS,
         )
 

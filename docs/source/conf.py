@@ -37,7 +37,7 @@ copybutton_exclude = ".linenos, .gp"
 # Use ``importlib.metadata.version`` as per
 # https://setuptools-scm.readthedocs.io/en/latest/usage/#usage-from-sphinx.
 version = importlib.metadata.version(distribution_name=project)
-_month, _day, _year, *_ = version.split(".")
+_month, _day, _year, *_ = version.split(sep=".")
 release = f"{_month}.{_day}.{_year}"
 
 html_theme = "furo"
