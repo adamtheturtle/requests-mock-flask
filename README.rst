@@ -159,7 +159,7 @@ See the `full documentation <https://requests-mock-flask.readthedocs.io/en/lates
 .. _responses: https://github.com/getsentry/responses
 .. _httpretty: https://httpretty.readthedocs.io
 
-.. |Build Status| image:: https://github.com/adamtheturtle/requests-mock-flask/workflows/CI/badge.svg
+.. |Build Status| image:: https://github.com/adamtheturtle/requests-mock-flask/actions/workflows/ci.yml/badge.svg?branch=main
    :target: https://github.com/adamtheturtle/requests-mock-flask/actions
 .. |codecov| image:: https://codecov.io/gh/adamtheturtle/requests-mock-flask/branch/main/graph/badge.svg
    :target: https://codecov.io/gh/adamtheturtle/requests-mock-flask
