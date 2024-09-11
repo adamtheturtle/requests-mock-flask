@@ -8,7 +8,7 @@ Installation
 
 Requires Python 3.12+.
 
-.. code:: sh
+.. code-block:: sh
 
    pip install requests-mock-flask
 
@@ -16,7 +16,7 @@ Requires Python 3.12+.
 Usage example
 -------------
 
-.. code:: python
+.. code-block:: python
 
    import flask
    import httpretty
