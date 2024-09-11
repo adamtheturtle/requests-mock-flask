@@ -13,7 +13,7 @@ Installation
 
 Requires Python 3.12+.
 
-.. code-block:: sh
+.. code-block:: shell
 
    pip install requests-mock-flask
 
