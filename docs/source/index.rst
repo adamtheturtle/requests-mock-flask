@@ -18,8 +18,9 @@ Usage example
 
 .. Use "code" rather than "code-block" to avoid having this picked up
 .. by both the `PythonCodeBlockParser` and the `CaptureParser` from Sybil.
-.. Sybil does not recognize `code` as a code block, so it does not pick it up.
-.. If they both pick it up, we get an error about overlapping regions.
+.. We have set up Sybil not recognize `code` as a code block in the Python
+.. code block parser, so it does not pick this up.
+.. If multiple parsers pick this up, we get an error about overlapping regions.
 
 .. code:: python
 
