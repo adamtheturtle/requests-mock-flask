@@ -1,16 +1,20 @@
 """Setup for Sybil."""
 
+import pathlib
+import subprocess
+import sys
+import tempfile
 from doctest import ELLIPSIS
 
 import pytest
 from beartype import beartype
-from sybil import Sybil
+from sybil import Example, Sybil
+from sybil.evaluators.python import pad
 from sybil.parsers.rest import (
-    CaptureParser,
+    CodeBlockParser,
     DocTestParser,
     PythonCodeBlockParser,
 )
-from sybil.parsers.rest.lexers import DirectiveInCommentLexer, DirectiveLexer
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -22,24 +26,45 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.obj = beartype(obj=item.obj)
 
 
-# We create a new parser for Python which is the same as the default one
-# but with a lexer which does not pick up `.. code::` blocks.
-#
-# This allows us to have some code blocks which are not picked up.
-python_code_block_parser = PythonCodeBlockParser()
-lexers = [
-    DirectiveLexer(directive=r"code-block"),
-    DirectiveInCommentLexer(directive=r"(invisible-)?code(-block)?"),
-]
-python_code_block_parser.lexers.clear()
-python_code_block_parser.lexers.extend(lexers)
+class PytestEvaluator:
+    """A :any:`Evaluator` for pytest examples."""
+
+    def __call__(self, example: Example) -> None:
+        """
+        Run the code as a pytest test.
+        """
+        source = pad(
+            source=example.parsed,
+            line=example.line + example.parsed.line_offset,
+        )
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            test_file = pathlib.Path(tmp_dir) / "test_src.py"
+            test_file.write_text(data=source)
+            subprocess.check_output(
+                args=[
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    test_file,
+                    "--basetemp",
+                    test_file.parent,
+                ],
+            )
 
 
-pytest_collect_file = Sybil(
+run_code_sybil = Sybil(
     parsers=[
         DocTestParser(optionflags=ELLIPSIS),
-        python_code_block_parser,
-        CaptureParser(),
+        PythonCodeBlockParser(),
     ],
     patterns=["*.rst", "*.py"],
-).pytest()
+)
+
+pytest_sybil = Sybil(
+    parsers=[CodeBlockParser(language="python", evaluator=PytestEvaluator())],
+    patterns=["*.rst"],
+)
+
+sybils = run_code_sybil + pytest_sybil
+
+pytest_collect_file = sybils.pytest()
