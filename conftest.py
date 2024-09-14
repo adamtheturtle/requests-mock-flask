@@ -1,16 +1,17 @@
 """Setup for Sybil."""
 
+import sys
 from doctest import ELLIPSIS
 
 import pytest
 from beartype import beartype
 from sybil import Sybil
 from sybil.parsers.rest import (
-    CaptureParser,
+    CodeBlockParser,
     DocTestParser,
     PythonCodeBlockParser,
 )
-from sybil.parsers.rest.lexers import DirectiveInCommentLexer, DirectiveLexer
+from sybil_extras.evaluators.shell_evaluator import ShellCommandEvaluator
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -22,24 +23,29 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.obj = beartype(obj=item.obj)
 
 
-# We create a new parser for Python which is the same as the default one
-# but with a lexer which does not pick up `.. code::` blocks.
-#
-# This allows us to have some code blocks which are not picked up.
-python_code_block_parser = PythonCodeBlockParser()
-lexers = [
-    DirectiveLexer(directive=r"code-block"),
-    DirectiveInCommentLexer(directive=r"(invisible-)?code(-block)?"),
-]
-python_code_block_parser.lexers.clear()
-python_code_block_parser.lexers.extend(lexers)
-
-
-pytest_collect_file = Sybil(
+run_code_sybil = Sybil(
     parsers=[
         DocTestParser(optionflags=ELLIPSIS),
-        python_code_block_parser,
-        CaptureParser(),
+        PythonCodeBlockParser(),
     ],
     patterns=["*.rst", "*.py"],
-).pytest()
+)
+
+pytest_sybil = Sybil(
+    parsers=[
+        CodeBlockParser(
+            language="python",
+            evaluator=ShellCommandEvaluator(
+                args=[sys.executable, "-m", "pytest"],
+                tempfile_suffixes=[".py"],
+                pad_file=True,
+                write_to_file=False,
+            ),
+        ),
+    ],
+    patterns=["*.rst"],
+)
+
+sybils = run_code_sybil + pytest_sybil
+
+pytest_collect_file = sybils.pytest()
