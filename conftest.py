@@ -1,20 +1,17 @@
 """Setup for Sybil."""
 
-import pathlib
-import subprocess
 import sys
-import tempfile
 from doctest import ELLIPSIS
 
 import pytest
 from beartype import beartype
-from sybil import Example, Sybil
-from sybil.evaluators.python import pad
+from sybil import Sybil
 from sybil.parsers.rest import (
     CodeBlockParser,
     DocTestParser,
     PythonCodeBlockParser,
 )
+from sybil_extras.evaluators.shell_evaluator import ShellCommandEvaluator
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -26,32 +23,6 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             item.obj = beartype(obj=item.obj)
 
 
-class PytestEvaluator:
-    """A :any:`Evaluator` for pytest examples."""
-
-    def __call__(self, example: Example) -> None:
-        """
-        Run the code as a pytest test.
-        """
-        source = pad(
-            source=example.parsed,
-            line=example.line + example.parsed.line_offset,
-        )
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            test_file = pathlib.Path(tmp_dir) / "test_src.py"
-            test_file.write_text(data=source)
-            subprocess.check_output(
-                args=[
-                    sys.executable,
-                    "-m",
-                    "pytest",
-                    test_file,
-                    "--basetemp",
-                    test_file.parent,
-                ],
-            )
-
-
 run_code_sybil = Sybil(
     parsers=[
         DocTestParser(optionflags=ELLIPSIS),
@@ -61,7 +32,17 @@ run_code_sybil = Sybil(
 )
 
 pytest_sybil = Sybil(
-    parsers=[CodeBlockParser(language="python", evaluator=PytestEvaluator())],
+    parsers=[
+        CodeBlockParser(
+            language="python",
+            evaluator=ShellCommandEvaluator(
+                args=[sys.executable, "-m", "pytest"],
+                tempfile_suffixes=[".py"],
+                pad_file=True,
+                write_to_file=False,
+            ),
+        ),
+    ],
     patterns=["*.rst"],
 )
 
