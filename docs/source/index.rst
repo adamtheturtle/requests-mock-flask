@@ -16,13 +16,7 @@ Requires Python 3.12+.
 Usage example
 -------------
 
-.. Use "code" rather than "code-block" to avoid having this picked up
-.. by both the `PythonCodeBlockParser` and the `CaptureParser` from Sybil.
-.. We have set up Sybil not recognize `code` as a code block in the Python
-.. code block parser, so it does not pick this up.
-.. If multiple parsers pick this up, we get an error about overlapping regions.
-
-.. code:: python
+.. code-block:: python
 
    """
    Examples of using requests-mock-flask with responses, requests-mock
@@ -136,23 +130,6 @@ Usage example
 
        assert response.status_code == 200
        assert response.text == "Hello, World!"
-
-.. -> test_src
-
-.. invisible-code-block: python
-
-   import pathlib
-   import subprocess
-   import tempfile
-
-   import pytest
-
-   with tempfile.TemporaryDirectory() as tmp_dir:
-       test_file = pathlib.Path(tmp_dir) / "test_src.py"
-       test_file.write_text(test_src)
-       subprocess.check_output(
-           ["python", "-m", "pytest", test_file, "--basetemp", test_file.parent]
-       )
 
 Use cases
 ---------
