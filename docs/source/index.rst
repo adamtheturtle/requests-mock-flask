@@ -23,6 +23,8 @@ Usage example
    and httpretty.
    """
 
+   from http import HTTPStatus
+
    import flask
    import httpretty
    import requests
@@ -53,7 +55,7 @@ Usage example
 
        response = requests.get("http://www.example.com", timeout=30)
 
-       assert response.status_code == 200
+       assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
 
@@ -72,7 +74,7 @@ Usage example
 
            response = requests.get("http://www.example.com", timeout=30)
 
-       assert response.status_code == 200
+       assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
 
@@ -90,7 +92,7 @@ Usage example
 
            response = requests.get("http://www.example.com", timeout=30)
 
-       assert response.status_code == 200
+       assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
 
@@ -110,7 +112,7 @@ Usage example
 
        response = session.get("mock://www.example.com", timeout=30)
 
-       assert response.status_code == 200
+       assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
 
@@ -128,7 +130,7 @@ Usage example
 
            response = requests.get("http://www.example.com", timeout=30)
 
-       assert response.status_code == 200
+       assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
 Use cases
