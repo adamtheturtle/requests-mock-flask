@@ -27,16 +27,18 @@ Usage example
    import flask
    import httpretty
    import requests
-   import responses
    import requests_mock
+   import responses
 
    from requests_mock_flask import add_flask_app_to_mock
 
    app = flask.Flask("test_app")
 
-   @app.route('/')
+
+   @app.route("/")
    def _() -> str:
-        return 'Hello, World!'
+       return "Hello, World!"
+
 
    @responses.activate
    def test_responses_decorator() -> None:
@@ -46,13 +48,14 @@ Usage example
        add_flask_app_to_mock(
            mock_obj=responses,
            flask_app=app,
-           base_url='http://www.example.com',
+           base_url="http://www.example.com",
        )
 
-       response = requests.get('http://www.example.com')
+       response = requests.get("http://www.example.com")
 
        assert response.status_code == 200
-       assert response.text == 'Hello, World!'
+       assert response.text == "Hello, World!"
+
 
    def test_responses_context_manager() -> None:
        """
@@ -64,13 +67,14 @@ Usage example
            add_flask_app_to_mock(
                mock_obj=resp_m,
                flask_app=app,
-               base_url='http://www.example.com',
+               base_url="http://www.example.com",
            )
 
-           response = requests.get('http://www.example.com')
+           response = requests.get("http://www.example.com")
 
        assert response.status_code == 200
-       assert response.text == 'Hello, World!'
+       assert response.text == "Hello, World!"
+
 
    def test_requests_mock_context_manager() -> None:
        """
@@ -81,13 +85,14 @@ Usage example
            add_flask_app_to_mock(
                mock_obj=resp_m,
                flask_app=app,
-               base_url='http://www.example.com',
+               base_url="http://www.example.com",
            )
 
-           response = requests.get('http://www.example.com')
+           response = requests.get("http://www.example.com")
 
        assert response.status_code == 200
-       assert response.text == 'Hello, World!'
+       assert response.text == "Hello, World!"
+
 
    def test_requests_mock_adapter() -> None:
        """
@@ -95,18 +100,19 @@ Usage example
        """
        session = requests.Session()
        adapter = requests_mock.Adapter()
-       session.mount('mock', adapter)
+       session.mount("mock", adapter)
 
        add_flask_app_to_mock(
            mock_obj=adapter,
            flask_app=app,
-           base_url='mock://www.example.com',
+           base_url="mock://www.example.com",
        )
 
-       response = session.get('mock://www.example.com')
+       response = session.get("mock://www.example.com")
 
        assert response.status_code == 200
-       assert response.text == 'Hello, World!'
+       assert response.text == "Hello, World!"
+
 
    def test_httpretty_context_manager() -> None:
        """
@@ -117,13 +123,13 @@ Usage example
            add_flask_app_to_mock(
                mock_obj=httpretty,
                flask_app=app,
-               base_url='http://www.example.com',
+               base_url="http://www.example.com",
            )
 
-           response = requests.get('http://www.example.com')
+           response = requests.get("http://www.example.com")
 
        assert response.status_code == 200
-       assert response.text == 'Hello, World!'
+       assert response.text == "Hello, World!"
 
 .. -> test_src
 
@@ -136,9 +142,11 @@ Usage example
    import pytest
 
    with tempfile.TemporaryDirectory() as tmp_dir:
-       test_file = pathlib.Path(tmp_dir) / 'test_src.py'
+       test_file = pathlib.Path(tmp_dir) / "test_src.py"
        test_file.write_text(test_src)
-       subprocess.check_output(["python", "-m", "pytest", test_file, "--basetemp", test_file.parent])
+       subprocess.check_output(
+           ["python", "-m", "pytest", test_file, "--basetemp", test_file.parent]
+       )
 
 Use cases
 ---------
