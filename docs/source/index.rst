@@ -74,8 +74,8 @@ Usage example
 
            response = requests.get("http://www.example.com", timeout=30)
 
-       assert response.status_code == HTTPStatus.OK
-       assert response.text == "Hello, World!"
+           assert response.status_code == HTTPStatus.OK
+           assert response.text == "Hello, World!"
 
 
    def test_requests_mock_context_manager() -> None:
