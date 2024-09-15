@@ -26,7 +26,7 @@ Usage example
    from http import HTTPStatus
 
    import flask
-   import httpretty
+   import httpretty  # type: ignore[import-untyped]
    import requests
    import requests_mock
    import responses
