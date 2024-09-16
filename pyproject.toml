@@ -59,13 +59,17 @@ optional-dependencies.dev = [
     "requests-mock==1.12.1",
     "responses==0.25.3",
     "ruff==0.6.5",
+    # We add shellcheck-py not only for shell scripts and shell code blocks,
+    # but also because having it installed means that ``actionlint-py`` will
+    # use it to lint shell commands in GitHub workflow files.
+    "shellcheck-py==0.10.0.1",
     "sphinx==8.0.2",
     "sphinx-copybutton==0.5.2",
     "sphinx-substitution-extensions==2024.8.6",
     "sphinxcontrib-spelling==8",
-    "sybil==7.0.0",
+    "sybil==7.1.0",
     "sybil-extras==2024.9.16",
-    "types-requests==2.32.0.20240907",
+    "types-requests==2.32.0.20240914",
     "vulture==2.11",
 ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
