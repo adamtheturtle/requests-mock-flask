@@ -65,7 +65,7 @@ optional-dependencies.dev = [
     "sphinxcontrib-spelling==8",
     "sybil==7.1.0",
     "sybil-extras==2024.9.14.4",
-    "types-requests==2.32.0.20240907",
+    "types-requests==2.32.0.20240914",
     "vulture==2.11",
 ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
