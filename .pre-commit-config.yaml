@@ -34,6 +34,19 @@ repos:
     pass_filenames: false
     types_or: [yaml]
 
+  - id: shellcheck
+    name: shellcheck
+    entry: shellcheck --shell bash
+    language: system
+    pass_filenames: false
+    types_or: [shell]
+
+  - id: shellcheck-docs
+    name: shellcheck-docs
+    entry: doccmd --language=shell --language=console --command="shellcheck --shell=bash"
+    language: system
+    types_or: [markdown, rst]
+
   - id: mypy
     name: mypy
     stages: [push]
@@ -206,6 +219,8 @@ ci:
   - ruff-check-fix-docs
   - ruff-format-fix
   - ruff-format-fix-docs
+  - shellcheck
+  - shellcheck-docs
   - spelling
   - vulture
   - vulture-docs
