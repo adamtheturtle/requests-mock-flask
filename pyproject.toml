@@ -71,7 +71,7 @@ optional-dependencies.dev = [
     "sybil==8.0.0",
     "sybil-extras==2024.9.22.1",
     "types-requests==2.32.0.20240914",
-    "vulture==2.12",
+    "vulture==2.13",
 ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
 
