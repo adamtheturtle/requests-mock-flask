@@ -6,6 +6,8 @@ Configuration for Sphinx.
 import datetime
 import importlib.metadata
 
+from packaging.specifiers import SpecifierSet
+
 # pylint: disable=invalid-name
 
 extensions = [
@@ -40,6 +42,13 @@ version = importlib.metadata.version(distribution_name=project)
 _month, _day, _year, *_ = version.split(sep=".")
 release = f"{_month}.{_day}.{_year}"
 
+project_metadata = importlib.metadata.metadata(distribution_name=project)
+requires_python = project_metadata["Requires-Python"]
+specifiers = SpecifierSet(specifiers=requires_python)
+(specifier,) = specifiers
+assert specifier.operator == ">="
+minimum_python_version = specifier.version
+
 html_theme = "furo"
 html_title = project
 html_show_copyright = False
@@ -57,6 +66,7 @@ spelling_word_list_filename = "../../spelling_private_dict.txt"
 rst_prolog = f"""
 .. |project| replace:: {project}
 .. |release| replace:: {release}
+.. |minimum-python-version| replace:: {minimum_python_version}
 .. |github-owner| replace:: adamtheturtle
 .. |github-repository| replace:: requests-mock-flask
 """
