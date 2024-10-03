@@ -11,7 +11,7 @@ requests-mock-flask
 Installation
 ------------
 
-Requires Python 3.12+.
+Requires Python |minimum-python-version|\+.
 
 .. code-block:: sh
 
@@ -165,3 +165,4 @@ See the `full documentation <https://requests-mock-flask.readthedocs.io/en/lates
    :alt: Documentation Status
 .. |PyPI| image:: https://badge.fury.io/py/requests-mock-flask.svg
    :target: https://badge.fury.io/py/requests-mock-flask
+.. |minimum-python-version| replace:: 3.12

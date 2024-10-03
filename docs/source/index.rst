@@ -6,7 +6,7 @@
 Installation
 ------------
 
-Requires Python 3.12+.
+Requires Python |minimum-python-version|\+.
 
 .. code-block:: shell
 
