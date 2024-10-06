@@ -27,10 +27,10 @@ jobs:
         uses: astral-sh/setup-uv@v3
 
       - name: "Lint"
-         run: |
-           uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage commit --verbose
-           uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage push --verbose
-           uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage manual --verbose
+        run: |
+          uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage commit --verbose
+          uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage push --verbose
+          uv run --all-extras --python=${{ matrix.python-version }} pre-commit run --all-files --hook-stage manual --verbose
 
       - name: "Run tests"
         run: |
