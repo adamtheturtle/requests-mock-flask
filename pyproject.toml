@@ -74,7 +74,7 @@ optional-dependencies.dev = [
     "types-requests==2.32.0.20240914",
     "vulture==2.13",
 ]
-optional-dependencies.release = ["build", "check-wheel-contents"]
+optional-dependencies.release = [ "build", "check-wheel-contents" ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
 
 [tool.setuptools]
