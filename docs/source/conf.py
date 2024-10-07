@@ -3,7 +3,6 @@
 Configuration for Sphinx.
 """
 
-import datetime
 import importlib.metadata
 
 from packaging.specifiers import SpecifierSet
@@ -19,14 +18,12 @@ extensions = [
 ]
 
 project = "requests-mock-flask"
+author = "Adam Dangoor"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
-# General information about the project.
-year = datetime.datetime.now(tz=datetime.UTC).year
-author = "Adam Dangoor"
-project_copyright = f"{year}, {author}"
+project_copyright = f"%Y, {author}"
 
 # Exclude the prompt from copied code with sphinx_copybutton.
 # https://sphinx-copybutton.readthedocs.io/en/latest/use.html#automatic-exclusion-of-prompts-from-the-copies.
