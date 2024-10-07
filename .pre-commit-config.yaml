@@ -202,7 +202,7 @@ repos:
 
   - id: docs
     name: Build Documentation
-    entry: uv run --extra=dev sphinx-build -M clean docs/source/ docs/build/ -W && uv run --extra=dev sphinx-build -M html docs/source/ docs/build/ -W
+    entry: make docs
     language: python
     stages: [manual]
     pass_filenames: false
