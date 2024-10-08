@@ -19,7 +19,9 @@ if TYPE_CHECKING:
 
 
 class _MockObjTypes(Enum):
-    """The types of mock objects that can be used."""
+    """
+    The types of mock objects that can be used.
+    """
 
     # A ``requests_mock.Mocker`` or a ``requests_mock.Adapter``.
     REQUESTS_MOCK = auto()
@@ -65,14 +67,18 @@ def add_flask_app_to_mock(
     def responses_callback(
         request: "requests.PreparedRequest",
     ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-        """Callback for responses."""
+        """
+        Callback for responses.
+        """
         return _responses_callback(request=request, flask_app=flask_app)
 
     def requests_mock_callback(
         request: "requests_mock_request.Request",
         context: "requests_mock_response.Context",
     ) -> str:
-        """Callback for requests_mock."""
+        """
+        Callback for requests_mock.
+        """
         return _requests_mock_callback(
             request=request,
             context=context,
@@ -84,7 +90,9 @@ def add_flask_app_to_mock(
         uri: str,
         headers: dict[str, Any],
     ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-        """Callback for HTTPretty."""
+        """
+        Callback for HTTPretty.
+        """
         return _httpretty_callback(
             request=request,
             uri=uri,
@@ -132,10 +140,8 @@ def _responses_callback(
     request: "requests.PreparedRequest",
     flask_app: "flask.Flask",
 ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-    """
-    Given a request to the flask app, send an equivalent request to an in
-    memory fake of the flask app and return some key details of the
-    response.
+    """Given a request to the flask app, send an equivalent request to an in
+    memory fake of the flask app and return some key details of the response.
 
     :param request: The incoming request to pass onto the flask app.
     :param flask_app: The Flask application to pass requests to.
@@ -185,10 +191,8 @@ def _httpretty_callback(
     headers: dict[str, Any],
     flask_app: "flask.Flask",
 ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-    """
-    Given a request to the Flask app, send an equivalent request to an in
-    memory fake of the Flask app and return some key details of the
-    response.
+    """Given a request to the Flask app, send an equivalent request to an in
+    memory fake of the Flask app and return some key details of the response.
 
     :param request: The incoming request to pass onto the flask app.
     :param uri: The URI of the request.
@@ -241,14 +245,12 @@ def _requests_mock_callback(
     context: "requests_mock_response.Context",
     flask_app: "flask.Flask",
 ) -> str:
-    """
-    Given a request to the Flask app, send an equivalent request to an in
-    memory fake of the Flask app and return some key details of the
-    response.
+    """Given a request to the Flask app, send an equivalent request to an in
+    memory fake of the Flask app and return some key details of the response.
 
     :param request: The incoming request to pass onto the flask app.
-    :param context: An object containing the collected known data about this
-        response.
+    :param context: An object containing the collected known data about
+        this response.
     :param flask_app: The Flask application to pass requests to.
     :return: A tuple of status code, response headers and response data
         from the flask app.
