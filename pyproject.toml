@@ -73,7 +73,7 @@ optional-dependencies.dev = [
     "sybil-extras==2024.9.22.1",
     "types-requests==2.32.0.20240914",
     "vulture==2.13",
-    "docformatter==1.7.5",
+    "docformatter --in-place==1.7.5",
 ]
 optional-dependencies.release = [ "check-wheel-contents==0.6.0" ]
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
@@ -249,6 +249,9 @@ spelling-private-dict-file = 'spelling_private_dict.txt'
 # Tells whether to store unknown words to indicated private dictionary in
 # --spelling-private-dict-file option instead of raising a message.
 spelling-store-unknown-words = 'no'
+
+[tool.docformatter]
+make-summary-multi-line = true
 
 [tool.check-manifest]
 
