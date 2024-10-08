@@ -1,4 +1,6 @@
-"""Setup for Sybil."""
+"""
+Setup for Sybil.
+"""
 
 import sys
 from doctest import ELLIPSIS
