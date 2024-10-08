@@ -32,7 +32,9 @@ class TestResponses:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         response = requests.Response()
@@ -64,7 +66,9 @@ class TestResponses:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -97,7 +101,9 @@ class TestRequestsMock:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         with req_mock.Mocker() as resp_m:
@@ -124,7 +130,9 @@ class TestRequestsMock:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -149,7 +157,9 @@ class TestRequestsMock:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         session = requests.Session()
@@ -169,11 +179,10 @@ class TestRequestsMock:
 
 
 class TestHTTPretty:
-    """
-    Tests for using the helper with HTTPretty.
+    """Tests for using the helper with HTTPretty.
 
-    We only test one way of using the helper with HTTPretty, because the other
-    ways also pass in the HTTPretty module.
+    We only test one way of using the helper with HTTPretty, because the
+    other ways also pass in the HTTPretty module.
     """
 
     @staticmethod
@@ -185,7 +194,9 @@ class TestHTTPretty:
 
         @app.route(rule="/")
         def _() -> str:
-            """Return a simple message."""
+            """
+            Return a simple message.
+            """
             return "Hello, World!"
 
         with httpretty.enabled():
