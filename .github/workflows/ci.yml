@@ -10,7 +10,7 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     # Run at 1:00 every day
-    - cron: '0 1 * * *'
+    - cron: 0 1 * * *
 
 jobs:
   build:
@@ -19,14 +19,14 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: ['3.12']
 
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
-      - name: "Lint"
+      - name: Lint
         run: |
           uv run --extra=dev pre-commit run --all-files --hook-stage pre-commit --verbose
           uv run --extra=dev pre-commit run --all-files --hook-stage pre-push --verbose
@@ -34,7 +34,7 @@ jobs:
         env:
           UV_PYTHON: ${{ matrix.python-version }}
 
-      - name: "Run tests"
+      - name: Run tests
         run: |
           # We run tests against "." and not the tests directory as we test the README
           # and documentation.
@@ -42,8 +42,8 @@ jobs:
         env:
           UV_PYTHON: ${{ matrix.python-version }}
 
-      - name: "Upload coverage to Codecov"
-        uses: "codecov/codecov-action@v4"
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
