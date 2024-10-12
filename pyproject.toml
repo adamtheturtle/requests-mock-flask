@@ -312,6 +312,8 @@ exclude_also = [
 [tool.mypy]
 
 strict = true
+files = [ "." ]
+exclude = [ "build" ]
 
 [tool.pyright]
 reportUnnecessaryTypeIgnoreComment = true
