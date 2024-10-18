@@ -50,31 +50,31 @@ optional-dependencies.dev = [
     "furo==2024.8.6",
     "httpretty==1.1.4",
     "interrogate==1.7.0",
-    "mypy==1.11.2",
+    "mypy==1.12.0",
     "pre-commit==4.0.1",
     "pylint==3.3.1",
     "pylint-per-file-ignores==1.3.2",
-    "pyproject-fmt==2.3.0",
-    "pyright==1.1.384",
+    "pyproject-fmt==2.4.3",
+    "pyright==1.1.385",
     "pyroma==4.2",
     "pytest==8.3.3",
     "pytest-cov==5.0.0",
     "requests==2.32.3",
     "requests-mock==1.12.1",
     "responses==0.25.3",
-    "ruff==0.6.9",
+    "ruff==0.7.0",
     # We add shellcheck-py not only for shell scripts and shell code blocks,
     # but also because having it installed means that ``actionlint-py`` will
     # use it to lint shell commands in GitHub workflow files.
     "shellcheck-py==0.10.0.1",
     "shfmt-py==3.7.0.1",
-    "sphinx==8.1.0",
+    "sphinx==8.1.3",
     "sphinx-copybutton==0.5.2",
-    "sphinx-substitution-extensions==2024.8.6",
+    "sphinx-substitution-extensions==2024.10.17",
     "sphinxcontrib-spelling==8",
     "sybil==8.0.0",
     "sybil-extras==2024.10.18",
-    "types-requests==2.32.0.20240914",
+    "types-requests==2.32.0.20241016",
     "vulture==2.13",
     "yamlfix==1.17.0",
 ]
@@ -98,6 +98,13 @@ requests_mock_flask = [
 universal = true
 
 [tool.setuptools_scm]
+
+# This keeps the start of the version the same as the last release.
+# This is useful for our documentation to include e.g. binary links
+# to the latest released binary.
+#
+# Code to match this is in ``conf.py``.
+version_scheme = "post-release"
 
 [tool.ruff]
 line-length = 79
