@@ -42,6 +42,7 @@ pytest_sybil = Sybil(
                 tempfile_suffixes=[".py"],
                 pad_file=True,
                 write_to_file=False,
+                use_pty=False,
             ),
         ),
     ],
