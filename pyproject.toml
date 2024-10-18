@@ -73,7 +73,7 @@ optional-dependencies.dev = [
     "sphinx-substitution-extensions==2024.10.17",
     "sphinxcontrib-spelling==8",
     "sybil==8.0.0",
-    "sybil-extras==2024.10.11",
+    "sybil-extras==2024.10.18",
     "types-requests==2.32.0.20241016",
     "vulture==2.13",
     "yamlfix==1.17.0",
