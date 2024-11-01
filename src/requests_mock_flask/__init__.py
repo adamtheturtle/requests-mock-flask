@@ -286,6 +286,6 @@ def _requests_mock_callback(
     )
     response = test_client.open(environ_builder.get_request())
 
-    context.headers = response.headers
+    context.headers = dict(response.headers)
     context.status_code = response.status_code
     return str(response.data.decode())
