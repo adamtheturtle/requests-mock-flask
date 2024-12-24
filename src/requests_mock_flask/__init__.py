@@ -109,8 +109,8 @@ def add_flask_app_to_mock(
         pattern = urljoin(base=base_url, url=path_to_match)
         urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
-        assert rule.methods is not None
-        for method in rule.methods:
+        methods = rule.methods or set()
+        for method in methods:
             for url in urls:
                 if mock_obj_type == _MockObjTypes.RESPONSES:
                     mock_obj.add_callback(
@@ -201,9 +201,10 @@ def _httpretty_callback(
     :return: A tuple of status code, response headers and response data
         from the flask app.
     """
-    # We make this assertion to satisfy linters.
+    # We do this to satisfy linters.
     # The parameters are given to httpretty callbacks, but we do not use them.
-    assert [uri, headers]
+    del uri
+    del headers
 
     test_client = flask_app.test_client()
     # See parameters at
