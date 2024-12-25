@@ -296,7 +296,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Hello: " + str(my_variable + 5)
+        return "Hello: " + str(object=my_variable + 5)
 
     test_client = app.test_client()
     response = test_client.get("/4")
@@ -343,7 +343,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Hello: " + str(my_variable + 5)
+        return "Hello: " + str(object=my_variable + 5)
 
     test_client = app.test_client()
     response = test_client.get("/4.0")
@@ -531,7 +531,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Posts for: " + str(my_variable)
+        return "Posts for: " + str(object=my_variable)
 
     test_client = app.test_client()
     response = test_client.get("/users/4/posts")
@@ -660,7 +660,10 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
-@pytest.mark.parametrize("custom_content_length", ["1", "100"])
+@pytest.mark.parametrize(
+    argnames="custom_content_length",
+    argvalues=["1", "100"],
+)
 @_MOCK_CTX_MARKER
 def test_incorrect_content_length(
     custom_content_length: str,
@@ -939,7 +942,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
         """
         assert request.mimetype == "application/json"
         request_json = request.get_json()
-        return str(request_json["hello"])
+        return str(object=request_json["hello"])
 
     test_client = app.test_client()
     response = test_client.get(
@@ -1046,7 +1049,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
         Return a simple message which includes a request query parameter.
         """
         result = request.args["frasier"]
-        return "Hello: " + str(result)
+        return "Hello: " + str(object=result)
 
     test_client = app.test_client()
     response = test_client.get("/?frasier=crane")
@@ -1094,7 +1097,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         Set cookies and return a simple message.
         """
         response = make_response()
-        response.set_cookie("frasier_set", "crane_set")
+        response.set_cookie(key="frasier_set", value="crane_set")
         assert request.cookies, request
         assert request.cookies["frasier"] == "crane"
         assert request.cookies["frasier2"] == "crane2"
