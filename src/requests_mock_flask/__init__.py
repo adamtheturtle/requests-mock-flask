@@ -152,11 +152,11 @@ def _responses_callback(
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     cookie_string = request.headers.get("Cookie", default="")
-    cookie_list = cookie_string.split(";")
+    cookie_list = cookie_string.split(sep=";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     simple_cookie: SimpleCookie = SimpleCookie()
     for cookie in cookie_list_no_empty:
-        simple_cookie.load(cookie)
+        simple_cookie.load(rawdata=cookie)
 
     cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
@@ -174,7 +174,7 @@ def _responses_callback(
     headers_dict = dict(request.headers).items()
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
-        method=str(request.method),
+        method=str(object=request.method),
         data=request.body,
         headers=headers_dict,
         environ_overrides=environ_overrides,
@@ -214,7 +214,7 @@ def _httpretty_callback(
     cookie_list_no_empty = [item for item in cookie_list if item]
     simple_cookie: SimpleCookie = SimpleCookie()
     for cookie in cookie_list_no_empty:
-        simple_cookie.load(cookie)
+        simple_cookie.load(rawdata=cookie)
 
     cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
@@ -264,7 +264,7 @@ def _requests_mock_callback(
     cookie_list_no_empty = [item for item in cookie_list if item]
     simple_cookie: SimpleCookie = SimpleCookie()
     for cookie in cookie_list_no_empty:
-        simple_cookie.load(cookie)
+        simple_cookie.load(rawdata=cookie)
 
     cookies_dict = {k: v.value for k, v in simple_cookie.items()}
 
@@ -289,4 +289,4 @@ def _requests_mock_callback(
 
     context.headers = dict(response.headers)
     context.status_code = response.status_code
-    return str(response.data.decode())
+    return str(object=response.data.decode())
