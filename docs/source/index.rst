@@ -33,10 +33,10 @@ Usage example
 
    from requests_mock_flask import add_flask_app_to_mock
 
-   app = flask.Flask("test_app")
+   app = flask.Flask(import_name="test_app")
 
 
-   @app.route("/")
+   @app.route(rule="/")
    def _() -> str:
        """Return a simple message."""
        return "Hello, World!"
@@ -53,7 +53,7 @@ Usage example
            base_url="http://www.example.com",
        )
 
-       response = requests.get("http://www.example.com", timeout=30)
+       response = requests.get(url="http://www.example.com", timeout=30)
 
        assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
@@ -72,7 +72,7 @@ Usage example
                base_url="http://www.example.com",
            )
 
-           response = requests.get("http://www.example.com", timeout=30)
+           response = requests.get(url="http://www.example.com", timeout=30)
 
            assert response.status_code == HTTPStatus.OK
            assert response.text == "Hello, World!"
@@ -90,7 +90,7 @@ Usage example
                base_url="http://www.example.com",
            )
 
-           response = requests.get("http://www.example.com", timeout=30)
+           response = requests.get(url="http://www.example.com", timeout=30)
 
        assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
@@ -102,7 +102,7 @@ Usage example
        """
        session = requests.Session()
        adapter = requests_mock.Adapter()
-       session.mount("mock", adapter)
+       session.mount(prefix="mock", adapter=adapter)
 
        add_flask_app_to_mock(
            mock_obj=adapter,
@@ -110,7 +110,7 @@ Usage example
            base_url="mock://www.example.com",
        )
 
-       response = session.get("mock://www.example.com", timeout=30)
+       response = session.get(url="mock://www.example.com", timeout=30)
 
        assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
@@ -128,7 +128,7 @@ Usage example
                base_url="http://www.example.com",
            )
 
-           response = requests.get("http://www.example.com", timeout=30)
+           response = requests.get(url="http://www.example.com", timeout=30)
 
        assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
