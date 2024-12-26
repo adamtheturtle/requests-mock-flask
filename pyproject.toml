@@ -328,6 +328,8 @@ plugins = [
 ]
 
 [tool.pyright]
+
+enableTypeIgnoreComments = false
 reportUnnecessaryTypeIgnoreComment = true
 typeCheckingMode = "strict"
 
