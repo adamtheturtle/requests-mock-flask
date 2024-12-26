@@ -5,7 +5,7 @@ Tests for ways the helper can be used.
 from http import HTTPStatus
 from typing import Final
 
-import httpretty  # type: ignore[import-untyped] # pyright: ignore[reportMissingTypeStubs]
+import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import requests
 import requests_mock as req_mock
 import responses
@@ -199,7 +199,7 @@ class TestHTTPretty:
             """
             return "Hello, World!"
 
-        with httpretty.enabled():
+        with httpretty.enabled():  # type: ignore[no-untyped-call]
             add_flask_app_to_mock(
                 mock_obj=httpretty,
                 flask_app=app,
