@@ -199,7 +199,7 @@ class TestHTTPretty:
             """
             return "Hello, World!"
 
-        with httpretty.enabled():
+        with httpretty.enabled():  # type: ignore[no-untyped-call]
             add_flask_app_to_mock(
                 mock_obj=httpretty,
                 flask_app=app,

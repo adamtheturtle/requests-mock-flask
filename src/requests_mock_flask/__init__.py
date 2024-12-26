@@ -210,7 +210,7 @@ def _httpretty_callback(
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     cookie_string = request.headers.get(name="Cookie", failobj="")
-    cookie_list = cookie_string.split(";")
+    cookie_list = cookie_string.split(sep=";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     simple_cookie: SimpleCookie = SimpleCookie()
     for cookie in cookie_list_no_empty:
