@@ -121,7 +121,7 @@ Usage example
        It is possible to use the helper with a ``httpretty`` context
        manager.
        """
-       with httpretty.core.httprettized():
+       with httpretty.core.httprettized():  # type: ignore[no-untyped-call]
            add_flask_app_to_mock(
                mock_obj=httpretty,
                flask_app=app,
