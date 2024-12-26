@@ -72,10 +72,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -121,10 +118,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -169,10 +163,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     assert response.json == expected_json
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -216,10 +207,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -263,10 +251,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -310,10 +295,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -357,10 +339,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -404,10 +383,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -450,10 +426,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -498,10 +471,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -545,10 +515,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -592,10 +559,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -639,10 +603,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -707,10 +668,7 @@ def test_incorrect_content_length(
     requests_request.headers["Content-Length"] = custom_content_length
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -755,10 +713,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     assert post_response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -809,10 +764,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -855,10 +807,8 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     assert b"not allowed for the requested URL." in response.data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -906,10 +856,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -960,10 +907,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1015,10 +959,7 @@ def test_multiple_functions_same_path_different_type(
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1063,10 +1004,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1130,10 +1068,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1184,10 +1119,7 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1250,10 +1182,7 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_var_data
 
     with mock_ctx() as mock_obj:
-        if mock_obj is None:
-            mock_obj_to_add: _MockObjType = httpretty
-        else:
-            mock_obj_to_add = mock_obj
+        mock_obj_to_add = mock_obj or httpretty
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
