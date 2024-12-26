@@ -26,7 +26,7 @@ Usage example
    from http import HTTPStatus
 
    import flask
-   import httpretty  # type: ignore[import-untyped]
+   import httpretty  # type: ignore[import-untyped] # pyright: ignore[reportMissingTypeStubs]
    import requests
    import requests_mock
    import responses
