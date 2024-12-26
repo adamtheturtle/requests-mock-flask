@@ -326,6 +326,7 @@ exclude = [ "build" ]
 plugins = [
     "mypy_strict_kwargs",
 ]
+follow_untyped_imports = true
 
 [tool.pyright]
 
