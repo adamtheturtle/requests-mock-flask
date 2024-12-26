@@ -9,6 +9,7 @@ import uuid
 from collections.abc import Callable
 from contextlib import AbstractContextManager
 from functools import partial
+from http import HTTPStatus
 from types import ModuleType
 from typing import Final
 
@@ -63,7 +64,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -112,7 +113,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/", headers={"hello": "world"})
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -155,12 +156,12 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple JSON message.
         """
-        return jsonify({"hello": "world"}), 201
+        return jsonify({"hello": "world"}), HTTPStatus.CREATED
 
     test_client = app.test_client()
     response = test_client.get("/")
 
-    expected_status_code = 201
+    expected_status_code = HTTPStatus.CREATED
     expected_content_type = "application/json"
     expected_json = {"hello": "world"}
 
@@ -207,7 +208,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/Frasier")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: Frasier"
 
@@ -254,7 +255,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/Frasier")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: Frasier"
 
@@ -301,7 +302,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/4")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: 9"
 
@@ -348,7 +349,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/4.0")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: 9.0"
 
@@ -395,7 +396,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/foo/bar")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: foo/bar"
 
@@ -442,7 +443,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/foo/bar")
 
-    expected_status_code = 404
+    expected_status_code = HTTPStatus.NOT_FOUND
     expected_content_type = "text/html; charset=utf-8"
 
     assert response.status_code == expected_status_code
@@ -489,7 +490,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     random_uuid = uuid.uuid4()
     response = test_client.get(f"/{random_uuid}")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = f"Hello: {random_uuid.hex}".encode()
 
@@ -536,7 +537,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/users/4/posts")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Posts for: 4"
 
@@ -583,7 +584,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/users/cranes/frasier/posts")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Posts for: cranes/frasier"
 
@@ -630,7 +631,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.post("/")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -695,7 +696,7 @@ def test_incorrect_content_length(
 
     response = test_client.open(environ_builder.get_request())
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
 
     assert response.status_code == expected_status_code
 
@@ -742,7 +743,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     get_response = test_client.get("/")
     post_response = test_client.post("/")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -801,7 +802,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/a")
 
-    expected_status_code = 404
+    expected_status_code = HTTPStatus.NOT_FOUND
     expected_content_type = "text/html; charset=utf-8"
 
     assert response.status_code == expected_status_code
@@ -831,7 +832,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
-def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
+def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
     """
     A route with the wrong method given works.
     """
@@ -847,7 +848,7 @@ def test_404_no_such_method(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.post("/")
 
-    expected_status_code = 405
+    expected_status_code = HTTPStatus.METHOD_NOT_ALLOWED
     expected_content_type = "text/html; charset=utf-8"
 
     assert response.status_code == expected_status_code
@@ -897,7 +898,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/", content_type="application/json")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -951,7 +952,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
         data=json.dumps(obj={"hello": "world"}),
     )
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"world"
 
@@ -1006,7 +1007,7 @@ def test_multiple_functions_same_path_different_type(
     test_client = app.test_client()
     response = test_client.get("/4")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"4, <class 'int'>"
 
@@ -1054,7 +1055,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/?frasier=crane")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello: crane"
 
@@ -1117,7 +1118,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     )
     response = test_client.post("/")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_data = b"Hello, World!"
 
@@ -1176,7 +1177,7 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_data = b"Hello, World!"
 
     assert response.status_code == expected_status_code
@@ -1234,7 +1235,7 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     test_client = app.test_client()
     response = test_client.get("/base")
 
-    expected_status_code = 200
+    expected_status_code = HTTPStatus.OK
     expected_content_type = "text/html; charset=utf-8"
     expected_base_data = b"Hello: World"
 
