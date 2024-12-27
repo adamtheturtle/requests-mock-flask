@@ -8,13 +8,13 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
+import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import requests_mock
 import responses
 import werkzeug
 
 if TYPE_CHECKING:
     import flask
-    import httpretty  # pyright: ignore[reportMissingTypeStubs]
     import requests
 
 
@@ -82,7 +82,10 @@ def add_flask_app_to_mock(
         methods = rule.methods or set()
         for method in methods:
             for url in urls:
-                if isinstance(mock_obj, responses.RequestsMock):
+                if isinstance(mock_obj, responses.RequestsMock) or (
+                    isinstance(mock_obj, ModuleType)
+                    and mock_obj.__name__ == "responses"
+                ):
                     mock_obj.add_callback(
                         method=method,
                         url=url,
@@ -97,13 +100,15 @@ def add_flask_app_to_mock(
                         url=url,
                         text=requests_mock_callback,
                     )
-                else:
-                    mock_obj.register_uri(
+                elif mock_obj.__name__ == "httpretty":
+                    httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
                         method=method,
                         uri=url,
-                        body=httpretty_callback,
+                        body=httpretty_callback,  # pyright: ignore[reportArgumentType]
                         forcing_headers={"Content-Type": None},
                     )
+                else:  # pragma: no cover
+                    pass
 
 
 def _responses_callback(

@@ -35,6 +35,7 @@ dynamic = [
     "version",
 ]
 dependencies = [
+    "httpretty>=1.1.4",
     "requests-mock>=1.12.1",
     "responses>=0.25.3",
     "werkzeug>=2.3",
@@ -49,7 +50,6 @@ optional-dependencies.dev = [
     "docformatter==1.7.5",
     "flask==3.1.0",
     "furo==2024.8.6",
-    "httpretty==1.1.4",
     "interrogate==1.7.0",
     "mypy[faster-cache]==1.14.0",
     "mypy-strict-kwargs==2024.12.25",
