@@ -3,59 +3,31 @@ Package for ``requests_mock_flask``.
 """
 
 import re
-from enum import Enum, auto
 from http.cookies import SimpleCookie
+from types import ModuleType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
+import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import requests_mock
+import responses
 import werkzeug
 
 if TYPE_CHECKING:
     import flask
-    import httpretty  # pyright: ignore[reportMissingTypeStubs]
     import requests
-    from requests_mock import request as requests_mock_request
-    from requests_mock import response as requests_mock_response
 
 
-class _MockObjTypes(Enum):
-    """
-    The types of mock objects that can be used.
-    """
-
-    # A ``requests_mock.Mocker`` or a ``requests_mock.Adapter``.
-    REQUESTS_MOCK = auto()
-    # A ``responses.RequestsMock``, or the ``responses`` module.
-    RESPONSES = auto()
-    HTTPRETTY = auto()
-
-
-def _get_mock_obj_type(
-    # We allow an `Any` type here, as we do not want to add all mocker types
-    # as requirements.
-    mock_obj: Any,  # noqa: ANN401
-) -> _MockObjTypes:
-    """
-    Get the type of the mock object.
-    """
-    if hasattr(mock_obj, "add_callback"):
-        return _MockObjTypes.RESPONSES
-    if hasattr(mock_obj, "request_history"):
-        return _MockObjTypes.REQUESTS_MOCK
-    if hasattr(mock_obj, "HTTPretty"):
-        return _MockObjTypes.HTTPRETTY
-
-    message = (
-        "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
-        f"got {type(mock_obj)}."
-    )
-    raise TypeError(message)
+_MockObjType = (
+    responses.RequestsMock
+    | requests_mock.Mocker
+    | requests_mock.Adapter
+    | ModuleType
+)
 
 
 def add_flask_app_to_mock(
-    # We allow an `Any` type here, as we do not want to add all mocker types
-    # as requirements.
-    mock_obj: Any,  # noqa: ANN401
+    mock_obj: _MockObjType,
     flask_app: "flask.Flask",
     base_url: str,
 ) -> None:
@@ -66,15 +38,15 @@ def add_flask_app_to_mock(
 
     def responses_callback(
         request: "requests.PreparedRequest",
-    ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+    ) -> tuple[int, dict[str, str], bytes]:
         """
         Callback for responses.
         """
         return _responses_callback(request=request, flask_app=flask_app)
 
     def requests_mock_callback(
-        request: "requests_mock_request.Request",
-        context: "requests_mock_response.Context",
+        request: "requests_mock.Request",
+        context: "requests_mock.Context",
     ) -> str:
         """
         Callback for requests_mock.
@@ -100,8 +72,6 @@ def add_flask_app_to_mock(
             flask_app=flask_app,
         )
 
-    mock_obj_type = _get_mock_obj_type(mock_obj=mock_obj)
-
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a match for any
         # string of characters of length > 0.
@@ -112,34 +82,44 @@ def add_flask_app_to_mock(
         methods = rule.methods or set()
         for method in methods:
             for url in urls:
-                if mock_obj_type == _MockObjTypes.RESPONSES:
+                if isinstance(mock_obj, responses.RequestsMock) or (
+                    isinstance(mock_obj, ModuleType)
+                    and mock_obj.__name__ == "responses"
+                ):
                     mock_obj.add_callback(
                         method=method,
                         url=url,
                         callback=responses_callback,
                         content_type=None,
                     )
-                elif mock_obj_type == _MockObjTypes.REQUESTS_MOCK:
+                elif isinstance(
+                    mock_obj, (requests_mock.Mocker | requests_mock.Adapter)
+                ):
                     mock_obj.register_uri(
                         method=method,
                         url=url,
                         text=requests_mock_callback,
                     )
-                elif mock_obj_type == _MockObjTypes.HTTPRETTY:
-                    mock_obj.register_uri(
+                elif mock_obj.__name__ == "httpretty":
+                    httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
                         method=method,
                         uri=url,
-                        body=httpretty_callback,
+                        body=httpretty_callback,  # pyright: ignore[reportArgumentType]
                         forcing_headers={"Content-Type": None},
                     )
-                else:  # pragma: no cover
-                    pass
+                else:
+                    msg = (
+                        "Expected a HTTPretty, ``requests_mock``, or "
+                        "``responses`` object, got module "
+                        f"'{mock_obj.__name__}'."
+                    )
+                    raise TypeError(msg)
 
 
 def _responses_callback(
     request: "requests.PreparedRequest",
     flask_app: "flask.Flask",
-) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+) -> tuple[int, dict[str, str], bytes]:
     """Given a request to the flask app, send an equivalent request to an in
     memory fake of the flask app and return some key details of the response.
 
@@ -242,8 +222,8 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: "requests_mock_request.Request",
-    context: "requests_mock_response.Context",
+    request: "requests_mock.Request",
+    context: "requests_mock.Context",
     flask_app: "flask.Flask",
 ) -> str:
     """Given a request to the Flask app, send an equivalent request to an in
