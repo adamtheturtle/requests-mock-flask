@@ -1232,7 +1232,7 @@ def test_unknown_mock_module() -> None:
         """
         Return a simple message.
         """
-        return "Hello, World!"
+        return ""  # pragma: no cover
 
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
