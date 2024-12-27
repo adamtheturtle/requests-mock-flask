@@ -13,6 +13,7 @@ macOS
 pragma
 pyright
 pytest
+reportArgumentType
 reportMissingTypeStubs
 reqs
 todo

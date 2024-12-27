@@ -7,8 +7,6 @@ import importlib.metadata
 
 from packaging.specifiers import SpecifierSet
 
-# pylint: disable=invalid-name
-
 extensions = [
     "sphinx_copybutton",
     "sphinx.ext.autodoc",
