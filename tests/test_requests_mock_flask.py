@@ -1225,13 +1225,22 @@ def test_unknown_mock_module() -> None:
     """
     When an unknown mock module is passed in, an error is raised.
     """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """
+        Return a simple message.
+        """
+        return "Hello, World!"
+
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
-        "got <class 'object'>."
+        "got module 'json'."
     )
     with pytest.raises(expected_exception=TypeError, match=expected_error):
         add_flask_app_to_mock(
             mock_obj=json,
-            flask_app=Flask(import_name=__name__, static_folder=None),
+            flask_app=app,
             base_url="http://www.example.com",
         )

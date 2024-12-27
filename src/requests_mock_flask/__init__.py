@@ -107,8 +107,13 @@ def add_flask_app_to_mock(
                         body=httpretty_callback,  # pyright: ignore[reportArgumentType]
                         forcing_headers={"Content-Type": None},
                     )
-                else:  # pragma: no cover
-                    pass
+                else:
+                    msg = (
+                        "Expected a HTTPretty, ``requests_mock``, or "
+                        "``responses`` object, got module "
+                        f"'{mock_obj.__name__}'."
+                    )
+                    raise TypeError(msg)
 
 
 def _responses_callback(
