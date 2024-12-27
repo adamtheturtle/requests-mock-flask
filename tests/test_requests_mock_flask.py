@@ -1221,9 +1221,9 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert mock_response_base_2.text == expected_base_data.decode()
 
 
-def test_unknown_mock_type() -> None:
+def test_unknown_mock_module() -> None:
     """
-    When an unknown mock type is passed in, an error is raised.
+    When an unknown mock module is passed in, an error is raised.
     """
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
@@ -1231,7 +1231,7 @@ def test_unknown_mock_type() -> None:
     )
     with pytest.raises(expected_exception=TypeError, match=expected_error):
         add_flask_app_to_mock(
-            mock_obj=object(),
+            mock_obj=json,
             flask_app=Flask(import_name=__name__, static_folder=None),
             base_url="http://www.example.com",
         )
