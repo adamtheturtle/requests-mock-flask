@@ -282,7 +282,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Hello: " + str(object=my_variable + 5)
+        return f"Hello: {my_variable + 5}"
 
     test_client = app.test_client()
     response = test_client.get("/4")
@@ -326,7 +326,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Hello: " + str(object=my_variable + 5)
+        return f"Hello: {my_variable + 5}"
 
     test_client = app.test_client()
     response = test_client.get("/4.0")
@@ -502,7 +502,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
         """
         Return a simple message which includes the route variable.
         """
-        return "Posts for: " + str(object=my_variable)
+        return f"Posts for: {my_variable}"
 
     test_client = app.test_client()
     response = test_client.get("/users/4/posts")
@@ -991,7 +991,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
         Return a simple message which includes a request query parameter.
         """
         result = request.args["frasier"]
-        return "Hello: " + str(object=result)
+        return f"Hello: {result}"
 
     test_client = app.test_client()
     response = test_client.get("/?frasier=crane")
