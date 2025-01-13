@@ -37,7 +37,8 @@ dynamic = [
 dependencies = [
     "httpretty>=1.1.4",
     "requests-mock>=1.12.1",
-    "responses>=0.25.3",
+    # Ignore 0.25.5 because of https://github.com/getsentry/responses/issues/751.
+    "responses>=0.25.3, != 0.25.5",
     "werkzeug>=2.3",
 ]
 optional-dependencies.dev = [
@@ -74,7 +75,7 @@ optional-dependencies.dev = [
     "sphinx-substitution-extensions==2025.1.2",
     "sphinxcontrib-spelling==8.0.1",
     "sybil==9.0.0",
-    "sybil-extras==2024.12.26",
+    "sybil-extras==2025.1.11",
     "types-requests==2.32.0.20241016",
     "vulture==2.14",
     "yamlfix==1.17.0",
