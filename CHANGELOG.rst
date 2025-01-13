@@ -4,6 +4,9 @@ Changelog
 Next
 ----
 
+2025.01.13
+----------
+
 * Add requirements for ``httpretty``, ``requests-mock`` and ``responses``.
 * Add more type safety for the passed in mock object.
 
