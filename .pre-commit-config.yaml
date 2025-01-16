@@ -77,21 +77,21 @@ repos:
         language: python
         pass_filenames: false
         types_or: [yaml]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: docformatter
         name: docformatter
         entry: uv run --extra=dev -m docformatter --in-place
         language: python
         types_or: [python]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: shellcheck
         name: shellcheck
         entry: uv run --extra=dev shellcheck --shell=bash
         language: python
         types_or: [shell]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: shellcheck-docs
         name: shellcheck-docs
@@ -99,14 +99,14 @@ repos:
           --shell=bash"
         language: python
         types_or: [markdown, rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: shfmt
         name: shfmt
         entry: shfmt --write --space-redirects --indent=4
         language: python
         types_or: [shell]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: shfmt-docs
         name: shfmt-docs
@@ -114,7 +114,7 @@ repos:
           --no-pad-file --command="shfmt --write --space-redirects --indent=4"
         language: python
         types_or: [markdown, rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: mypy
         name: mypy
@@ -123,7 +123,7 @@ repos:
         language: python
         types_or: [python, toml]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: mypy-docs
         name: mypy-docs
@@ -138,7 +138,7 @@ repos:
         entry: uv run --extra=dev -m check_manifest
         language: python
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pyright
         name: pyright
@@ -147,7 +147,7 @@ repos:
         language: python
         types_or: [python, toml]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pyright-docs
         name: pyright-docs
@@ -165,7 +165,7 @@ repos:
         language: python
         pass_filenames: false
         types_or: [python]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: vulture
         name: vulture
@@ -173,7 +173,7 @@ repos:
         language: python
         types_or: [python]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: vulture-docs
         name: vulture docs
@@ -181,7 +181,7 @@ repos:
         language: python
         types_or: [python]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pyroma
         name: pyroma
@@ -189,14 +189,14 @@ repos:
         language: python
         pass_filenames: false
         types_or: [toml]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: deptry
         name: deptry
         entry: uv run --extra=dev -m deptry src/
         language: python
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pylint
         name: pylint
@@ -204,7 +204,7 @@ repos:
         language: python
         stages: [manual]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pylint-docs
         name: pylint-docs
@@ -218,21 +218,21 @@ repos:
         entry: uv run --extra=dev -m ruff check --fix
         language: python
         types_or: [python]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: ruff-check-fix-docs
         name: Ruff check fix docs
         entry: uv run --extra=dev doccmd --language=python --command="ruff check --fix"
         language: python
         types_or: [markdown, rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: ruff-format-fix
         name: Ruff format
         entry: uv run --extra=dev -m ruff format
         language: python
         types_or: [python]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: ruff-format-fix-docs
         name: Ruff format docs
@@ -240,28 +240,28 @@ repos:
           format"
         language: python
         types_or: [markdown, rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: doc8
         name: doc8
         entry: uv run --extra=dev -m doc8
         language: python
         types_or: [rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: interrogate
         name: interrogate
         entry: uv run --extra=dev -m interrogate
         language: python
         types_or: [python]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: interrogate-docs
         name: interrogate docs
         entry: uv run --extra=dev doccmd --language=python --command="interrogate"
         language: python
         types_or: [markdown, rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: pyproject-fmt-fix
         name: pyproject-fmt
@@ -269,7 +269,7 @@ repos:
         language: python
         types_or: [toml]
         files: pyproject.toml
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: linkcheck
         name: linkcheck
@@ -278,7 +278,7 @@ repos:
         types_or: [rst]
         stages: [manual]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: spelling
         name: spelling
@@ -287,7 +287,7 @@ repos:
         types_or: [rst]
         stages: [manual]
         pass_filenames: false
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: docs
         name: Build Documentation
@@ -301,11 +301,11 @@ repos:
         entry: uv run --extra=dev yamlfix
         language: python
         types_or: [yaml]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
 
       - id: sphinx-lint
         name: sphinx-lint
         entry: uv run --extra=dev sphinx-lint --enable=all --disable=line-too-long
         language: python
         types_or: [rst]
-        additional_dependencies: [uv==0.5.14]
+        additional_dependencies: [uv==0.5.20]
