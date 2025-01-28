@@ -55,7 +55,7 @@ optional-dependencies.dev = [
     "mypy[faster-cache]==1.14.1",
     "mypy-strict-kwargs==2024.12.25",
     "pre-commit==4.1.0",
-    "pylint==3.3.3",
+    "pylint==3.3.4",
     "pylint-per-file-ignores==1.4.0",
     "pyproject-fmt==2.5.0",
     "pyright==1.1.392.post0",
