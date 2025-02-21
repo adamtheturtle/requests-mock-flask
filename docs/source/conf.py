@@ -4,8 +4,19 @@ Configuration for Sphinx.
 """
 
 import importlib.metadata
+from pathlib import Path
 
 from packaging.specifiers import SpecifierSet
+from sphinx_pyproject import SphinxConfig
+
+_pyproject_file = Path(__file__).parent.parent.parent / "pyproject.toml"
+_pyproject_config = SphinxConfig(
+    pyproject_file=_pyproject_file,
+    config_overrides={"version": None},
+)
+
+project = _pyproject_config.name
+author = _pyproject_config.author
 
 extensions = [
     "sphinx_copybutton",
@@ -14,9 +25,6 @@ extensions = [
     "sphinxcontrib.spelling",
     "sphinx_substitution_extensions",
 ]
-
-project = "requests-mock-flask"
-author = "Adam Dangoor"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
