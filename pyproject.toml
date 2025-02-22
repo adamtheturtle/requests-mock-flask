@@ -273,7 +273,6 @@ ignore = [
     "*.enc",
     ".pre-commit-config.yaml",
     ".vscode/*.json",
-    "readthedocs.yaml",
     "conftest.py",
     "CHANGELOG.rst",
     "CODE_OF_CONDUCT.rst",
