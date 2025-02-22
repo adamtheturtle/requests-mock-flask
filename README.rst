@@ -1,4 +1,4 @@
-|Build Status| |codecov| |PyPI| |Documentation Status|
+|Build Status| |codecov| |PyPI|
 
 requests-mock-flask
 ===================
@@ -149,7 +149,7 @@ Use cases
 Full documentation
 ------------------
 
-See the `full documentation <https://requests-mock-flask.readthedocs.io/en/latest>`__ for more information including how to contribute.
+See the `full documentation <https://adamtheturtle.github.io/requests-mock-flask/>`__ for more information including how to contribute.
 
 .. _Flask: https://flask.palletsprojects.com/
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
@@ -160,9 +160,6 @@ See the `full documentation <https://requests-mock-flask.readthedocs.io/en/lates
    :target: https://github.com/adamtheturtle/requests-mock-flask/actions
 .. |codecov| image:: https://codecov.io/gh/adamtheturtle/requests-mock-flask/branch/main/graph/badge.svg
    :target: https://codecov.io/gh/adamtheturtle/requests-mock-flask
-.. |Documentation Status| image:: https://readthedocs.org/projects/requests-mock-flask/badge/?version=latest
-   :target: https://requests-mock-flask.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation Status
 .. |PyPI| image:: https://badge.fury.io/py/requests-mock-flask.svg
    :target: https://badge.fury.io/py/requests-mock-flask
 .. |minimum-python-version| replace:: 3.12
