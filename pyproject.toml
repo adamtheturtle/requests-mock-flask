@@ -53,7 +53,7 @@ optional-dependencies.dev = [
     "furo==2024.8.6",
     "interrogate==1.7.0",
     "mypy[faster-cache]==1.15.0",
-    "mypy-strict-kwargs==2024.12.25",
+    "mypy-strict-kwargs==2025.3.28",
     "pre-commit==4.2.0",
     "pylint==3.3.6",
     "pylint-per-file-ignores==1.4.0",
@@ -77,7 +77,7 @@ optional-dependencies.dev = [
     "sphinxcontrib-spelling==8.0.1",
     "sybil==9.1.0",
     "sybil-extras==2025.3.27",
-    "types-requests==2.32.0.20250306",
+    "types-requests==2.32.0.20250328",
     "vulture==2.14",
     "yamlfix==1.17.0",
 ]
