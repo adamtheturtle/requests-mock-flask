@@ -45,7 +45,7 @@ optional-dependencies.dev = [
     "beartype==0.20.2",
     "check-manifest==0.50",
     "deptry==0.23.0",
-    "doc8==1.1.2",
+    "doc8==2.0.0",
     "doccmd==2025.4.8",
     "docformatter==1.7.7",
     "flask==3.1.1",
