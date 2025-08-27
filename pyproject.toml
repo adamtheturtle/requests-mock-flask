@@ -54,7 +54,7 @@ optional-dependencies.dev = [
     "mypy-strict-kwargs==2025.4.3",
     "pre-commit==4.3.0",
     "pylint==3.3.8",
-    "pylint-per-file-ignores==1.4.0",
+    "pylint-per-file-ignores==2.0.3",
     "pyproject-fmt==2.6.0",
     "pyright==1.1.404",
     "pyroma==5.0",
@@ -238,8 +238,9 @@ disable = [
 # - We want to use generated module names, which may not be valid, but are never seen.
 # - We want to use global variables in documentation, which may not be uppercase
 per-file-ignores = [
-    "docs/:invalid-name",
-    "doccmd_README_rst.*.py:invalid-name",
+    "docs/source/conf.py:invalid-name",
+    "docs/source/doccmd_*.py:invalid-name",
+    "doccmd_README_rst_*.py:invalid-name",
 ]
 
 [tool.pylint.'FORMAT']
