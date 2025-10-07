@@ -1,4 +1,4 @@
-|Build Status| |codecov| |PyPI|
+|Build Status| |PyPI|
 
 requests-mock-flask
 ===================
@@ -158,8 +158,6 @@ See the `full documentation <https://adamtheturtle.github.io/requests-mock-flask
 
 .. |Build Status| image:: https://github.com/adamtheturtle/requests-mock-flask/actions/workflows/ci.yml/badge.svg?branch=main
    :target: https://github.com/adamtheturtle/requests-mock-flask/actions
-.. |codecov| image:: https://codecov.io/gh/adamtheturtle/requests-mock-flask/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/adamtheturtle/requests-mock-flask
 .. |PyPI| image:: https://badge.fury.io/py/requests-mock-flask.svg
    :target: https://badge.fury.io/py/requests-mock-flask
 .. |minimum-python-version| replace:: 3.12
