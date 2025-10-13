@@ -77,7 +77,7 @@ optional-dependencies.dev = [
     "sybil-extras==2025.4.7",
     "types-requests==2.32.4.20250913",
     "vulture==2.14",
-    "yamlfix==1.18.0",
+    "yamlfix==1.19.0",
 ]
 optional-dependencies.release = [ "check-wheel-contents==0.6.3" ]
 urls.Documentation = "https://adamtheturtle.github.io/requests-mock-flask/"
