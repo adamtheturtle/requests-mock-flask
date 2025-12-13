@@ -212,7 +212,7 @@ def _httpretty_callback(
     # We cast the path to a string because httpretty types it as
     # str | bytes, but in practice it's always a string when handling
     # HTTP requests.
-    path = cast(str, request.path)  # type: ignore[redundant-cast]  # pyright: ignore[reportUnnecessaryCast]
+    path = cast("str", request.path)  # type: ignore[redundant-cast]  # pyright: ignore[reportUnnecessaryCast]
     environ_builder = werkzeug.test.EnvironBuilder(
         path=path,
         method=request.method,
