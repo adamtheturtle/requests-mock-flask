@@ -5,7 +5,7 @@ Package for ``requests_mock_flask``.
 import re
 from http.cookies import SimpleCookie
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urljoin
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
@@ -209,8 +209,12 @@ def _httpretty_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
+    # We cast the path to a string because httpretty types it as
+    # str | bytes, but in practice it's always a string when handling
+    # HTTP requests.
+    path = cast("str", request.path)  # type: ignore[redundant-cast]  # pyright: ignore[reportUnnecessaryCast]
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=request.path,
+        path=path,
         method=request.method,
         headers=request.headers.items(),
         data=request.body,

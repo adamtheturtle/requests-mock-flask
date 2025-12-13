@@ -41,7 +41,7 @@ dependencies = [
 ]
 optional-dependencies.dev = [
     "actionlint-py==1.7.9.24",
-    "beartype==0.22.8",
+    "beartype==0.22.9",
     "check-manifest==0.51",
     "deptry==0.24.0",
     "doc8==2.0.0",
@@ -61,7 +61,7 @@ optional-dependencies.dev = [
     "pytest==9.0.2",
     "pytest-cov==7.0.0",
     "requests==2.32.5",
-    "ruff==0.14.8",
+    "ruff==0.14.9",
     # We add shellcheck-py not only for shell scripts and shell code blocks,
     # but also because having it installed means that ``actionlint-py`` will
     # use it to lint shell commands in GitHub workflow files.
@@ -75,6 +75,7 @@ optional-dependencies.dev = [
     "sphinxcontrib-spelling==8.0.2",
     "sybil==9.3.0",
     "sybil-extras==2025.12.10.3",
+    "ty==0.0.1a34",
     "types-requests==2.32.4.20250913",
     "vulture==2.14",
     "yamlfix==1.19.0",
