@@ -131,7 +131,8 @@ def _responses_callback(
     test_client = flask_app.test_client()
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get("Cookie", default="")
+    cookie_dict = dict(request.headers)
+    cookie_string = cookie_dict.get("Cookie", "")
     cookie_list = cookie_string.split(sep=";")
     cookie_list_no_empty = [item for item in cookie_list if item]
     simple_cookie: SimpleCookie = SimpleCookie()
