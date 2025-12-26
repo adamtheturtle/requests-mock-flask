@@ -817,13 +817,12 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        with pytest.raises(
-            expected_exception=(
-                requests.exceptions.ConnectionError,
-                NoMockAddress,
-                ValueError,
-            ),
-        ):
+        expected_exceptions: tuple[type[Exception], ...] = (
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+            ValueError,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
             requests.post(
                 url="http://www.example.com/",
                 timeout=_TIMEOUT_SECONDS,
