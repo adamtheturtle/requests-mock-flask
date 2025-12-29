@@ -37,6 +37,7 @@ ci:
     - vulture
     - vulture-docs
     - yamlfix
+    - zizmor
 
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
@@ -364,6 +365,15 @@ repos:
         name: pyproject-fmt
         entry: uv run --extra=dev yamlfix
         language: python
+        types_or: [yaml]
+        additional_dependencies: [uv==0.9.5]
+        stages: [pre-commit]
+
+      - id: zizmor
+        name: zizmor
+        entry: uv run --extra=dev zizmor .github
+        language: python
+        pass_filenames: false
         types_or: [yaml]
         additional_dependencies: [uv==0.9.5]
         stages: [pre-commit]
