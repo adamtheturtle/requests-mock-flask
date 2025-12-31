@@ -23,6 +23,8 @@ ci:
     - pyright-verifytypes
     - ty
     - ty-docs
+    - pyrefly
+    - pyrefly-docs
     - pyroma
     - ruff-check-fix
     - ruff-check-fix-docs
@@ -210,6 +212,24 @@ repos:
         stages: [pre-push]
         entry: uv run --extra=dev doccmd --no-write-to-file --example-workers 0 --language=python
           --command="ty check"
+        language: python
+        types_or: [markdown, rst]
+        additional_dependencies: [uv==0.9.5]
+
+      - id: pyrefly
+        name: pyrefly
+        stages: [pre-push]
+        entry: uv run --extra=dev pyrefly check
+        language: python
+        types_or: [python, toml]
+        pass_filenames: false
+        additional_dependencies: [uv==0.9.5]
+
+      - id: pyrefly-docs
+        name: pyrefly-docs
+        stages: [pre-push]
+        entry: uv run --extra=dev doccmd --no-write-to-file --example-workers 0 --language=python
+          --command="pyrefly check"
         language: python
         types_or: [markdown, rst]
         additional_dependencies: [uv==0.9.5]
