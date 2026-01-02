@@ -40,7 +40,7 @@ dependencies = [
     "werkzeug>=2.3",
 ]
 optional-dependencies.dev = [
-    "actionlint-py==1.7.9.24",
+    "actionlint-py==1.7.10.24",
     "beartype==0.22.9",
     "check-manifest==0.51",
     "deptry==0.24.0",
