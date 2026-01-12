@@ -1249,19 +1249,8 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
-    """A route with multiple variables should not match URLs with extra
-    segments.
-
-    This is a regression test for
-    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
-
-    The bug was that the regex pattern `<.+>` was greedy, so it would match
-    from the first `<` to the last `>`, collapsing multiple variables into a
-    single wildcard. For example, `/users/<org>/<user>/posts` would become
-    `/users/.+/posts` instead of `/users/.+/.+/posts`.
-
-    This caused URLs with extra segments like `/users/myorg/myuser/extra/posts`
-    to incorrectly match the route.
+    """
+    A route with multiple variables should not match URLs with extra segments.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1299,11 +1288,9 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 def test_multiple_variables_rejects_extra_segments(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """URLs with extra path segments should not match routes with multiple
+    """
+    URLs with extra path segments should not match routes with multiple
     variables.
-
-    This is a regression test for
-    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
