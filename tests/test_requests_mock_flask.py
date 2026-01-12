@@ -1220,6 +1220,96 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert mock_response_base_2.text == expected_base_data.decode()
 
 
+@_MOCK_CTX_MARKER
+def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
+    """
+    A route with multiple variables should not match URLs with extra segments.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
+    def _(my_org: str, my_user: str) -> str:
+        """
+        Return a simple message which includes the route variables.
+        """
+        return "Posts for: " + my_org + "/" + my_user
+
+    # Verify the real Flask app rejects URLs with extra segments
+    test_client = app.test_client()
+    response = test_client.get("/users/cranes/frasier/extra/posts")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = mock_obj or httpretty
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        # Verify that the correct URL works
+        valid_response = requests.get(
+            url="http://www.example.com/users/cranes/frasier/posts",
+            timeout=_TIMEOUT_SECONDS,
+        )
+        assert valid_response.status_code == HTTPStatus.OK
+        assert valid_response.text == "Posts for: cranes/frasier"
+
+
+# This test cannot use httpretty because httpretty has a bug with
+# allow_net_connect=False when used with urllib3 2.3.0+.
+# See: https://github.com/gabrielfalcao/HTTPretty/issues/484
+_MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
+    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
+    requests_mock.Mocker,
+]
+
+_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock"]
+
+_MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=_MOCK_CTXS_NO_HTTPRETTY,
+    ids=_MOCK_IDS_NO_HTTPRETTY,
+)
+
+
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
+def test_multiple_variables_rejects_extra_segments(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """
+    URLs with extra path segments should not match routes with multiple
+    variables.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
+    def _(my_org: str, my_user: str) -> str:
+        """
+        Return a simple message which includes the route variables.
+        """
+        return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = mock_obj or httpretty
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            requests.get(
+                url="http://www.example.com/users/cranes/frasier/extra/posts",
+                timeout=_TIMEOUT_SECONDS,
+            )
+
+
 def test_unknown_mock_module() -> None:
     """
     When an unknown mock module is passed in, an error is raised.
