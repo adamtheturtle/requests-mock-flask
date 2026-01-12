@@ -1257,13 +1257,40 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         assert valid_response.text == "Posts for: cranes/frasier"
 
 
-@_MOCK_CTX_MARKER
+# This test cannot use httpretty because httpretty has a bug with
+# allow_net_connect=False when used with urllib3 2.3.0+.
+# See: https://github.com/gabrielfalcao/HTTPretty/issues/484
+_MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
+    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
+    requests_mock.Mocker,
+]
+
+_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock"]
+
+_MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=_MOCK_CTXS_NO_HTTPRETTY,
+    ids=_MOCK_IDS_NO_HTTPRETTY,
+)
+
+
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
 def test_multiple_variables_rejects_extra_segments(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """
-    URLs with extra path segments should not match routes with multiple
+    """URLs with extra path segments should not match routes with multiple
     variables.
+
+    This is a regression test for
+    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
+
+    The bug was that the regex pattern `<.+>` was greedy, so it would match
+    from the first `<` to the last `>`, collapsing multiple variables into a
+    single wildcard. For example, `/users/<org>/<user>/posts` would become
+    `/users/.+/posts` instead of `/users/[^/]+/[^/]+/posts`.
+
+    This caused URLs with extra segments like `/users/myorg/myuser/extra/posts`
+    to incorrectly match the route.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1274,13 +1301,6 @@ def test_multiple_variables_rejects_extra_segments(
         """
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
-    @app.route(rule="/<path:path>")
-    def __catch_all(path: str) -> str:
-        """
-        Catch-all route.
-        """
-        return "Caught by fallback, path " + path
-
     with mock_ctx() as mock_obj:
         mock_obj_to_add = mock_obj or httpretty
         add_flask_app_to_mock(
@@ -1289,14 +1309,18 @@ def test_multiple_variables_rejects_extra_segments(
             base_url="http://www.example.com",
         )
 
-        response = requests.get(
-            url="http://www.example.com/users/cranes/frasier/extra/posts",
-            timeout=_TIMEOUT_SECONDS,
+        # This URL has an extra segment "extra" and should NOT match the route.
+        # With the buggy greedy regex, the pattern `/users/.+/posts` would
+        # incorrectly match this URL.
+        expected_exceptions: tuple[type[Exception], ...] = (
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
         )
-        assert (
-            response.text
-            == "Caught by fallback, path users/cranes/frasier/extra/posts"
-        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            requests.get(
+                url="http://www.example.com/users/cranes/frasier/extra/posts",
+                timeout=_TIMEOUT_SECONDS,
+            )
 
 
 def test_unknown_mock_module() -> None:
