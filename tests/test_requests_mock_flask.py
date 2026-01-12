@@ -1277,14 +1277,12 @@ def test_multiple_variables_rejects_extra_segments(
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
     @app.route(rule="/<path:path>")
-    def _catchall(path: str) -> tuple[str, int]:
+    def __ignored(path: str) -> tuple[str, int]:
         """
         Catch-all route that returns a 418 status code.
         """
         del path
         return "Caught by fallback", HTTPStatus.IM_A_TEAPOT
-
-    del _catchall  # Avoid pyright reportUnusedFunction
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = mock_obj or httpretty
