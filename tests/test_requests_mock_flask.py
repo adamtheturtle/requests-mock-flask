@@ -1271,6 +1271,17 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         assert valid_response.text == "Posts for: cranes/frasier"
 
 
+# This list is similar to _MOCK_CTXS but with allow_net_connect=False for
+# httpretty. This is needed for tests that verify unmatched URLs raise errors
+# rather than making real network requests.
+#
+# Note: Due to https://github.com/gabrielfalcao/HTTPretty/issues/484,
+# httpretty with allow_net_connect=False has a bug when used with urllib3
+# 2.3.0+. When an unmatched request is made, httpretty raises an UnmockedError
+# with the message "Failed to socket.shutdown because a real socket does not
+# exist" instead of the expected "Failed to handle network request" message.
+# Tests using this marker should expect UnmockedError in addition to other
+# connection-related exceptions.
 _MOCK_CTXS_NO_NET_CONNECT: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
