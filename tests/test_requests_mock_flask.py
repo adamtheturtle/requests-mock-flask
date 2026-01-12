@@ -1268,15 +1268,15 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
     response = test_client.get("/users/cranes/frasier/extra/posts")
     assert response.status_code == HTTPStatus.NOT_FOUND
 
-    # Verify the mock also rejects URLs with extra segments
     with mock_ctx() as mock_obj:
+        mock_obj_to_add = mock_obj or httpretty
+
         add_flask_app_to_mock(
-            mock_obj=mock_obj,
+            mock_obj=mock_obj_to_add,
             flask_app=app,
             base_url="http://www.example.com",
         )
 
-        # Verify that the correct URL still works
         valid_response = requests.get(
             url="http://www.example.com/users/cranes/frasier/posts",
             timeout=_TIMEOUT_SECONDS,
@@ -1284,7 +1284,6 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         assert valid_response.status_code == HTTPStatus.OK
         assert valid_response.text == "Posts for: cranes/frasier"
 
-        # Verify that URLs with extra segments are rejected
         expected_exceptions: tuple[type[Exception], ...] = (
             requests.exceptions.ConnectionError,
             NoMockAddress,
