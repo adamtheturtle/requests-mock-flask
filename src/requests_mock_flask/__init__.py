@@ -73,9 +73,20 @@ def add_flask_app_to_mock(
         )
 
     for rule in flask_app.url_map.iter_rules():
-        # We replace everything inside angle brackets with a match for any
-        # string of characters of length > 0.
-        path_to_match = re.sub(pattern="<.+>", repl=".+", string=rule.rule)
+        # We replace everything inside angle brackets with a regex pattern.
+        # For path variables (<path:...>), we use .+ to match any characters
+        # including slashes. For all other variable types, we use [^/]+ to
+        # match only within a single path segment.
+        path_to_match = re.sub(
+            pattern="<path:.+?>",
+            repl=".+",
+            string=rule.rule,
+        )
+        path_to_match = re.sub(
+            pattern="<.+?>",
+            repl="[^/]+",
+            string=path_to_match,
+        )
         pattern = urljoin(base=base_url, url=path_to_match)
         urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
