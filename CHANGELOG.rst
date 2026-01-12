@@ -4,6 +4,10 @@ Changelog
 Next
 ----
 
+2026.01.12
+----------
+
+
 * Fix a bug where routes with multiple variables (e.g. ``/users/<org>/<user>/posts``) would incorrectly match URLs with extra path segments.
 
 2025.01.13
