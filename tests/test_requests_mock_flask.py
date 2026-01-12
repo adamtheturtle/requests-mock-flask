@@ -1279,8 +1279,7 @@ def test_multiple_variables_rejects_extra_segments(
         """
         Catch-all route that returns a 418 status code.
         """
-        del path
-        return "Caught by fallback", HTTPStatus.IM_A_TEAPOT
+        return "Caught by fallback, path " + path, HTTPStatus.IM_A_TEAPOT
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = mock_obj or httpretty
@@ -1295,7 +1294,10 @@ def test_multiple_variables_rejects_extra_segments(
             timeout=_TIMEOUT_SECONDS,
         )
         assert response.status_code == HTTPStatus.IM_A_TEAPOT
-        assert response.text == "Caught by fallback"
+        assert (
+            response.text
+            == "Caught by fallback, path users/cranes/frasier/extra/posts"
+        )
 
 
 def test_unknown_mock_module() -> None:
