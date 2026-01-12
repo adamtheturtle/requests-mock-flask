@@ -1220,6 +1220,58 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert mock_response_base_2.text == expected_base_data.decode()
 
 
+@_MOCK_CTX_MARKER
+def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
+    """A route with multiple variables should not match URLs with extra
+    segments.
+
+    This is a regression test for
+    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
+
+    The bug was that the regex pattern `<.+>` was greedy, so it would match
+    from the first `<` to the last `>`, collapsing multiple variables into a
+    single wildcard. For example, `/users/<org>/<user>/posts` would become
+    `/users/.+/posts` instead of `/users/.+/.+/posts`.
+
+    This caused URLs with extra segments like `/users/myorg/myuser/extra/posts`
+    to incorrectly match the route.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
+    def _(my_org: str, my_user: str) -> str:
+        """
+        Return a simple message which includes the route variables.
+        """
+        return "Posts for: " + my_org + "/" + my_user
+
+    # Verify the real Flask app rejects URLs with extra segments
+    test_client = app.test_client()
+    response = test_client.get("/users/cranes/frasier/extra/posts")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+    # Verify the mock also rejects URLs with extra segments
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = mock_obj or httpretty
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+            ValueError,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            requests.get(
+                url="http://www.example.com/users/cranes/frasier/extra/posts",
+                timeout=_TIMEOUT_SECONDS,
+            )
+
+
 def test_unknown_mock_module() -> None:
     """
     When an unknown mock module is passed in, an error is raised.
