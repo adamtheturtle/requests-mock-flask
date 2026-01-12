@@ -1261,11 +1261,9 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 def test_multiple_variables_rejects_extra_segments(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """URLs with extra path segments should not match routes with multiple
+    """
+    URLs with extra path segments should not match routes with multiple
     variables.
-
-    This is a regression test for
-    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
