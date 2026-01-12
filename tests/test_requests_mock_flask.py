@@ -1275,7 +1275,7 @@ def test_multiple_variables_rejects_extra_segments(
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
     @app.route(rule="/<path:path>")
-    def __ignored(path: str) -> tuple[str, int]:
+    def __catch_all(path: str) -> tuple[str, int]:
         """
         Catch-all route that returns a 418 status code.
         """
