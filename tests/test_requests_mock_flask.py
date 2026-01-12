@@ -20,6 +20,9 @@ import requests_mock
 import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
+from httpretty.errors import (  # pyright: ignore[reportMissingTypeStubs]
+    UnmockedError,
+)
 from requests_mock.exceptions import NoMockAddress
 
 from requests_mock_flask import add_flask_app_to_mock
@@ -1220,21 +1223,7 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert mock_response_base_2.text == expected_base_data.decode()
 
 
-_MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
-    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
-    requests_mock.Mocker,
-]
-
-_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock"]
-
-_MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
-    argnames="mock_ctx",
-    argvalues=_MOCK_CTXS_NO_HTTPRETTY,
-    ids=_MOCK_IDS_NO_HTTPRETTY,
-)
-
-
-@_MOCK_CTX_MARKER_NO_HTTPRETTY
+@_MOCK_CTX_MARKER
 def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
     """A route with multiple variables should not match URLs with extra
     segments.
@@ -1249,10 +1238,6 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 
     This caused URLs with extra segments like `/users/myorg/myuser/extra/posts`
     to incorrectly match the route.
-
-    Note: This test excludes httpretty because httpretty allows real network
-    connections for unmatched URLs by default, and there's no way to configure
-    this when using the httprettized decorator.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1277,6 +1262,7 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
+        # Verify that the correct URL works
         valid_response = requests.get(
             url="http://www.example.com/users/cranes/frasier/posts",
             timeout=_TIMEOUT_SECONDS,
@@ -1284,9 +1270,53 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         assert valid_response.status_code == HTTPStatus.OK
         assert valid_response.text == "Posts for: cranes/frasier"
 
+
+_MOCK_CTXS_NO_NET_CONNECT: list[_MockCtxType] = [
+    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
+    requests_mock.Mocker,
+    partial(httpretty.httprettized, allow_net_connect=False),
+]
+
+_MOCK_IDS_NO_NET_CONNECT = ["responses", "requests_mock", "httpretty"]
+
+_MOCK_CTX_MARKER_NO_NET_CONNECT = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=_MOCK_CTXS_NO_NET_CONNECT,
+    ids=_MOCK_IDS_NO_NET_CONNECT,
+)
+
+
+@_MOCK_CTX_MARKER_NO_NET_CONNECT
+def test_multiple_variables_rejects_extra_segments(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """URLs with extra path segments should not match routes with multiple
+    variables.
+
+    This is a regression test for
+    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
+    def _(my_org: str, my_user: str) -> str:
+        """
+        Return a simple message which includes the route variables.
+        """
+        return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = mock_obj or httpretty
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
         expected_exceptions: tuple[type[Exception], ...] = (
             requests.exceptions.ConnectionError,
             NoMockAddress,
+            UnmockedError,
         )
         with pytest.raises(expected_exception=expected_exceptions):
             requests.get(
