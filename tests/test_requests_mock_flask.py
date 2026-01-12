@@ -1276,14 +1276,6 @@ def test_multiple_variables_rejects_extra_segments(
         """
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
-    # Add a catch-all route that returns a distinctive status code.
-    # This allows us to verify that the URL with extra segments does NOT
-    # match the specific route above.
-    #
-    # We use this approach instead of httpretty's allow_net_connect=False
-    # because httpretty has a bug with that setting when used with
-    # urllib3 2.3.0+.
-    # See: https://github.com/gabrielfalcao/HTTPretty/issues/484
     @app.route(rule="/<path:path>")
     def _catchall(path: str) -> tuple[str, int]:
         """
