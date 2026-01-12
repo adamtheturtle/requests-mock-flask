@@ -20,9 +20,6 @@ import requests_mock
 import responses
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
-from httpretty.errors import (  # pyright: ignore[reportMissingTypeStubs]
-    UnmockedError,
-)
 from requests_mock.exceptions import NoMockAddress
 
 from requests_mock_flask import add_flask_app_to_mock
@@ -46,30 +43,6 @@ _MOCK_IDS = ["responses", "requests_mock", "httpretty"]
 _MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
     argvalues=_MOCK_CTXS,
-    ids=_MOCK_IDS,
-)
-
-
-# This list is similar to _MOCK_CTXS but with allow_net_connect=False for
-# httpretty. This is needed for tests that verify unmatched URLs raise errors
-# rather than making real network requests.
-#
-# Note: Due to https://github.com/gabrielfalcao/HTTPretty/issues/484,
-# httpretty with allow_net_connect=False has a bug when used with urllib3
-# 2.3.0+. When an unmatched request is made, httpretty raises an UnmockedError
-# with the message "Failed to socket.shutdown because a real socket does not
-# exist" instead of the expected "Failed to handle network request" message.
-# Tests using this marker should expect UnmockedError in addition to other
-# connection-related exceptions.
-_MOCK_CTXS_NO_NET_CONNECT: list[_MockCtxType] = [
-    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
-    requests_mock.Mocker,
-    partial(httpretty.httprettized, allow_net_connect=False),
-]
-
-_MOCK_CTX_MARKER_NO_NET_CONNECT = pytest.mark.parametrize(
-    argnames="mock_ctx",
-    argvalues=_MOCK_CTXS_NO_NET_CONNECT,
     ids=_MOCK_IDS,
 )
 
@@ -1284,13 +1257,15 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         assert valid_response.text == "Posts for: cranes/frasier"
 
 
-@_MOCK_CTX_MARKER_NO_NET_CONNECT
+@_MOCK_CTX_MARKER
 def test_multiple_variables_rejects_extra_segments(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """
-    URLs with extra path segments should not match routes with multiple
+    """URLs with extra path segments should not match routes with multiple
     variables.
+
+    This is a regression test for
+    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1301,6 +1276,24 @@ def test_multiple_variables_rejects_extra_segments(
         """
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
+    # Add a catch-all route that returns a distinctive status code.
+    # This allows us to verify that the URL with extra segments does NOT
+    # match the specific route above.
+    #
+    # We use this approach instead of httpretty's allow_net_connect=False
+    # because httpretty has a bug with that setting when used with
+    # urllib3 2.3.0+.
+    # See: https://github.com/gabrielfalcao/HTTPretty/issues/484
+    @app.route(rule="/<path:path>")
+    def _catchall(path: str) -> tuple[str, int]:
+        """
+        Catch-all route that returns a 418 status code.
+        """
+        del path
+        return "Caught by fallback", HTTPStatus.IM_A_TEAPOT
+
+    del _catchall  # Avoid pyright reportUnusedFunction
+
     with mock_ctx() as mock_obj:
         mock_obj_to_add = mock_obj or httpretty
         add_flask_app_to_mock(
@@ -1309,16 +1302,12 @@ def test_multiple_variables_rejects_extra_segments(
             base_url="http://www.example.com",
         )
 
-        expected_exceptions: tuple[type[Exception], ...] = (
-            requests.exceptions.ConnectionError,
-            NoMockAddress,
-            UnmockedError,
+        response = requests.get(
+            url="http://www.example.com/users/cranes/frasier/extra/posts",
+            timeout=_TIMEOUT_SECONDS,
         )
-        with pytest.raises(expected_exception=expected_exceptions):
-            requests.get(
-                url="http://www.example.com/users/cranes/frasier/extra/posts",
-                timeout=_TIMEOUT_SECONDS,
-            )
+        assert response.status_code == HTTPStatus.IM_A_TEAPOT
+        assert response.text == "Caught by fallback"
 
 
 def test_unknown_mock_module() -> None:
