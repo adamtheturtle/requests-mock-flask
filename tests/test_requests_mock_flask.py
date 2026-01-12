@@ -1278,19 +1278,9 @@ _MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
 def test_multiple_variables_rejects_extra_segments(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """URLs with extra path segments should not match routes with multiple
+    """
+    URLs with extra path segments should not match routes with multiple
     variables.
-
-    This is a regression test for
-    https://github.com/adamtheturtle/requests-mock-flask/issues/1540.
-
-    The bug was that the regex pattern `<.+>` was greedy, so it would match
-    from the first `<` to the last `>`, collapsing multiple variables into a
-    single wildcard. For example, `/users/<org>/<user>/posts` would become
-    `/users/.+/posts` instead of `/users/[^/]+/[^/]+/posts`.
-
-    This caused URLs with extra segments like `/users/myorg/myuser/extra/posts`
-    to incorrectly match the route.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1309,9 +1299,6 @@ def test_multiple_variables_rejects_extra_segments(
             base_url="http://www.example.com",
         )
 
-        # This URL has an extra segment "extra" and should NOT match the route.
-        # With the buggy greedy regex, the pattern `/users/.+/posts` would
-        # incorrectly match this URL.
         expected_exceptions: tuple[type[Exception], ...] = (
             requests.exceptions.ConnectionError,
             NoMockAddress,
