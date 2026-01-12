@@ -1275,11 +1275,11 @@ def test_multiple_variables_rejects_extra_segments(
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
     @app.route(rule="/<path:path>")
-    def __catch_all(path: str) -> tuple[str, int]:
+    def __catch_all(path: str) -> str:
         """
-        Catch-all route that returns a 418 status code.
+        Catch-all route.
         """
-        return "Caught by fallback, path " + path, HTTPStatus.IM_A_TEAPOT
+        return "Caught by fallback, path " + path
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = mock_obj or httpretty
@@ -1293,7 +1293,6 @@ def test_multiple_variables_rejects_extra_segments(
             url="http://www.example.com/users/cranes/frasier/extra/posts",
             timeout=_TIMEOUT_SECONDS,
         )
-        assert response.status_code == HTTPStatus.IM_A_TEAPOT
         assert (
             response.text
             == "Caught by fallback, path users/cranes/frasier/extra/posts"
