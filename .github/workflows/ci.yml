@@ -1,5 +1,4 @@
 ---
-
 name: CI
 
 on:
@@ -16,7 +15,6 @@ permissions: {}
 
 jobs:
   build:
-
     strategy:
       matrix:
         python-version: ['3.12', '3.13']
@@ -35,6 +33,9 @@ jobs:
           cache-dependency-glob: '**/pyproject.toml'
 
       - name: Lint
+        # Use bash to ensure the step fails if any command fails.
+        # PowerShell does not fail on intermediate command failures by default.
+        shell: bash
         run: |
           uv run --extra=dev prek run --all-files --hook-stage pre-commit --verbose
           uv run --extra=dev prek run --all-files --hook-stage pre-push --verbose
