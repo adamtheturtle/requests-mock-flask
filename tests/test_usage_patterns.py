@@ -1,6 +1,4 @@
-"""
-Tests for ways the helper can be used.
-"""
+"""Tests for ways the helper can be used."""
 
 from http import HTTPStatus
 from typing import Final
@@ -19,22 +17,19 @@ _TIMEOUT_SECONDS: Final[int] = 120
 
 
 class TestResponses:
-    """
-    Tests for using the helper with ``responses``.
-    """
+    """Tests for using the helper with ``responses``."""
 
     @staticmethod
     def test_context_manager() -> None:
         """
-        It is possible to use the helper with a ``responses`` context manager.
+        It is possible to use the helper with a ``responses`` context
+        manager.
         """
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         response = requests.Response()
@@ -59,16 +54,12 @@ class TestResponses:
     @staticmethod
     @responses.activate
     def test_decorator() -> None:
-        """
-        It is possible to use the helper with a ``responses`` decorator.
-        """
+        """It is possible to use the helper with a ``responses`` decorator."""
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -87,23 +78,20 @@ class TestResponses:
 
 
 class TestRequestsMock:
-    """
-    Tests for using the helper with ``requests_mock``.
-    """
+    """Tests for using the helper with ``requests_mock``."""
 
     @staticmethod
     def test_context_manager() -> None:
         """
-        It is possible to use the helper with a ``requests_mock`` context
+        It is possible to use the helper with a ``requests_mock``
+        context
         manager.
         """
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         with req_mock.Mocker() as resp_m:
@@ -124,15 +112,14 @@ class TestRequestsMock:
     @staticmethod
     def test_fixture(requests_mock: req_mock.Mocker) -> None:
         """
-        It is possible to use the helper with a ``requests_mock`` fixture.
+        It is possible to use the helper with a ``requests_mock``
+        fixture.
         """
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         add_flask_app_to_mock(
@@ -151,15 +138,14 @@ class TestRequestsMock:
     @staticmethod
     def test_adapter() -> None:
         """
-        It is possible to use the helper with a ``requests_mock`` adapter.
+        It is possible to use the helper with a ``requests_mock``
+        adapter.
         """
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         session = requests.Session()
@@ -187,16 +173,12 @@ class TestHTTPretty:
 
     @staticmethod
     def test_use() -> None:
-        """
-        It is possible to use the helper with HTTPretty.
-        """
+        """It is possible to use the helper with HTTPretty."""
         app = Flask(import_name=__name__, static_folder=None)
 
         @app.route(rule="/")
         def _() -> str:
-            """
-            Return a simple message.
-            """
+            """Return a simple message."""
             return "Hello, World!"
 
         with httpretty.enabled():  # type: ignore[no-untyped-call]

@@ -49,16 +49,12 @@ _MOCK_CTX_MARKER = pytest.mark.parametrize(
 
 @_MOCK_CTX_MARKER
 def test_simple_route(mock_ctx: _MockCtxType) -> None:
-    """
-    A simple GET route works.
-    """
+    """A simple GET route works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
-        """
-        Return a simple message.
-        """
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -93,15 +89,14 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_headers(mock_ctx: _MockCtxType) -> None:
-    """
-    Request headers are sent.
-    """
+    """Request headers are sent."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
         """
-        Check that the headers includes {"hello": "world"} and no Content-Type.
+        Check that the headers includes {"hello": "world"} and no
+        Content-Type.
         """
         assert "Content-Type" not in request.headers
         assert request.headers["hello"] == "world"
@@ -140,16 +135,12 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_json(mock_ctx: _MockCtxType) -> None:
-    """
-    A route that returns JSON data works.
-    """
+    """A route that returns JSON data works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> tuple[Response, int]:
-        """
-        Return a simple JSON message.
-        """
+        """Return a simple JSON message."""
         return jsonify({"hello": "world"}), HTTPStatus.CREATED
 
     test_client = app.test_client()
@@ -184,16 +175,12 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a variable works.
-    """
+    """A route with a variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<my_variable>")
     def _(my_variable: str) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -228,16 +215,12 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a string variable works.
-    """
+    """A route with a string variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<string:my_variable>")
     def _(my_variable: str) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -272,16 +255,12 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with an int variable works.
-    """
+    """A route with an int variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<int:my_variable>")
     def _(my_variable: int) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return f"Hello: {my_variable + 5}"
 
     test_client = app.test_client()
@@ -316,16 +295,12 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a float variable works.
-    """
+    """A route with a float variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<float:my_variable>")
     def _(my_variable: float) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return f"Hello: {my_variable + 5}"
 
     test_client = app.test_client()
@@ -360,16 +335,12 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a path variable works.
-    """
+    """A route with a path variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<path:my_variable>")
     def _(my_variable: str) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     test_client = app.test_client()
@@ -404,16 +375,12 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a string variable when given a slash works.
-    """
+    """A route with a string variable when given a slash works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<string:my_variable>")
     def _(_: str) -> str:
-        """
-        Return an empty string.
-        """
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -447,16 +414,12 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a uuid variable works.
-    """
+    """A route with a uuid variable works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<uuid:my_variable>")
     def _(my_variable: uuid.UUID) -> str:
-        """
-        Return a simple message which includes the route variables.
-        """
+        """Return a simple message which includes the route variables."""
         return "Hello: " + my_variable.hex
 
     test_client = app.test_client()
@@ -492,16 +455,12 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_nested_path(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with a variable nested in a path works.
-    """
+    """A route with a variable nested in a path works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/users/<int:my_variable>/posts")
     def _(my_variable: int) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return f"Posts for: {my_variable}"
 
     test_client = app.test_client()
@@ -536,16 +495,12 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with multiple variables works.
-    """
+    """A route with multiple variables works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
-        """
-        Return a simple message which includes the route variables.
-        """
+        """Return a simple message which includes the route variables."""
         return "Posts for: " + my_org + "/" + my_user
 
     test_client = app.test_client()
@@ -580,16 +535,12 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_post_verb(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with the POST verb works.
-    """
+    """A route with the POST verb works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["POST"])
     def _() -> str:
-        """
-        Return a simple message.
-        """
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -632,16 +583,15 @@ def test_incorrect_content_length(
     mock_ctx: _MockCtxType,
 ) -> None:
     """
-    Custom content length headers are passed through to the Flask endpoint.
+    Custom content length headers are passed through to the Flask
+    endpoint.
     """
     app = Flask(import_name=__name__, static_folder=None)
     data = b"12345"
 
     @app.route(rule="/", methods=["POST"])
     def _() -> str:
-        """
-        Check some features of the request.
-        """
+        """Check some features of the request."""
         request.environ["wsgi.input_terminated"] = True
         assert len(data) == len(request.data)
         assert request.headers["Content-Length"] == custom_content_length
@@ -685,16 +635,12 @@ def test_incorrect_content_length(
 
 @_MOCK_CTX_MARKER
 def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with multiple verbs works.
-    """
+    """A route with multiple verbs works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["GET", "POST"])
     def _() -> str:
-        """
-        Return a simple message.
-        """
+        """Return a simple message."""
         return "Hello, World!"
 
     test_client = app.test_client()
@@ -742,16 +688,12 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with the wrong type given works.
-    """
+    """A route with the wrong type given works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<int:my_variable>")
     def _(_: int) -> str:
-        """
-        Return an empty string.
-        """
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -785,16 +727,12 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
-    """
-    A route with the wrong method given works.
-    """
+    """A route with the wrong method given works."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
-        """
-        Return an empty string.
-        """
+        """Return an empty string."""
         return ""  # pragma: no cover
 
     test_client = app.test_client()
@@ -831,16 +769,12 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
-    """
-    Routes which require a content type are supported.
-    """
+    """Routes which require a content type are supported."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
-        """
-        Check the MIME type and return a simple message.
-        """
+        """Check the MIME type and return a simple message."""
         assert request.mimetype == "application/json"
         return "Hello, World!"
 
@@ -877,16 +811,12 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
-    """
-    Routes which require data are supported.
-    """
+    """Routes which require data are supported."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
-        """
-        Check the MIME type and return some given data.
-        """
+        """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
         request_json = request.get_json()
         return str(object=request_json["hello"])
@@ -932,15 +862,14 @@ def test_multiple_functions_same_path_different_type(
     mock_ctx: _MockCtxType,
 ) -> None:
     """
-    When multiple functions exist with the same path but have a different type,
+    When multiple functions exist with the same path but have a
+    different type,
     the mock matches them just the same.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
     def show_type(variable: float | str) -> str:
-        """
-        Return a string which includes the type of the variable.
-        """
+        """Return a string which includes the type of the variable."""
         return f"{variable}, {type(variable)}"
 
     app.add_url_rule(rule="/<variable>", view_func=show_type)
@@ -979,15 +908,14 @@ def test_multiple_functions_same_path_different_type(
 
 @_MOCK_CTX_MARKER
 def test_query_string(mock_ctx: _MockCtxType) -> None:
-    """
-    Query strings work.
-    """
+    """Query strings work."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
         """
-        Return a simple message which includes a request query parameter.
+        Return a simple message which includes a request query
+        parameter.
         """
         result = request.args["frasier"]
         return f"Hello: {result}"
@@ -1024,16 +952,12 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_cookies(mock_ctx: _MockCtxType) -> None:
-    """
-    Cookies work.
-    """
+    """Cookies work."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["POST"])
     def _() -> Response:
-        """
-        Set cookies and return a simple message.
-        """
+        """Set cookies and return a simple message."""
         response = make_response()
         response.set_cookie(key="frasier_set", value="crane_set")
         assert request.cookies, request
@@ -1093,16 +1017,12 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_no_content_type(mock_ctx: _MockCtxType) -> None:
-    """
-    It is possible to get a response without a content type.
-    """
+    """It is possible to get a response without a content type."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["GET"])
     def _() -> Response:
-        """
-        Return a simple message with no Content-Type.
-        """
+        """Return a simple message with no Content-Type."""
         response = make_response()
         response.data = "Hello, World!"
         del response.headers["Content-Type"]
@@ -1140,20 +1060,17 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
 @_MOCK_CTX_MARKER
 def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     """
-    A route with overlap to another route works across multiple requests.
+    A route with overlap to another route works across multiple
+    requests.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
     def base_route() -> str:
-        """
-        Return a simple message.
-        """
+        """Return a simple message."""
         return "Hello: World"
 
     def with_variable(my_variable: str) -> str:
-        """
-        Return a simple message which includes the route variable.
-        """
+        """Return a simple message which includes the route variable."""
         return "Hello: " + my_variable
 
     app.add_url_rule(rule="/base", methods=["GET"], view_func=base_route)
@@ -1223,15 +1140,14 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
 @_MOCK_CTX_MARKER
 def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
     """
-    A route with multiple variables should not match URLs with extra segments.
+    A route with multiple variables should not match URLs with extra
+    segments.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
-        """
-        Return a simple message which includes the route variables.
-        """
+        """Return a simple message which includes the route variables."""
         return "Posts for: " + my_org + "/" + my_user
 
     # Verify the real Flask app rejects URLs with extra segments
@@ -1286,9 +1202,7 @@ def test_multiple_variables_rejects_extra_segments(
 
     @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
-        """
-        Return a simple message which includes the route variables.
-        """
+        """Return a simple message which includes the route variables."""
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
     with mock_ctx() as mock_obj:
@@ -1311,16 +1225,12 @@ def test_multiple_variables_rejects_extra_segments(
 
 
 def test_unknown_mock_module() -> None:
-    """
-    When an unknown mock module is passed in, an error is raised.
-    """
+    """When an unknown mock module is passed in, an error is raised."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
     def _() -> str:
-        """
-        Return a simple message.
-        """
+        """Return a simple message."""
         return ""  # pragma: no cover
 
     expected_error = (
