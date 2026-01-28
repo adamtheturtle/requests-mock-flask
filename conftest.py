@@ -17,7 +17,7 @@ from sybil_extras.evaluators.shell_evaluator import ShellCommandEvaluator
 
 
 def _make_temp_file_path(*, example: Example) -> Path:
-    """Create a temporary file path for an example with .py suffix."""
+    """Create a temporary file path for an example with ``.py`` suffix."""
     return Path(example.path).parent / f"_sybil_example_{uuid.uuid4().hex}.py"
 
 
