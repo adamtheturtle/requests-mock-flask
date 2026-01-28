@@ -1,17 +1,24 @@
 """Setup for Sybil."""
 
 import sys
+import uuid
 from doctest import ELLIPSIS
+from pathlib import Path
 
 import pytest
 from beartype import beartype
-from sybil import Sybil
+from sybil import Example, Sybil
 from sybil.parsers.rest import (
     CodeBlockParser,
     DocTestParser,
     PythonCodeBlockParser,
 )
 from sybil_extras.evaluators.shell_evaluator import ShellCommandEvaluator
+
+
+def _make_temp_file_path(*, example: Example) -> Path:
+    """Create a temporary file path for an example with .py suffix."""
+    return Path(example.path).parent / f"_sybil_example_{uuid.uuid4().hex}.py"
 
 
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
@@ -35,7 +42,7 @@ pytest_sybil = Sybil(
             language="python",
             evaluator=ShellCommandEvaluator(
                 args=[sys.executable, "-m", "pytest"],
-                tempfile_suffixes=[".py"],
+                temp_file_path_maker=_make_temp_file_path,
                 pad_file=True,
                 write_to_file=False,
                 use_pty=False,
