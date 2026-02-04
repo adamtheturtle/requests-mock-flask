@@ -46,18 +46,18 @@ optional-dependencies.dev = [
     "check-manifest==0.51",
     "deptry==0.24.0",
     "doc8==2.0.0",
-    "doccmd==2026.1.27.4",
+    "doccmd==2026.1.31.3",
     "flask==3.1.2",
     "furo==2025.12.19",
     "interrogate==1.7.0",
     "mypy[faster-cache]==1.19.1",
     "mypy-strict-kwargs==2026.1.12",
-    "prek==0.3.0",
+    "prek==0.3.1",
     "pydocstringformatter==0.7.5",
     "pylint[spelling]==4.0.4",
     "pylint-per-file-ignores==3.2.0",
-    "pyproject-fmt==2.11.1",
-    "pyrefly==0.50.0",
+    "pyproject-fmt==2.12.1",
+    "pyrefly==0.51.0",
     "pyright==1.1.408",
     "pyroma==5.0.1",
     "pytest==9.0.2",
@@ -338,6 +338,12 @@ follow_untyped_imports = true
 enableTypeIgnoreComments = false
 reportUnnecessaryTypeIgnoreComment = true
 typeCheckingMode = "strict"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = false
+
+[tool.ty.terminal]
+error-on-warning = true
 
 [tool.pydocstringformatter]
 write = true
