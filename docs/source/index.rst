@@ -13,15 +13,12 @@ Requires Python |minimum-python-version|\+.
    pip install requests-mock-flask
 
 
-Usage example
--------------
+Usage examples
+--------------
 
 .. code-block:: python
 
-   """
-   Examples of using requests-mock-flask with responses, requests-mock
-   and httpretty.
-   """
+   """Examples of using requests-mock-flask."""
 
    from http import HTTPStatus
 
@@ -33,7 +30,7 @@ Usage example
 
    from requests_mock_flask import add_flask_app_to_mock
 
-   app = flask.Flask(import_name="test_app")
+   app = flask.Flask(import_name="example_app")
 
 
    @app.route(rule="/")
@@ -42,96 +39,63 @@ Usage example
        return "Hello, World!"
 
 
-   @responses.activate
-   def test_responses_decorator() -> None:
-       """
-       It is possible to use the helper with a ``responses`` decorator.
-       """
+   # Using responses
+   with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_m:
        add_flask_app_to_mock(
-           mock_obj=responses,
+           mock_obj=resp_m,
            flask_app=app,
            base_url="http://www.example.com",
        )
 
        response = requests.get(url="http://www.example.com", timeout=30)
 
-       assert response.status_code == HTTPStatus.OK
-       assert response.text == "Hello, World!"
+   assert response.status_code == HTTPStatus.OK
+   assert response.text == "Hello, World!"
 
 
-   def test_responses_context_manager() -> None:
-       """
-       It is possible to use the helper with a ``responses`` context manager.
-       """
-       with responses.RequestsMock(
-           assert_all_requests_are_fired=False,
-       ) as resp_m:
-           add_flask_app_to_mock(
-               mock_obj=resp_m,
-               flask_app=app,
-               base_url="http://www.example.com",
-           )
-
-           response = requests.get(url="http://www.example.com", timeout=30)
-
-           assert response.status_code == HTTPStatus.OK
-           assert response.text == "Hello, World!"
-
-
-   def test_requests_mock_context_manager() -> None:
-       """
-       It is possible to use the helper with a ``requests_mock`` context
-       manager.
-       """
-       with requests_mock.Mocker() as resp_m:
-           add_flask_app_to_mock(
-               mock_obj=resp_m,
-               flask_app=app,
-               base_url="http://www.example.com",
-           )
-
-           response = requests.get(url="http://www.example.com", timeout=30)
-
-       assert response.status_code == HTTPStatus.OK
-       assert response.text == "Hello, World!"
-
-
-   def test_requests_mock_adapter() -> None:
-       """
-       It is possible to use the helper with a ``requests_mock`` fixture.
-       """
-       session = requests.Session()
-       adapter = requests_mock.Adapter()
-       session.mount(prefix="mock", adapter=adapter)
-
+   # Using requests-mock
+   with requests_mock.Mocker() as req_m:
        add_flask_app_to_mock(
-           mock_obj=adapter,
+           mock_obj=req_m,
            flask_app=app,
-           base_url="mock://www.example.com",
+           base_url="http://www.example.com",
        )
 
-       response = session.get(url="mock://www.example.com", timeout=30)
+       response = requests.get(url="http://www.example.com", timeout=30)
 
-       assert response.status_code == HTTPStatus.OK
-       assert response.text == "Hello, World!"
+   assert response.status_code == HTTPStatus.OK
+   assert response.text == "Hello, World!"
 
 
-   def test_httpretty_context_manager() -> None:
-       """
-       It is possible to use the helper with a ``httpretty`` context
-       manager.
-       """
-       with httpretty.core.httprettized():  # type: ignore[no-untyped-call]
-           add_flask_app_to_mock(
-               mock_obj=httpretty,
-               flask_app=app,
-               base_url="http://www.example.com",
-           )
+   # Using a requests-mock adapter
+   session = requests.Session()
+   adapter = requests_mock.Adapter()
+   session.mount(prefix="mock", adapter=adapter)
 
-           response = requests.get(url="http://www.example.com", timeout=30)
+   add_flask_app_to_mock(
+       mock_obj=adapter,
+       flask_app=app,
+       base_url="mock://www.example.com",
+   )
 
-       assert response.status_code == HTTPStatus.OK
-       assert response.text == "Hello, World!"
+   response = session.get(url="mock://www.example.com", timeout=30)
+
+   assert response.status_code == HTTPStatus.OK
+   assert response.text == "Hello, World!"
+
+
+   # Using httpretty
+   with httpretty.core.httprettized():  # type: ignore[no-untyped-call]
+       add_flask_app_to_mock(
+           mock_obj=httpretty,
+           flask_app=app,
+           base_url="http://www.example.com",
+       )
+
+       response = requests.get(url="http://www.example.com", timeout=30)
+
+   assert response.status_code == HTTPStatus.OK
+   assert response.text == "Hello, World!"
 
 Use cases
 ---------
