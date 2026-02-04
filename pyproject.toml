@@ -76,6 +76,7 @@ optional-dependencies.dev = [
     "sphinx-substitution-extensions==2026.1.12",
     "sphinxcontrib-spelling==8.0.2",
     "sybil==9.3.0",
+    "sybil-extras==2026.1.27",
     "ty==0.0.14",
     "types-requests==2.32.4.20260107",
     "vulture==2.14",
@@ -129,8 +130,6 @@ lint.ignore = [
 ]
 
 lint.per-file-ignores."doccmd_*.py" = [
-    # Allow missing module docstring in generated doc code files.
-    "D100",
     # Allow our chosen docstring line-style - pydocstringformatter handles
     # formatting but docstrings in docs may not match this style.
     "D200",
@@ -355,7 +354,6 @@ linewrap-full-docstring = true
 fail-under = 100
 omit-covered-files = true
 verbose = 2
-exclude = [ "doccmd_*" ]
 
 [tool.doc8]
 
