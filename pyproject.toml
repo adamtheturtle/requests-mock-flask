@@ -76,7 +76,6 @@ optional-dependencies.dev = [
     "sphinx-substitution-extensions==2026.1.12",
     "sphinxcontrib-spelling==8.0.2",
     "sybil==9.3.0",
-    "sybil-extras==2026.1.27",
     "ty==0.0.14",
     "types-requests==2.32.4.20260107",
     "vulture==2.14",
@@ -90,14 +89,14 @@ urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
 [tool.setuptools]
 zip-safe = false
 
-[tool.setuptools.packages.find]
-where = [
-    "src",
-]
-
 [tool.setuptools.package-data]
 requests_mock_flask = [
     "py.typed",
+]
+
+[tool.setuptools.packages.find]
+where = [
+    "src",
 ]
 
 [tool.distutils.bdist_wheel]
@@ -130,6 +129,8 @@ lint.ignore = [
 ]
 
 lint.per-file-ignores."doccmd_*.py" = [
+    # Allow missing module docstring in generated doc code files.
+    "D100",
     # Allow our chosen docstring line-style - pydocstringformatter handles
     # formatting but docstrings in docs may not match this style.
     "D200",
@@ -153,6 +154,12 @@ lint.unfixable = [
 lint.pydocstyle.convention = "google"
 
 [tool.pylint]
+
+[tool.pylint.'FORMAT']
+
+# Allow the body of an if to be on the same line as the test if there is no
+# else.
+single-line-if-stmt = false
 
 [tool.pylint.'MASTER']
 
@@ -250,12 +257,6 @@ per-file-ignores = [
     "doccmd_README_rst_*.py:invalid-name",
 ]
 
-[tool.pylint.'FORMAT']
-
-# Allow the body of an if to be on the same line as the test if there is no
-# else.
-single-line-if-stmt = false
-
 [tool.pylint.'SPELLING']
 
 # Spelling dictionary name. Available dictionaries: none. To make it working
@@ -312,15 +313,15 @@ max_supported_python = "3.14"
 xfail_strict = true
 log_cli = true
 
-[tool.coverage.run]
-
-branch = true
-
 [tool.coverage.report]
 
 exclude_also = [
     "if TYPE_CHECKING:",
 ]
+
+[tool.coverage.run]
+
+branch = true
 
 [tool.mypy]
 
@@ -348,6 +349,7 @@ linewrap-full-docstring = true
 fail-under = 100
 omit-covered-files = true
 verbose = 2
+exclude = [ "doccmd_*" ]
 
 [tool.doc8]
 

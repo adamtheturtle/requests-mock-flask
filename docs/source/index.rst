@@ -133,6 +133,28 @@ Usage example
        assert response.status_code == HTTPStatus.OK
        assert response.text == "Hello, World!"
 
+.. invisible-code-block: python
+
+   """
+   Run all test functions defined in the code block above.
+
+   Sybil's PythonCodeBlockParser executes the code block, which defines the
+   test functions but does not call them. This invisible block collects all
+   functions with names starting with "test_" and runs them using unittest.
+
+   To verify this is working, add ``raise Exception()`` to any test function
+   above and run ``pytest docs/source/index.rst`` - the test should fail.
+   """
+
+   import unittest
+
+   suite = unittest.TestSuite()
+   for name, obj in list(locals().items()):
+       if name.startswith("test_") and callable(obj):
+           suite.addTest(unittest.FunctionTestCase(obj))  # type: ignore[misc]
+   result = unittest.TextTestRunner(verbosity=2).run(suite)  # type: ignore[misc]
+   assert result.wasSuccessful()
+
 Use cases
 ---------
 
