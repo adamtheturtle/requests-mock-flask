@@ -296,6 +296,9 @@ plugins = [
 ]
 follow_untyped_imports = true
 
+[tool.pyrefly]
+errors.non-exhaustive-match = "error"
+
 [tool.pyright]
 enableTypeIgnoreComments = false
 reportUnnecessaryTypeIgnoreComment = true
@@ -374,6 +377,3 @@ ignore_decorators = [
 [tool.yamlfix]
 section_whitelines = 1
 whitelines = 1
-
-[tool.pyrefly]
-errors.non-exhaustive-match = "error"
