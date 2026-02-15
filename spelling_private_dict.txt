@@ -6,6 +6,7 @@ beartype
 changelog
 hasattr
 httpretty
+httpx
 keyring
 linters
 linting
@@ -16,6 +17,7 @@ pytest
 reportArgumentType
 reportMissingTypeStubs
 reqs
+respx
 todo
 tuple
 typehints
