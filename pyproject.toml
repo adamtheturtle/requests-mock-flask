@@ -183,6 +183,7 @@ lint.pydocstyle.convention = "google"
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
 "MASTER".unsafe-load-any-extension = false
+"DESIGN".max-complexity = 11
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
