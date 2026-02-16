@@ -69,7 +69,7 @@ def _do_get(
 ) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
-        return httpx.get(url=url, headers=headers)
+        return httpx.get(url=url, headers=headers, timeout=_TIMEOUT_SECONDS)
     return requests.get(
         url=url,
         headers=headers,
@@ -85,7 +85,7 @@ def _do_post(
 ) -> requests.Response | httpx.Response:
     """Make a POST request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
-        return httpx.post(url=url, cookies=cookies)
+        return httpx.post(url=url, cookies=cookies, timeout=_TIMEOUT_SECONDS)
     return requests.post(
         url=url,
         cookies=cookies,
