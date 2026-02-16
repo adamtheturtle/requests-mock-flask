@@ -52,6 +52,34 @@ def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
     return mock_obj or httpretty
 
 
+def _do_get(
+    *,
+    mock_obj: _MockObjType,  # noqa: ARG001  # pylint: disable=unused-argument
+    url: str,
+    headers: dict[str, str] | None = None,
+) -> requests.Response:
+    """Make a GET request via the appropriate HTTP client."""
+    return requests.get(
+        url=url,
+        headers=headers,
+        timeout=_TIMEOUT_SECONDS,
+    )
+
+
+def _do_post(
+    *,
+    mock_obj: _MockObjType,  # noqa: ARG001  # pylint: disable=unused-argument
+    url: str,
+    cookies: dict[str, str] | None = None,
+) -> requests.Response:
+    """Make a POST request via the appropriate HTTP client."""
+    return requests.post(
+        url=url,
+        cookies=cookies,
+        timeout=_TIMEOUT_SECONDS,
+    )
+
+
 @_MOCK_CTX_MARKER
 def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """A simple GET route works."""
@@ -82,9 +110,9 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -127,10 +155,10 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"hello": "world"},
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -168,9 +196,9 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -208,9 +236,9 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -248,9 +276,9 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -288,9 +316,9 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/4",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -328,9 +356,9 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/4.0",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -368,9 +396,9 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/foo/bar",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -407,9 +435,9 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/foo/bar",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -448,9 +476,9 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url=f"http://www.example.com/{random_uuid}",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -488,9 +516,9 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/4/posts",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -528,9 +556,9 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -568,9 +596,9 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.post(
+        mock_response = _do_post(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -673,13 +701,13 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_get_response = requests.get(
+        mock_get_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
-            timeout=_TIMEOUT_SECONDS,
         )
-        mock_post_response = requests.post(
+        mock_post_response = _do_post(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_get_response.status_code == expected_status_code
@@ -720,9 +748,9 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/a",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -802,10 +830,10 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"Content-Type": "application/json"},
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -900,9 +928,9 @@ def test_multiple_functions_same_path_different_type(
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/4",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -944,9 +972,9 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com?frasier=crane",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1004,13 +1032,13 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.post(
+        mock_response = _do_post(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             cookies={
                 "frasier": "crane",
                 "frasier2": "crane2",
             },
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1051,9 +1079,9 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1111,19 +1139,19 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response_base = requests.get(
+        mock_response_base = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
-            timeout=_TIMEOUT_SECONDS,
         )
 
-        mock_response_var = requests.get(
+        mock_response_var = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base/Frasier",
-            timeout=_TIMEOUT_SECONDS,
         )
 
-        mock_response_base_2 = requests.get(
+        mock_response_base_2 = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
-            timeout=_TIMEOUT_SECONDS,
         )
 
     assert mock_response_base.status_code == expected_status_code
@@ -1169,9 +1197,9 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         )
 
         # Verify that the correct URL works
-        valid_response = requests.get(
+        valid_response = _do_get(
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
-            timeout=_TIMEOUT_SECONDS,
         )
         assert valid_response.status_code == HTTPStatus.OK
         assert valid_response.text == "Posts for: cranes/frasier"
