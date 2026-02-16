@@ -48,7 +48,7 @@ optional-dependencies.dev = [
     "check-manifest==0.51",
     "deptry==0.24.0",
     "doc8==2.0.0",
-    "doccmd==2026.1.31.3",
+    "doccmd==2026.2.15",
     "flask==3.1.2",
     "furo==2025.12.19",
     "httpx==0.28.1",
