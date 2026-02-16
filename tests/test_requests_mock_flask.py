@@ -793,9 +793,9 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
             ValueError,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            requests.post(
+            _do_post(
+                mock_obj=mock_obj_to_add,
                 url="http://www.example.com/",
-                timeout=_TIMEOUT_SECONDS,
             )
 
 
@@ -1250,9 +1250,9 @@ def test_multiple_variables_rejects_extra_segments(
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            requests.get(
+            _do_get(
+                mock_obj=mock_obj_to_add,
                 url="http://www.example.com/users/cranes/frasier/extra/posts",
-                timeout=_TIMEOUT_SECONDS,
             )
 
 
