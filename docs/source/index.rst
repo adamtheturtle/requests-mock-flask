@@ -101,7 +101,7 @@ Usage examples
 
 
    # Using respx
-   with respx.mock() as respx_mock:
+   with respx.mock(assert_all_called=False) as respx_mock:
        add_flask_app_to_mock(
            mock_obj=respx_mock,
            flask_app=app,

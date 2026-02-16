@@ -143,7 +143,7 @@ lint.per-file-ignores."tests/test_*.py" = [
 lint.unfixable = [
     "ERA001",
 ]
-lint.mccabe.max-complexity = 11
+lint.mccabe.max-complexity = 12
 lint.pydocstyle.convention = "google"
 
 [tool.pylint]
@@ -183,7 +183,7 @@ lint.pydocstyle.convention = "google"
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
 "MASTER".unsafe-load-any-extension = false
-"DESIGN".max-complexity = 11
+"DESIGN".max-complexity = 12
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where

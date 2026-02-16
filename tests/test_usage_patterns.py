@@ -215,7 +215,7 @@ class TestRespx:
             """Return a simple message."""
             return "Hello, World!"
 
-        with respx.mock() as respx_mock:
+        with respx.mock(assert_all_called=False) as respx_mock:
             add_flask_app_to_mock(
                 mock_obj=respx_mock,
                 flask_app=app,
@@ -228,8 +228,8 @@ class TestRespx:
         assert response.text == "Hello, World!"
 
     @staticmethod
-    @respx.mock
-    def test_decorator() -> None:
+    @respx.mock(assert_all_called=False)
+    def test_decorator(respx_mock: respx.MockRouter) -> None:
         """
         It is possible to use the helper with a ``respx``
         decorator.
@@ -242,7 +242,7 @@ class TestRespx:
             return "Hello, World!"
 
         add_flask_app_to_mock(
-            mock_obj=respx.mock,
+            mock_obj=respx_mock,
             flask_app=app,
             base_url="http://www.example.com",
         )

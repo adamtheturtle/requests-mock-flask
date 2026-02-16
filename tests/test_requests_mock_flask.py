@@ -23,6 +23,7 @@ import respx
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
+from respx.models import AllMockedAssertionError
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -43,7 +44,7 @@ _MOCK_CTXS: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
     httpretty.httprettized,
-    respx.mock,
+    partial(respx.mock, assert_all_called=False),
 ]
 
 _MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx"]
@@ -52,23 +53,6 @@ _MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
     argvalues=_MOCK_CTXS,
     ids=_MOCK_IDS,
-)
-
-# Backends that use ``requests`` as the HTTP client (not ``httpx``).
-# Use this for tests where respx behavior differs fundamentally
-# (e.g. respx returns a response instead of raising an exception).
-_MOCK_CTXS_NO_RESPX: list[_MockCtxType] = [
-    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
-    requests_mock.Mocker,
-    httpretty.httprettized,
-]
-
-_MOCK_IDS_NO_RESPX = ["responses", "requests_mock", "httpretty"]
-
-_MOCK_CTX_MARKER_NO_RESPX = pytest.mark.parametrize(
-    argnames="mock_ctx",
-    argvalues=_MOCK_CTXS_NO_RESPX,
-    ids=_MOCK_IDS_NO_RESPX,
 )
 
 
@@ -795,7 +779,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     assert "not found on the server" in mock_response.text
 
 
-@_MOCK_CTX_MARKER_NO_RESPX
+@_MOCK_CTX_MARKER
 def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
     """A route with the wrong method given works."""
     app = Flask(import_name=__name__, static_folder=None)
@@ -825,14 +809,15 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
         )
 
         expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
             requests.exceptions.ConnectionError,
             NoMockAddress,
             ValueError,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            requests.post(
+            _do_post(
+                mock_obj=mock_obj_to_add,
                 url="http://www.example.com/",
-                timeout=_TIMEOUT_SECONDS,
             )
 
 
@@ -1257,9 +1242,10 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 _MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
+    partial(respx.mock, assert_all_called=False),
 ]
 
-_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock"]
+_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock", "respx"]
 
 _MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
     argnames="mock_ctx",
@@ -1292,13 +1278,14 @@ def test_multiple_variables_rejects_extra_segments(
         )
 
         expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
             requests.exceptions.ConnectionError,
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            requests.get(
+            _do_get(
+                mock_obj=mock_obj_to_add,
                 url="http://www.example.com/users/cranes/frasier/extra/posts",
-                timeout=_TIMEOUT_SECONDS,
             )
 
 
@@ -1322,83 +1309,3 @@ def test_unknown_mock_module() -> None:
             flask_app=app,
             base_url="http://www.example.com",
         )
-
-
-def test_405_no_such_method_respx() -> None:
-    """
-    A route with the wrong method given returns a 405 with respx.
-
-    Unlike the other mock backends which raise exceptions for
-    unregistered methods, respx forwards the request to Flask which
-    returns a proper 405 response.
-    """
-    app = Flask(import_name=__name__, static_folder=None)
-
-    @app.route(rule="/")
-    def _() -> str:
-        """Return an empty string."""
-        return ""  # pragma: no cover
-
-    test_client = app.test_client()
-    response = test_client.post("/")
-
-    expected_status_code = HTTPStatus.METHOD_NOT_ALLOWED
-    expected_content_type = "text/html; charset=utf-8"
-
-    assert response.status_code == expected_status_code
-    assert response.headers["Content-Type"] == expected_content_type
-    assert b"not allowed for the requested URL." in response.data
-
-    with respx.mock() as respx_mock:
-        add_flask_app_to_mock(
-            mock_obj=respx_mock,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-
-        mock_response = httpx.post(
-            url="http://www.example.com/",
-        )
-
-    assert mock_response.status_code == expected_status_code
-    assert mock_response.headers["Content-Type"] == expected_content_type
-    assert "not allowed for the requested URL." in mock_response.text
-
-
-def test_multiple_variables_no_extra_segments_respx() -> None:
-    """
-    A route with multiple variables should not match URLs with extra
-    segments with respx. Flask handles the 404 directly.
-    """
-    app = Flask(import_name=__name__, static_folder=None)
-
-    @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
-    def _(my_org: str, my_user: str) -> str:
-        """Return a simple message which includes the route variables."""
-        return "Posts for: " + my_org + "/" + my_user
-
-    # Verify the real Flask app rejects URLs with extra segments
-    test_client = app.test_client()
-    response = test_client.get("/users/cranes/frasier/extra/posts")
-    assert response.status_code == HTTPStatus.NOT_FOUND
-
-    with respx.mock() as respx_mock:
-        add_flask_app_to_mock(
-            mock_obj=respx_mock,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-
-        # Verify that the correct URL works
-        valid_response = httpx.get(
-            url="http://www.example.com/users/cranes/frasier/posts",
-        )
-        assert valid_response.status_code == HTTPStatus.OK
-        assert valid_response.text == "Posts for: cranes/frasier"
-
-        # With respx catch-all routing, Flask returns a 404
-        # instead of a mock-level exception.
-        invalid_response = httpx.get(
-            url=("http://www.example.com/users/cranes/frasier/extra/posts"),
-        )
-        assert invalid_response.status_code == HTTPStatus.NOT_FOUND
