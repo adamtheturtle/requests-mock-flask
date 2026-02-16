@@ -78,9 +78,9 @@ def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
 
 
 def _do_get(
+    *,
     mock_obj: _MockObjType,
     url: str,
-    *,
     headers: dict[str, str] | None = None,
 ) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
@@ -94,9 +94,9 @@ def _do_get(
 
 
 def _do_post(
+    *,
     mock_obj: _MockObjType,
     url: str,
-    *,
     cookies: dict[str, str] | None = None,
 ) -> requests.Response | httpx.Response:
     """Make a POST request via the appropriate HTTP client."""
@@ -140,7 +140,8 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -225,7 +226,8 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -344,7 +346,8 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com/4"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/4",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -623,7 +626,8 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_post(
-            mock_obj=mock_obj_to_add, url="http://www.example.com/"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -782,7 +786,8 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com/a"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/a",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -970,7 +975,8 @@ def test_multiple_functions_same_path_different_type(
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com/4"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/4",
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1120,7 +1126,8 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj=mock_obj_to_add, url="http://www.example.com"
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
         )
 
     assert mock_response.status_code == expected_status_code
