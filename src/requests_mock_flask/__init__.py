@@ -7,8 +7,10 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpx
 import requests_mock
 import responses
+import respx
 import werkzeug
 
 if TYPE_CHECKING:
@@ -20,6 +22,8 @@ _MockObjType = (
     responses.RequestsMock
     | requests_mock.Mocker
     | requests_mock.Adapter
+    | respx.MockRouter
+    | respx.Router
     | ModuleType
 )
 
@@ -34,6 +38,13 @@ def add_flask_app_to_mock(
     the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        _add_respx_mock(
+            mock_obj=mock_obj,
+            flask_app=flask_app,
+            base_url=base_url,
+        )
+        return
 
     def responses_callback(
         request: "requests.PreparedRequest",
@@ -113,11 +124,38 @@ def add_flask_app_to_mock(
                     )
                 else:
                     msg = (
-                        "Expected a HTTPretty, ``requests_mock``, or "
-                        "``responses`` object, got module "
-                        f"'{mock_obj.__name__}'."
+                        "Expected a HTTPretty, ``requests_mock``, "
+                        "``respx``, or ``responses`` object, got "
+                        f"module '{mock_obj.__name__}'."
                     )
                     raise TypeError(msg)
+
+
+def _add_respx_mock(
+    mock_obj: respx.MockRouter | respx.Router,
+    flask_app: "flask.Flask",
+    base_url: str,
+) -> None:
+    """Register a catch-all ``respx`` route that forwards requests to
+    the
+    Flask app via ``httpx.WSGITransport``.
+
+    :param mock_obj: The respx mock router to register routes with.
+    :param flask_app: The Flask application to pass requests to.
+    :param base_url: The base URL to match requests against.
+    """
+    transport = httpx.WSGITransport(app=flask_app)
+
+    def respx_side_effect(
+        request: httpx.Request,
+    ) -> httpx.Response:
+        """Side effect for respx."""
+        return transport.handle_request(request=request)
+
+    escaped_base = re.escape(pattern=base_url.rstrip("/"))
+    mock_obj.route(url__regex=escaped_base + ".*").mock(
+        side_effect=respx_side_effect,
+    )
 
 
 def _responses_callback(
