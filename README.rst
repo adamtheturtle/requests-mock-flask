@@ -3,7 +3,7 @@
 requests-mock-flask
 ===================
 
-``requests-mock-flask`` helps with testing `Flask`_ applications with `httpretty`_, `responses`_ or `requests-mock`_.
+``requests-mock-flask`` helps with testing `Flask`_ applications with `httpretty`_, `respx`_, `responses`_ or `requests-mock`_.
 
 .. contents::
    :local:
@@ -29,9 +29,11 @@ Usage examples
 
    import flask
    import httpretty  # pyright: ignore[reportMissingTypeStubs]
+   import httpx
    import requests
    import requests_mock
    import responses
+   import respx
 
    from requests_mock_flask import add_flask_app_to_mock
 
@@ -102,6 +104,20 @@ Usage examples
    assert response.status_code == HTTPStatus.OK
    assert response.text == "Hello, World!"
 
+
+   # Using respx
+   with respx.mock(assert_all_called=False) as respx_mock:
+       add_flask_app_to_mock(
+           mock_obj=respx_mock,
+           flask_app=app,
+           base_url="http://www.example.com",
+       )
+
+       httpx_response = httpx.get(url="http://www.example.com")
+
+   assert httpx_response.status_code == HTTPStatus.OK
+   assert httpx_response.text == "Hello, World!"
+
 Use cases
 ---------
 
@@ -117,6 +133,7 @@ See the `full documentation <https://adamtheturtle.github.io/requests-mock-flask
 
 .. _Flask: https://flask.palletsprojects.com/
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
+.. _respx: https://lundberg.github.io/respx/
 .. _responses: https://github.com/getsentry/responses
 .. _httpretty: https://httpretty.readthedocs.io
 

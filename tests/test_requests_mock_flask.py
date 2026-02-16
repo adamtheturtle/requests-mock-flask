@@ -14,13 +14,16 @@ from types import ModuleType
 from typing import Final
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpx
 import pytest
 import requests
 import requests_mock
 import responses
+import respx
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
+from respx.models import AllMockedAssertionError
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -28,7 +31,12 @@ from requests_mock_flask import add_flask_app_to_mock
 # made.
 _TIMEOUT_SECONDS: Final[int] = 120
 
-_MockObjType = responses.RequestsMock | requests_mock.Mocker | ModuleType
+_MockObjType = (
+    responses.RequestsMock
+    | requests_mock.Mocker
+    | ModuleType
+    | respx.MockRouter
+)
 _MockCtxManagerYieldType = _MockObjType | None
 _MockCtxType = Callable[[], AbstractContextManager[_MockCtxManagerYieldType]]
 
@@ -36,9 +44,10 @@ _MOCK_CTXS: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
     httpretty.httprettized,
+    partial(respx.mock, assert_all_called=False),
 ]
 
-_MOCK_IDS = ["responses", "requests_mock", "httpretty"]
+_MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx"]
 
 _MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
@@ -54,11 +63,13 @@ def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
 
 def _do_get(
     *,
-    mock_obj: _MockObjType,  # noqa: ARG001  # pylint: disable=unused-argument
+    mock_obj: _MockObjType,
     url: str,
     headers: dict[str, str] | None = None,
-) -> requests.Response:
+) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        return httpx.get(url=url, headers=headers, timeout=_TIMEOUT_SECONDS)
     return requests.get(
         url=url,
         headers=headers,
@@ -68,11 +79,13 @@ def _do_get(
 
 def _do_post(
     *,
-    mock_obj: _MockObjType,  # noqa: ARG001  # pylint: disable=unused-argument
+    mock_obj: _MockObjType,
     url: str,
     cookies: dict[str, str] | None = None,
-) -> requests.Response:
+) -> requests.Response | httpx.Response:
     """Make a POST request via the appropriate HTTP client."""
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        return httpx.post(url=url, cookies=cookies, timeout=_TIMEOUT_SECONDS)
     return requests.post(
         url=url,
         cookies=cookies,
@@ -644,13 +657,6 @@ def test_incorrect_content_length(
 
     assert response.status_code == expected_status_code
 
-    requests_request = requests.Request(
-        method="POST",
-        url="http://www.example.com/",
-        data=data,
-    ).prepare()
-    requests_request.headers["Content-Length"] = custom_content_length
-
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
@@ -660,8 +666,23 @@ def test_incorrect_content_length(
             base_url="http://www.example.com",
         )
 
-        session = requests.Session()
-        mock_response = session.send(request=requests_request)
+        mock_response: requests.Response | httpx.Response
+        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+            mock_response = httpx.request(
+                method="POST",
+                url="http://www.example.com/",
+                content=data,
+                headers={"Content-Length": custom_content_length},
+            )
+        else:
+            requests_request = requests.Request(
+                method="POST",
+                url="http://www.example.com/",
+                data=data,
+            ).prepare()
+            requests_request.headers["Content-Length"] = custom_content_length
+            session = requests.Session()
+            mock_response = session.send(request=requests_request)
 
     assert mock_response.status_code == expected_status_code
 
@@ -788,6 +809,7 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
         )
 
         expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
             requests.exceptions.ConnectionError,
             NoMockAddress,
             ValueError,
@@ -877,12 +899,21 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = requests.get(
-            url="http://www.example.com",
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(obj={"hello": "world"}),
-            timeout=_TIMEOUT_SECONDS,
-        )
+        mock_response: requests.Response | httpx.Response
+        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+            mock_response = httpx.request(
+                method="GET",
+                url="http://www.example.com",
+                headers={"Content-Type": "application/json"},
+                content=json.dumps(obj={"hello": "world"}).encode(),
+            )
+        else:
+            mock_response = requests.get(
+                url="http://www.example.com",
+                headers={"Content-Type": "application/json"},
+                data=json.dumps(obj={"hello": "world"}),
+                timeout=_TIMEOUT_SECONDS,
+            )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -1249,6 +1280,7 @@ def test_multiple_variables_rejects_extra_segments(
         )
 
         expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
             requests.exceptions.ConnectionError,
             NoMockAddress,
         )
@@ -1269,7 +1301,8 @@ def test_unknown_mock_module() -> None:
         return ""  # pragma: no cover
 
     expected_error = (
-        "Expected a HTTPretty, ``requests_mock``, or ``responses`` object, "
+        "Expected a HTTPretty, ``requests_mock``, "
+        "``respx``, or ``responses`` object, "
         "got module 'json'."
     )
     with pytest.raises(expected_exception=TypeError, match=expected_error):

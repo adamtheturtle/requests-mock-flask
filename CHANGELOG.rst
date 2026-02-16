@@ -4,6 +4,8 @@ Changelog
 Next
 ----
 
+* Add support for ``respx``.
+
 2026.01.12
 ----------
 

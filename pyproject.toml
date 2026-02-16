@@ -35,9 +35,11 @@ dynamic = [
 ]
 dependencies = [
     "httpretty>=1.1.4",
+    "httpx>=0.27.0",
     "requests-mock>=1.12.1",
     # Ignore 0.25.5 because of https://github.com/getsentry/responses/issues/751.
     "responses>=0.25.3,!=0.25.5",
+    "respx>=0.22.0",
     "werkzeug>=2.3",
 ]
 optional-dependencies.dev = [
@@ -49,6 +51,7 @@ optional-dependencies.dev = [
     "doccmd==2026.1.31.3",
     "flask==3.1.2",
     "furo==2025.12.19",
+    "httpx==0.28.1",
     "interrogate==1.7.0",
     "mypy[faster-cache]==1.19.1",
     "mypy-strict-kwargs==2026.1.12",
@@ -140,6 +143,7 @@ lint.per-file-ignores."tests/test_*.py" = [
 lint.unfixable = [
     "ERA001",
 ]
+lint.mccabe.max-complexity = 12
 lint.pydocstyle.convention = "google"
 
 [tool.pylint]
@@ -179,6 +183,7 @@ lint.pydocstyle.convention = "google"
 # Allow loading of arbitrary C extensions. Extensions are imported into the
 # active Python interpreter and may run arbitrary code.
 "MASTER".unsafe-load-any-extension = false
+"DESIGN".max-complexity = 12
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where

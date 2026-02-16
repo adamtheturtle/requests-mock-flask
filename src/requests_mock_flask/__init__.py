@@ -7,8 +7,10 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpx
 import requests_mock
 import responses
+import respx
 import werkzeug
 
 if TYPE_CHECKING:
@@ -20,6 +22,8 @@ _MockObjType = (
     responses.RequestsMock
     | requests_mock.Mocker
     | requests_mock.Adapter
+    | respx.MockRouter
+    | respx.Router
     | ModuleType
 )
 
@@ -34,6 +38,13 @@ def add_flask_app_to_mock(
     the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
+    transport = httpx.WSGITransport(app=flask_app)
+
+    def respx_side_effect(
+        request: httpx.Request,
+    ) -> httpx.Response:
+        """Side effect for respx."""
+        return transport.handle_request(request=request)
 
     def responses_callback(
         request: "requests.PreparedRequest",
@@ -104,6 +115,11 @@ def add_flask_app_to_mock(
                         url=url,
                         text=requests_mock_callback,
                     )
+                elif isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+                    mock_obj.route(
+                        method=method,
+                        url__regex=url.pattern,
+                    ).mock(side_effect=respx_side_effect)
                 elif mock_obj.__name__ == "httpretty":
                     httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
                         method=method,
@@ -113,9 +129,9 @@ def add_flask_app_to_mock(
                     )
                 else:
                     msg = (
-                        "Expected a HTTPretty, ``requests_mock``, or "
-                        "``responses`` object, got module "
-                        f"'{mock_obj.__name__}'."
+                        "Expected a HTTPretty, ``requests_mock``, "
+                        "``respx``, or ``responses`` object, got "
+                        f"module '{mock_obj.__name__}'."
                     )
                     raise TypeError(msg)
 
