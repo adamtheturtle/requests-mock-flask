@@ -109,11 +109,6 @@ def _do_post(
     )
 
 
-def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
-    """Get the mock object, handling the None yield from httpretty."""
-    return mock_obj or httpretty
-
-
 @_MOCK_CTX_MARKER
 def test_simple_route(mock_ctx: _MockCtxType) -> None:
     """A simple GET route works."""
