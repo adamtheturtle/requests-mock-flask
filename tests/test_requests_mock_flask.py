@@ -131,7 +131,7 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -139,7 +139,9 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = _do_get(mock_obj_to_add, url="http://www.example.com")
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add, url="http://www.example.com"
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -173,7 +175,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -182,7 +184,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"hello": "world"},
         )
@@ -214,7 +216,7 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
     assert response.json == expected_json
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -222,7 +224,9 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = _do_get(mock_obj_to_add, url="http://www.example.com")
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add, url="http://www.example.com"
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -251,7 +255,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -260,7 +264,7 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
         )
 
@@ -291,7 +295,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -300,7 +304,7 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
         )
 
@@ -331,7 +335,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -340,7 +344,7 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add, url="http://www.example.com/4"
+            mock_obj=mock_obj_to_add, url="http://www.example.com/4"
         )
 
     assert mock_response.status_code == expected_status_code
@@ -370,7 +374,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -379,7 +383,7 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/4.0",
         )
 
@@ -410,7 +414,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -419,7 +423,7 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/foo/bar",
         )
 
@@ -449,7 +453,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -458,7 +462,7 @@ def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/foo/bar",
         )
 
@@ -490,7 +494,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -499,7 +503,7 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url=f"http://www.example.com/{random_uuid}",
         )
 
@@ -530,7 +534,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -539,7 +543,7 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/4/posts",
         )
 
@@ -570,7 +574,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -579,7 +583,7 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
         )
 
@@ -610,7 +614,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -619,7 +623,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_post(
-            mock_obj_to_add, url="http://www.example.com/"
+            mock_obj=mock_obj_to_add, url="http://www.example.com/"
         )
 
     assert mock_response.status_code == expected_status_code
@@ -666,7 +670,7 @@ def test_incorrect_content_length(
     assert response.status_code == expected_status_code
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -674,6 +678,7 @@ def test_incorrect_content_length(
             base_url="http://www.example.com",
         )
 
+        mock_response: requests.Response | httpx.Response
         if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
             mock_response = httpx.request(
                 method="POST",
@@ -721,7 +726,7 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     assert post_response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -730,11 +735,11 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_get_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
         )
         mock_post_response = _do_post(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
         )
 
@@ -768,7 +773,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
     assert b"not found on the server" in response.data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -777,7 +782,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add, url="http://www.example.com/a"
+            mock_obj=mock_obj_to_add, url="http://www.example.com/a"
         )
 
     assert mock_response.status_code == expected_status_code
@@ -806,7 +811,7 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
     assert b"not allowed for the requested URL." in response.data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -849,7 +854,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -858,7 +863,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"Content-Type": "application/json"},
         )
@@ -896,7 +901,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -904,6 +909,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
+        mock_response: requests.Response | httpx.Response
         if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
             mock_response = httpx.request(
                 method="GET",
@@ -955,7 +961,7 @@ def test_multiple_functions_same_path_different_type(
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -964,7 +970,7 @@ def test_multiple_functions_same_path_different_type(
         )
 
         mock_response = _do_get(
-            mock_obj_to_add, url="http://www.example.com/4"
+            mock_obj=mock_obj_to_add, url="http://www.example.com/4"
         )
 
     assert mock_response.status_code == expected_status_code
@@ -998,7 +1004,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1007,7 +1013,7 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com?frasier=crane",
         )
 
@@ -1058,7 +1064,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1067,7 +1073,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response = _do_post(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             cookies={
                 "frasier": "crane",
@@ -1105,7 +1111,7 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1113,7 +1119,9 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = _do_get(mock_obj_to_add, url="http://www.example.com")
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add, url="http://www.example.com"
+        )
 
     assert mock_response.status_code == expected_status_code
     assert "Content-Type" not in mock_response.headers
@@ -1162,7 +1170,7 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
     assert response.data == expected_var_data
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1171,17 +1179,17 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
         )
 
         mock_response_base = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
         )
 
         mock_response_var = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base/Frasier",
         )
 
         mock_response_base_2 = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
         )
 
@@ -1219,7 +1227,7 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
     assert response.status_code == HTTPStatus.NOT_FOUND
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
 
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
@@ -1229,7 +1237,7 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 
         # Verify that the correct URL works
         valid_response = _do_get(
-            mock_obj_to_add,
+            mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
         )
         assert valid_response.status_code == HTTPStatus.OK
@@ -1269,7 +1277,7 @@ def test_multiple_variables_rejects_extra_segments(
         return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
 
     with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj)
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
         add_flask_app_to_mock(
             mock_obj=mock_obj_to_add,
             flask_app=app,
