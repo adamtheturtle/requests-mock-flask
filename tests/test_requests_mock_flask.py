@@ -1209,11 +1209,14 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
 # allow_net_connect=False when used with urllib3 2.3.0+.
 # See: https://github.com/gabrielfalcao/HTTPretty/issues/484
 _MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
-    partial(responses.RequestsMock, assert_all_requests_are_fired=False),
-    requests_mock.Mocker,
+    ctx
+    for ctx, mock_id in zip(_MOCK_CTXS, _MOCK_IDS, strict=True)
+    if mock_id != "httpretty"
 ]
 
-_MOCK_IDS_NO_HTTPRETTY = ["responses", "requests_mock"]
+_MOCK_IDS_NO_HTTPRETTY = [
+    mock_id for mock_id in _MOCK_IDS if mock_id != "httpretty"
+]
 
 _MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
     argnames="mock_ctx",
