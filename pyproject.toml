@@ -81,7 +81,7 @@ optional-dependencies.dev = [
     "sybil==9.3.0",
     "ty==0.0.20",
     "types-requests==2.32.4.20260107",
-    "vulture==2.14",
+    "vulture==2.15",
     "yamlfix==1.19.1",
     "zizmor==1.22.0",
 ]
