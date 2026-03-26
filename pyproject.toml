@@ -78,7 +78,7 @@ optional-dependencies.dev = [
     "sphinx-pyproject==0.3.0",
     "sphinx-substitution-extensions==2026.1.12",
     "sphinxcontrib-spelling==8.0.2",
-    "sybil==9.3.0",
+    "sybil==10.0.1",
     "ty==0.0.26",
     "types-requests==2.32.4.20260324",
     "vulture==2.16",
