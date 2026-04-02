@@ -288,7 +288,7 @@ def _requests_mock_callback(
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         method=request.method,
-        headers=dict(request.headers),
+        headers=list(request.headers.items()),
         data=request.body,
         environ_overrides=environ_overrides,
     )
