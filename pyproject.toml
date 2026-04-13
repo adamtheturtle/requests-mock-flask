@@ -83,7 +83,7 @@ optional-dependencies.dev = [
     "types-requests==2.33.0.20260408",
     "vulture==2.16",
     "yamlfix==1.19.1",
-    "zizmor==1.23.1",
+    "zizmor==1.24.1",
 ]
 optional-dependencies.release = [ "check-wheel-contents==0.6.3" ]
 urls.Documentation = "https://adamtheturtle.github.io/requests-mock-flask/"
