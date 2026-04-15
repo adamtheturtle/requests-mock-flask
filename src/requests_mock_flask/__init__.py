@@ -30,7 +30,7 @@ _MockObjType = (
 
 
 class _MockCallbacks(NamedTuple):
-    """Callbacks for each supported mock backend."""
+    """Callbacks for each supported mock back end."""
 
     responses: Callable[..., Any]
     requests_mock: Callable[..., Any]
@@ -44,9 +44,9 @@ def _register_mock(
     url: re.Pattern[str],
     callbacks: _MockCallbacks,
 ) -> None:
-    """Register a single method/URL pair with the given mock backend.
+    """Register a single method/URL pair with the given mock back end.
 
-    To support a new mock backend, add a case branch.
+    To support a new mock back end, add a case branch.
     """
     match mock_obj:
         case responses.RequestsMock():
