@@ -32,10 +32,10 @@ _MockObjType = (
 class _MockCallbacks(NamedTuple):
     """Callbacks for each supported mock backend."""
 
-    responses: Callable[..., object]
-    requests_mock: Callable[..., object]
-    respx: Callable[..., object]
-    httpretty: Callable[..., object]
+    responses: Callable[..., Any]
+    requests_mock: Callable[..., Any]
+    respx: Callable[..., Any]
+    httpretty: Callable[..., Any]
 
 
 def _register_mock(
