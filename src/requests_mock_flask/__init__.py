@@ -51,14 +51,10 @@ def _register_mock(
     To support a new mock back end, add a case branch.
     """
     match mock_obj:
-        case responses.RequestsMock():
-            mock_obj.add_callback(
-                method=method,
-                url=url,
-                callback=callbacks.responses,
-                content_type=None,
-            )
-        case ModuleType() if mock_obj.__name__ == "responses":
+        case responses.RequestsMock() | ModuleType() if (
+            not isinstance(mock_obj, ModuleType)
+            or mock_obj.__name__ == "responses"
+        ):
             mock_obj.add_callback(
                 method=method,
                 url=url,
@@ -84,10 +80,15 @@ def _register_mock(
                 forcing_headers={"Content-Type": None},
             )
         case _:
+            name = getattr(
+                mock_obj,
+                "__name__",
+                type(mock_obj).__name__,
+            )
             msg = (
                 "Expected a HTTPretty, ``requests_mock``, "
                 "``respx``, or ``responses`` object, got "
-                f"module '{mock_obj.__name__}'."
+                f"module '{name}'."
             )
             raise TypeError(msg)
 
