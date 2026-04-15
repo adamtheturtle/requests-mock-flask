@@ -1,9 +1,10 @@
 """Package for ``requests_mock_flask``."""
 
 import re
+from collections.abc import Callable
 from http.cookies import SimpleCookie
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 from urllib.parse import urljoin
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
@@ -26,6 +27,67 @@ _MockObjType = (
     | respx.Router
     | ModuleType
 )
+
+
+class _MockCallbacks(NamedTuple):
+    """Callbacks for each supported mock backend."""
+
+    responses: Callable[..., object]
+    requests_mock: Callable[..., object]
+    respx: Callable[..., object]
+    httpretty: Callable[..., object]
+
+
+def _register_mock(
+    mock_obj: _MockObjType,
+    method: str,
+    url: re.Pattern[str],
+    callbacks: _MockCallbacks,
+) -> None:
+    """Register a single method/URL pair with the given mock backend.
+
+    To support a new mock backend, add a case branch.
+    """
+    match mock_obj:
+        case responses.RequestsMock():
+            mock_obj.add_callback(
+                method=method,
+                url=url,
+                callback=callbacks.responses,
+                content_type=None,
+            )
+        case ModuleType() if mock_obj.__name__ == "responses":
+            mock_obj.add_callback(
+                method=method,
+                url=url,
+                callback=callbacks.responses,
+                content_type=None,
+            )
+        case requests_mock.Mocker() | requests_mock.Adapter():
+            mock_obj.register_uri(
+                method=method,
+                url=url,
+                text=callbacks.requests_mock,
+            )
+        case respx.MockRouter() | respx.Router():
+            mock_obj.route(
+                method=method,
+                url__regex=url.pattern,
+            ).mock(side_effect=callbacks.respx)
+        case ModuleType() if mock_obj.__name__ == "httpretty":
+            httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
+                method=method,
+                uri=url,
+                body=callbacks.httpretty,  # pyright: ignore[reportArgumentType]
+                forcing_headers={"Content-Type": None},
+            )
+        case _:
+            msg = (
+                "Expected a HTTPretty, ``requests_mock``, "
+                "``respx``, or ``responses`` object, got "
+                f"module '{mock_obj.__name__}'."
+            )
+            raise TypeError(msg)
 
 
 def add_flask_app_to_mock(
@@ -76,6 +138,13 @@ def add_flask_app_to_mock(
             flask_app=flask_app,
         )
 
+    callbacks = _MockCallbacks(
+        responses=responses_callback,
+        requests_mock=requests_mock_callback,
+        respx=respx_side_effect,
+        httpretty=httpretty_callback,
+    )
+
     for rule in flask_app.url_map.iter_rules():
         # We replace everything inside angle brackets with a regex pattern.
         # For path variables (<path:...>), we use .+ to match any characters
@@ -97,43 +166,12 @@ def add_flask_app_to_mock(
         methods = rule.methods or set()
         for method in methods:
             for url in urls:
-                if isinstance(mock_obj, responses.RequestsMock) or (
-                    isinstance(mock_obj, ModuleType)
-                    and mock_obj.__name__ == "responses"
-                ):
-                    mock_obj.add_callback(
-                        method=method,
-                        url=url,
-                        callback=responses_callback,
-                        content_type=None,
-                    )
-                elif isinstance(
-                    mock_obj, (requests_mock.Mocker | requests_mock.Adapter)
-                ):
-                    mock_obj.register_uri(
-                        method=method,
-                        url=url,
-                        text=requests_mock_callback,
-                    )
-                elif isinstance(mock_obj, (respx.MockRouter, respx.Router)):
-                    mock_obj.route(
-                        method=method,
-                        url__regex=url.pattern,
-                    ).mock(side_effect=respx_side_effect)
-                elif mock_obj.__name__ == "httpretty":
-                    httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
-                        method=method,
-                        uri=url,
-                        body=httpretty_callback,  # pyright: ignore[reportArgumentType]
-                        forcing_headers={"Content-Type": None},
-                    )
-                else:
-                    msg = (
-                        "Expected a HTTPretty, ``requests_mock``, "
-                        "``respx``, or ``responses`` object, got "
-                        f"module '{mock_obj.__name__}'."
-                    )
-                    raise TypeError(msg)
+                _register_mock(
+                    mock_obj=mock_obj,
+                    method=method,
+                    url=url,
+                    callbacks=callbacks,
+                )
 
 
 def _responses_callback(
