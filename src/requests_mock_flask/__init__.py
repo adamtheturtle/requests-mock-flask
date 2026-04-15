@@ -1,10 +1,11 @@
 """Package for ``requests_mock_flask``."""
 
+import dataclasses
 import re
 from collections.abc import Callable
 from http.cookies import SimpleCookie
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
@@ -29,7 +30,8 @@ _MockObjType = (
 )
 
 
-class _MockCallbacks(NamedTuple):
+@dataclasses.dataclass(frozen=True)
+class _MockCallbacks:
     """Callbacks for each supported mock back end."""
 
     responses: Callable[..., Any]
