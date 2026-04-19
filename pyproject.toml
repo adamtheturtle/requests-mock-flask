@@ -64,6 +64,7 @@ optional-dependencies.dev = [
     "pyright==1.1.408",
     "pyroma==5.0.1",
     "pytest==9.0.3",
+    "pytest-beartype-tests==2026.4.19.1",
     "pytest-cov==7.1.0",
     "requests==2.33.1",
     "ruff==0.15.11",
@@ -88,6 +89,9 @@ optional-dependencies.dev = [
 optional-dependencies.release = [ "check-wheel-contents==0.6.3" ]
 urls.Documentation = "https://adamtheturtle.github.io/requests-mock-flask/"
 urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
+
+[dependency-groups]
+dev = []
 
 [tool.setuptools]
 zip-safe = false
@@ -341,7 +345,6 @@ ignore_path = [
 ignore_names = [
     # pytest configuration
     "pytest_collect_file",
-    "pytest_collection_modifyitems",
     "pytest_plugins",
     # pytest fixtures - we name fixtures like this for this purpose
     "fixture_*",
