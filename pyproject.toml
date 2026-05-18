@@ -42,8 +42,7 @@ dependencies = [
     "respx>=0.22.0",
     "werkzeug>=2.3",
 ]
-optional-dependencies.dev = [
-    "actionlint-py==1.7.12.24",
+optional-dependencies.dev = [    "actionlint-py==1.7.12.24",
     "beartype==0.22.9",
     "check-manifest==0.51",
     "deptry==0.25.1",
