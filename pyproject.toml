@@ -82,7 +82,7 @@ optional-dependencies.dev = [
     "strict-kwargs==2026.5.18.post4",
     "sybil==10.0.1",
     "ty==0.0.36",
-    "types-requests==2.33.0.20260513",
+    "types-requests==2.33.0.20260518",
     "vulture==2.16",
     "yamlfix==1.19.1",
     "zizmor==1.25.0",
