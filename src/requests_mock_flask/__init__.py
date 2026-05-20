@@ -80,7 +80,7 @@ def _register_mock(
                 forcing_headers={"Content-Type": None},
             )
         case _:
-            name = getattr(
+            name = getattr(  # pylint: disable=bad-builtin
                 mock_obj,
                 "__name__",
                 type(mock_obj).__name__,
