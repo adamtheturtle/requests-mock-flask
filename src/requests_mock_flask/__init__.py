@@ -80,11 +80,10 @@ def _register_mock(
                 forcing_headers={"Content-Type": None},
             )
         case _:
-            name = getattr(  # pylint: disable=bad-builtin
-                mock_obj,
-                "__name__",
-                type(mock_obj).__name__,
-            )
+            if isinstance(mock_obj, ModuleType):
+                name = mock_obj.__name__
+            else:
+                name = type(mock_obj).__name__
             msg = (
                 "Expected a HTTPretty, ``requests_mock``, "
                 "``respx``, or ``responses`` object, got "
