@@ -79,10 +79,12 @@ def _register_mock(
                 body=callbacks.httpretty,  # pyright: ignore[reportArgumentType]
                 forcing_headers={"Content-Type": None},
             )
-        case ModuleType() as module:
-            name = module.__name__
         case _:
-            name = type(mock_obj).__name__
+            name = getattr(  # pylint: disable=bad-builtin
+                mock_obj,
+                "__name__",
+                type(mock_obj).__name__,
+            )
             msg = (
                 "Expected a HTTPretty, ``requests_mock``, "
                 "``respx``, or ``responses`` object, got "
