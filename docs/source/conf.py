@@ -21,8 +21,17 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinxcontrib.spelling",
+    "sphinxcontrib.towncrier.ext",
     "sphinx_substitution_extensions",
 ]
+
+# Render the unreleased ``newsfragments/`` entries into
+# ``docs/source/unreleased.rst`` so the Sphinx spelling, doc-build and
+# link-checking gates cover the prose before it is assembled into
+# CHANGELOG.rst at release time.
+towncrier_draft_autoversion_mode = "draft"
+towncrier_draft_include_empty = True
+towncrier_draft_working_directory = f"{_pyproject_file.parent}"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
