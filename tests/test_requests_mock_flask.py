@@ -11,7 +11,7 @@ from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
 from types import ModuleType
-from typing import Final
+from typing import Any, Final
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import httpx
@@ -1309,6 +1309,29 @@ def test_unknown_mock_module() -> None:
     with pytest.raises(expected_exception=TypeError, match=expected_error):
         add_flask_app_to_mock(
             mock_obj=json,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+
+def test_unknown_mock_object() -> None:
+    """When an unknown mock object is passed in, an error is raised."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return ""  # pragma: no cover
+
+    unknown_mock_obj: Any = object()
+    expected_error = (
+        "Expected a HTTPretty, ``requests_mock``, "
+        "``respx``, or ``responses`` object, "
+        "got module 'object'."
+    )
+    with pytest.raises(expected_exception=TypeError, match=expected_error):
+        add_flask_app_to_mock(
+            mock_obj=unknown_mock_obj,
             flask_app=app,
             base_url="http://www.example.com",
         )
