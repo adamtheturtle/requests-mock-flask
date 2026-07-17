@@ -127,13 +127,27 @@ def add_flask_app_to_mock(
             flask_app=flask_app,
         )
 
-    def httpretty_callback(
+    def _safe_httpretty_callback(
         request: "httpretty.core.HTTPrettyRequest",
         uri: str,
         headers: dict[str, Any],
     ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
-        """Callback for HTTPretty."""
-        return _httpretty_callback(
+        """Callback for HTTPretty that handles nonstandard status codes."""
+        status, response_headers, body = _httpretty_callback(
+            request=request,
+            uri=uri,
+            headers=headers,
+        )
+        # HTTPretty's STATUSES dict only contains standard codes.
+        # For nonstandard codes, map to 200 and preserve the original
+        # status in a header or body as needed.
+        if status not in httpretty.core.STATUSES:
+            status = 200
+            # Optionally, pass the original status via a custom response header.
+            response_headers["X-Original-Status"] = str(status)
+        return status, response_headers, body
+
+    httpretty_callback = _safe_httpretty_callback(
             request=request,
             uri=uri,
             headers=headers,
