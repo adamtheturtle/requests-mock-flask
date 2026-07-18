@@ -107,8 +107,6 @@ package-data.requests_mock_flask = [
 ]
 zip-safe = false
 
-[tool.distutils]
-bdist_wheel.universal = true
 
 [tool.setuptools_scm]
 # This keeps the start of the version the same as the last release.
