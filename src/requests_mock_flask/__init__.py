@@ -20,6 +20,25 @@ if TYPE_CHECKING:
     import requests
 
 
+# Known HTTP methods to register for every route URL. We register all of
+# these (rather than only the methods a rule supports) so that requests using
+# an unsupported method for a known path are still forwarded to Flask, which
+# then returns its usual ``405 Method Not Allowed`` response (including the
+# ``Allow`` header and any custom error handler).
+_KNOWN_HTTP_METHODS = frozenset(
+    {
+        "GET",
+        "HEAD",
+        "OPTIONS",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH",
+        "TRACE",
+    },
+)
+
+
 _MockObjType = (
     responses.RequestsMock
     | requests_mock.Mocker
@@ -165,7 +184,7 @@ def add_flask_app_to_mock(
         pattern = urljoin(base=base_url, url=path_to_match)
         urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
-        methods = rule.methods or set()
+        methods = (rule.methods or set()) | _KNOWN_HTTP_METHODS
         for method in methods:
             for url in urls:
                 _register_mock(

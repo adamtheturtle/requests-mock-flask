@@ -1,0 +1,1 @@
+Requests using an unsupported method for a known route are now forwarded to Flask, which returns its usual ``405 Method Not Allowed`` response.
