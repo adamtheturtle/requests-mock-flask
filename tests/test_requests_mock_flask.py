@@ -1256,7 +1256,8 @@ def test_multiple_variables_rejects_extra_segments(
 @_MOCK_CTX_MARKER
 def test_route_matches_optional_query_string(mock_ctx: _MockCtxType) -> None:
     """
-    A route such as ``/api`` matches its exact path both with and without a
+    A route such as ``/api`` matches its exact path both with and
+    without a
     query string.
     """
     app = Flask(import_name=__name__, static_folder=None)
@@ -1292,7 +1293,8 @@ def test_route_matches_optional_query_string(mock_ctx: _MockCtxType) -> None:
 @_MOCK_CTX_MARKER_NO_HTTPRETTY
 def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
     """
-    A route such as ``/api`` does not intercept unrelated paths which share
+    A route such as ``/api`` does not intercept unrelated paths which
+    share
     its prefix, such as ``/api-extra``.
     """
     app = Flask(import_name=__name__, static_folder=None)
