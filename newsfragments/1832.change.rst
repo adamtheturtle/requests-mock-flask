@@ -1,0 +1,1 @@
+Route matchers are now anchored so that a rule such as ``/api`` no longer intercepts unrelated paths such as ``/api-extra``, while still matching an optional query string.

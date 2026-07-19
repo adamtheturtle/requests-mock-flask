@@ -163,7 +163,10 @@ def add_flask_app_to_mock(
             string=path_to_match,
         )
         pattern = urljoin(base=base_url, url=path_to_match)
-        urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
+        # Anchor the end of the path so that a rule such as ``/api`` matches
+        # only the exact path and not arbitrary suffixes such as
+        # ``/api-extra``.  An optional query string is still allowed.
+        urls = (re.compile(pattern=pattern + r"(\?.*)?$"),)
 
         methods = rule.methods or set()
         for method in methods:

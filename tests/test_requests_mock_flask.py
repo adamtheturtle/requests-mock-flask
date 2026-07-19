@@ -420,45 +420,6 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
-def test_route_with_string_variable_with_slash(mock_ctx: _MockCtxType) -> None:
-    """A route with a string variable when given a slash works."""
-    app = Flask(import_name=__name__, static_folder=None)
-
-    @app.route(rule="/<string:my_variable>")
-    def _(_: str) -> str:
-        """Return an empty string."""
-        return ""  # pragma: no cover
-
-    test_client = app.test_client()
-    response = test_client.get("/foo/bar")
-
-    expected_status_code = HTTPStatus.NOT_FOUND
-    expected_content_type = "text/html; charset=utf-8"
-
-    assert response.status_code == expected_status_code
-    assert response.headers["Content-Type"] == expected_content_type
-    assert b"not found on the server" in response.data
-
-    with mock_ctx() as mock_obj:
-        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
-
-        add_flask_app_to_mock(
-            mock_obj=mock_obj_to_add,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-
-        mock_response = _do_get(
-            mock_obj=mock_obj_to_add,
-            url="http://www.example.com/foo/bar",
-        )
-
-    assert mock_response.status_code == expected_status_code
-    assert mock_response.headers["Content-Type"] == expected_content_type
-    assert "not found on the server" in mock_response.text
-
-
-@_MOCK_CTX_MARKER
 def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """A route with a uuid variable works."""
     app = Flask(import_name=__name__, static_folder=None)
@@ -1289,6 +1250,115 @@ def test_multiple_variables_rejects_extra_segments(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/users/cranes/frasier/extra/posts",
+            )
+
+
+@_MOCK_CTX_MARKER
+def test_route_matches_optional_query_string(mock_ctx: _MockCtxType) -> None:
+    """
+    A route such as ``/api`` matches its exact path both with and without a
+    query string.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/api")
+    def _() -> str:
+        """Return a simple message."""
+        return "api"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/api",
+        )
+        assert mock_response.status_code == HTTPStatus.OK
+        assert mock_response.text == "api"
+
+        query_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/api?x=1",
+        )
+        assert query_response.status_code == HTTPStatus.OK
+        assert query_response.text == "api"
+
+
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
+def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
+    """
+    A route such as ``/api`` does not intercept unrelated paths which share
+    its prefix, such as ``/api-extra``.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/api")
+    def _() -> str:
+        """Return a simple message."""
+        return "api"  # pragma: no cover
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://www.example.com/api-extra",
+            )
+
+
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
+def test_string_variable_rejects_extra_segments(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """
+    A route with a single string variable does not match URLs with extra
+    path segments.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/<string:my_variable>")
+    def _(_: str) -> str:
+        """Return an empty string."""
+        return ""  # pragma: no cover
+
+    # The real Flask app rejects URLs with extra segments.
+    test_client = app.test_client()
+    response = test_client.get("/foo/bar")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://www.example.com/foo/bar",
             )
 
 
