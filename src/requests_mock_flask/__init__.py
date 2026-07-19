@@ -165,8 +165,8 @@ def _normalize_base_url_host_to_idna(base_url: str) -> str:
     Return ``base_url`` with any internationalized host encoded using
     IDNA.
 
-    HTTP clients convert Unicode hostnames to their ASCII IDNA/Punycode form
-    before sending a request, so the registered matcher must use the same
+    HTTP clients convert Unicode host names to their ASCII IDNA form
+    before sending a request, so the registered pattern must use the same
     ASCII form in order to intercept those requests.
     """
     if base_url.isascii():
