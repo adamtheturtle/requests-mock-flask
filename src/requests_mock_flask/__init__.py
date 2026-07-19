@@ -7,7 +7,7 @@ import re
 from operator import methodcaller
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, BinaryIO
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 import httpretty
 import httpx
@@ -361,7 +361,8 @@ def _rule_to_path_regex(rule: Rule) -> str:
             converter = rule_converters[data]
             path_parts.append(converter.regex)
         else:
-            path_parts.append(re.escape(pattern=data))
+            encoded_literal = quote(string=data, safe="/")
+            path_parts.append(re.escape(pattern=encoded_literal))
     return "".join(path_parts)
 
 

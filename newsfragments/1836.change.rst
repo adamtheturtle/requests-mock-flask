@@ -1,0 +1,1 @@
+Percent-encode the static portions of route paths so that non-ASCII routes such as ``/café`` are reachable through the mock.

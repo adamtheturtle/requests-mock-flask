@@ -2369,3 +2369,29 @@ def test_internationalized_host_rule_is_registered() -> None:
     )
 
     assert mock_obj.registered()
+
+
+@_MOCK_CTX_MARKER
+def test_non_ascii_route(mock_ctx: _MockCtxType) -> None:
+    """A non-ASCII static route is matched in percent-encoded form."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/café")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/café",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"
