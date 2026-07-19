@@ -40,6 +40,7 @@ dependencies = [
     # Ignore 0.25.5 because of https://github.com/getsentry/responses/issues/751.
     "responses>=0.25.3,!=0.25.5",
     "respx>=0.22.0",
+    "urllib3>=2",
     "werkzeug>=2.3",
 ]
 optional-dependencies.dev = [
