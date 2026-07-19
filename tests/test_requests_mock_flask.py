@@ -67,14 +67,21 @@ def _do_get(
     mock_obj: _MockObjType,
     url: str,
     headers: dict[str, str] | None = None,
+    allow_redirects: bool = True,
 ) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
-        return httpx.get(url=url, headers=headers, timeout=_TIMEOUT_SECONDS)
+        return httpx.get(
+            url=url,
+            headers=headers,
+            timeout=_TIMEOUT_SECONDS,
+            follow_redirects=allow_redirects,
+        )
     return requests.get(
         url=url,
         headers=headers,
         timeout=_TIMEOUT_SECONDS,
+        allow_redirects=allow_redirects,
     )
 
 
@@ -1837,3 +1844,36 @@ def test_call_on_close_runs(mock_ctx: _MockCtxType) -> None:
         assert mock_response.text == "ok"
 
     assert events == ["closed"]
+
+
+@_MOCK_CTX_MARKER
+def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
+    """A missing trailing slash is forwarded for Flask to redirect."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/folder/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    response = app.test_client().get("/folder", follow_redirects=False)
+    expected_status_code = HTTPStatus.PERMANENT_REDIRECT
+    expected_location_suffix = "/folder/"
+    assert response.status_code == expected_status_code
+    assert response.headers["Location"].endswith(expected_location_suffix)
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/folder",
+            allow_redirects=False,
+        )
+
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers["Location"].endswith(expected_location_suffix)

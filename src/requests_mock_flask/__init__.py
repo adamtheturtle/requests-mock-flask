@@ -181,16 +181,14 @@ def add_flask_app_to_mock(
         # should still be forwarded to the Flask app so that it can produce the
         # appropriate response (e.g. a 404). Literal parts are kept literal.
         path_to_match = _rule_to_path_regex(rule=rule)
-        pattern = urljoin(base=base_url, url=path_to_match)
-        # Anchor the end of the path so that a rule such as ``/api`` matches
-        # only the exact path and not arbitrary suffixes such as
-        # ``/api-extra``.  An optional query string is still allowed.
-        patterns = [pattern]
-        if path_to_match == "/":
-            patterns.append(pattern.rstrip("/"))
+        paths_to_match = [path_to_match]
+        if rule.strict_slashes and path_to_match.endswith("/") and path_to_match != "/":
+            paths_to_match.append(path_to_match.rstrip("/"))
         urls = tuple(
-            re.compile(pattern=path_pattern + r"(\?.*)?$")
-            for path_pattern in patterns
+            re.compile(
+                pattern=urljoin(base=base_url, url=path) + r"(\?.*)?$",
+            )
+            for path in paths_to_match
         )
 
         methods = (rule.methods or set()) | _KNOWN_HTTP_METHODS
