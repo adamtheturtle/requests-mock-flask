@@ -2131,3 +2131,27 @@ def test_host_matching_rule_registered_for_matching_host(
 
     assert mock_response.status_code == HTTPStatus.OK
     assert mock_response.text == "Hello, World!"
+
+
+@_MOCK_CTX_MARKER
+def test_internationalized_base_url(mock_ctx: _MockCtxType) -> None:
+    """A Unicode base URL host is registered in its ASCII IDNA form."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    base_url = "http://münich.example"
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url=base_url,
+        )
+        mock_response = _do_get(mock_obj=mock_obj_to_add, url=base_url)
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"

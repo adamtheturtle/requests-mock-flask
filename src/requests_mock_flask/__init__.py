@@ -160,6 +160,35 @@ def _normalize_base_url(*, base_url: str) -> str:
     )
 
 
+def _normalize_base_url_host_to_idna(base_url: str) -> str:
+    """
+    Return ``base_url`` with any internationalized host encoded using
+    IDNA.
+
+    HTTP clients convert Unicode hostnames to their ASCII IDNA/Punycode form
+    before sending a request, so the registered matcher must use the same
+    ASCII form in order to intercept those requests.
+    """
+    if base_url.isascii():
+        return base_url
+
+    split = urlsplit(url=base_url)
+    host = split.hostname
+    if host is None:
+        return base_url
+
+    idna_host = host.encode(encoding="idna").decode(encoding="ascii")
+    netloc = idna_host
+    if split.port is not None:
+        netloc = f"{netloc}:{split.port}"
+    if split.username is not None:
+        userinfo = split.username
+        if split.password is not None:
+            userinfo = f"{userinfo}:{split.password}"
+        netloc = f"{userinfo}@{netloc}"
+    return split._replace(netloc=netloc).geturl()
+
+
 def add_flask_app_to_mock(
     mock_obj: _MockObjType,
     flask_app: "flask.Flask",
@@ -171,6 +200,7 @@ def add_flask_app_to_mock(
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
     base_url = _normalize_base_url(base_url=base_url)
+    base_url = _normalize_base_url_host_to_idna(base_url=base_url)
     transport = httpx.WSGITransport(app=flask_app)
 
     def respx_side_effect(
