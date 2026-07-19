@@ -1,0 +1,1 @@
+Forwarded Flask responses are now closed so ``call_on_close`` callbacks run.

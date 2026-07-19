@@ -1731,3 +1731,32 @@ def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
         "scheme": "https",
         "secure": True,
     }
+
+
+@_MOCK_CTX_MARKER
+def test_call_on_close_runs(mock_ctx: _MockCtxType) -> None:
+    """Response close callbacks run after the forwarded response is consumed."""
+    events: list[str] = []
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return a response with a close callback."""
+        response = Response(response="ok")
+        response.call_on_close(func=lambda: events.append("closed"))
+        return response
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+        )
+        assert mock_response.text == "ok"
+
+    assert events == ["closed"]
