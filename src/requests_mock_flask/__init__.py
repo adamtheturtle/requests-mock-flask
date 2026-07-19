@@ -116,7 +116,8 @@ def _register_mock(
 def _normalize_base_url(*, base_url: str) -> str:
     """Lowercase the case-insensitive scheme and host of ``base_url``.
 
-    HTTP clients normalize the scheme and host to lowercase before matching
+    HTTP clients normalize the scheme and host to lowercase before
+    matching
     requests, so a ``base_url`` with uppercase scheme or host characters would
     otherwise register patterns that no client can reach. The user information, path
     and query components retain their original case.
