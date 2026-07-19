@@ -1080,6 +1080,47 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_duplicate_cookies(mock_ctx: _MockCtxType) -> None:
+    """Duplicate cookies with the same name are preserved."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["GET"])
+    def _() -> Response:
+        """Return the duplicate cookie values and the raw ``Cookie``
+        header.
+        """
+        assert request.cookies.getlist(key="id") == ["one", "two"]
+        assert request.headers["Cookie"] == "id=one; id=two"
+        return make_response()
+
+    headers = {"Cookie": "id=one; id=two"}
+
+    test_client = app.test_client(use_cookies=False)
+    response = test_client.get("/", headers=headers)
+
+    expected_status_code = HTTPStatus.OK
+
+    assert response.status_code == expected_status_code, response.data
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+            headers=headers,
+        )
+
+    assert mock_response.status_code == expected_status_code
+
+
+@_MOCK_CTX_MARKER
 def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     """It is possible to get a response without a content type."""
     app = Flask(import_name=__name__, static_folder=None)

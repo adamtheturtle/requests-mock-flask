@@ -3,7 +3,6 @@
 import dataclasses
 import re
 from collections.abc import Callable
-from http.cookies import SimpleCookie
 from types import ModuleType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
@@ -190,26 +189,12 @@ def _responses_callback(
     :return: A tuple of status code, response headers and response data
         from the flask app.
     """
-    test_client = flask_app.test_client()
+    # We disable the test client's cookie jar so that the original ``Cookie``
+    # header is forwarded to the Flask app untouched. This preserves duplicate
+    # cookies with the same name and other multi-value header semantics.
+    test_client = flask_app.test_client(use_cookies=False)
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_dict = dict(request.headers)
-    cookie_string = cookie_dict.get("Cookie", "")
-    cookie_list = cookie_string.split(sep=";")
-    cookie_list_no_empty = [item for item in cookie_list if item]
-    simple_cookie: SimpleCookie = SimpleCookie()
-    for cookie in cookie_list_no_empty:
-        simple_cookie.load(rawdata=cookie)
-
-    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
-
-    for key, value in cookies_dict.items():
-        test_client.set_cookie(
-            domain="localhost",
-            key=key,
-            value=value,
-        )
-
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
@@ -251,25 +236,12 @@ def _httpretty_callback(
     del uri
     del headers
 
-    test_client = flask_app.test_client()
+    # We disable the test client's cookie jar so that the original ``Cookie``
+    # header is forwarded to the Flask app untouched. This preserves duplicate
+    # cookies with the same name and other multi-value header semantics.
+    test_client = flask_app.test_client(use_cookies=False)
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get(name="Cookie", failobj="")
-    cookie_list = cookie_string.split(sep=";")
-    cookie_list_no_empty = [item for item in cookie_list if item]
-    simple_cookie: SimpleCookie = SimpleCookie()
-    for cookie in cookie_list_no_empty:
-        simple_cookie.load(rawdata=cookie)
-
-    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
-
-    for key, value in cookies_dict.items():
-        test_client.set_cookie(
-            domain=request.host,
-            key=key,
-            value=value,
-        )
-
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
@@ -303,25 +275,12 @@ def _requests_mock_callback(
     :return: A tuple of status code, response headers and response data
         from the flask app.
     """
-    test_client = flask_app.test_client()
+    # We disable the test client's cookie jar so that the original ``Cookie``
+    # header is forwarded to the Flask app untouched. This preserves duplicate
+    # cookies with the same name and other multi-value header semantics.
+    test_client = flask_app.test_client(use_cookies=False)
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
-    cookie_string = request.headers.get("Cookie", "")
-    cookie_list = cookie_string.split(";")
-    cookie_list_no_empty = [item for item in cookie_list if item]
-    simple_cookie: SimpleCookie = SimpleCookie()
-    for cookie in cookie_list_no_empty:
-        simple_cookie.load(rawdata=cookie)
-
-    cookies_dict = {k: v.value for k, v in simple_cookie.items()}
-
-    for key, value in cookies_dict.items():
-        test_client.set_cookie(
-            domain="localhost",
-            key=key,
-            value=value,
-        )
-
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
