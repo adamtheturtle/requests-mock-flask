@@ -166,7 +166,13 @@ def add_flask_app_to_mock(
         # Anchor the end of the path so that a rule such as ``/api`` matches
         # only the exact path and not arbitrary suffixes such as
         # ``/api-extra``.  An optional query string is still allowed.
-        urls = (re.compile(pattern=pattern + r"(\?.*)?$"),)
+        patterns = [pattern]
+        if path_to_match == "/":
+            patterns.append(pattern.rstrip("/"))
+        urls = tuple(
+            re.compile(pattern=path_pattern + r"(\?.*)?$")
+            for path_pattern in patterns
+        )
 
         methods = rule.methods or set()
         for method in methods:
