@@ -2,7 +2,7 @@
 
 import dataclasses
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin, urlsplit, urlunsplit
@@ -19,6 +19,18 @@ if TYPE_CHECKING:
     import flask
     import requests
     from werkzeug.routing import Rule
+
+
+def _without_transfer_encoding(headers: Iterable[tuple[str, str]]) -> list[tuple[str, str]]:
+    """Return headers excluding ``Transfer-Encoding``."""
+    return [(key, value) for key, value in headers if key.lower() != "transfer-encoding"]
+
+
+def _normalize_body(body: str | bytes | Iterable[str | bytes] | None) -> str | bytes | None:
+    """Convert streaming request bodies to bytes for Werkzeug."""
+    if body is None or isinstance(body, str | bytes):
+        return body
+    return b"".join(part.encode() if isinstance(part, str) else part for part in body)
 
 
 # Known HTTP methods to register for every route URL. We register all of
@@ -307,14 +319,14 @@ def _responses_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
-    headers_dict = dict(request.headers).items()
+    headers_dict = _without_transfer_encoding(headers=dict(request.headers).items())
     split_url = urlsplit(url=str(object=request.url))
     base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         base_url=base_url,
         method=str(object=request.method),
-        data=request.body,
+        data=_normalize_body(body=request.body),
         headers=headers_dict,
         environ_overrides=environ_overrides,
     )
@@ -415,8 +427,8 @@ def _requests_mock_callback(
         path=request.path_url,
         base_url=base_url,
         method=request.method,
-        headers=list(request.headers.items()),
-        data=request.body,
+        headers=_without_transfer_encoding(headers=request.headers.items()),
+        data=_normalize_body(body=request.body),
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:

@@ -1245,6 +1245,62 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
+    """Iterable (chunked/streaming) request bodies do not crash the
+    callback.
+
+    With the ``responses`` and ``requests-mock`` backends the iterable is
+    consumed into raw bytes and delivered to Flask. The other backends leave
+    the body chunk-framed or unread, but must at least not error.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["POST"])
+    def _() -> str:
+        """Echo the raw request body."""
+        return request.get_data(as_text=True)
+
+    expected_status_code = HTTPStatus.OK
+    expected_data = b"abcdef"
+
+    def chunks() -> Iterator[bytes]:
+        """Yield the request body in chunks."""
+        yield b"abc"
+        yield b"def"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response: requests.Response | httpx.Response
+        delivers_body = isinstance(
+            mock_obj_to_add,
+            (responses.RequestsMock, requests_mock.Mocker),
+        )
+        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+            mock_response = httpx.post(
+                url="http://www.example.com",
+                content=chunks(),
+                timeout=_TIMEOUT_SECONDS,
+            )
+        else:
+            mock_response = requests.post(
+                url="http://www.example.com",
+                data=chunks(),
+                timeout=_TIMEOUT_SECONDS,
+            )
+
+    assert mock_response.status_code == expected_status_code
+    if delivers_body:
+        assert mock_response.text == expected_data.decode()
+
+
+@_MOCK_CTX_MARKER
 def test_multiple_functions_same_path_different_type(
     mock_ctx: _MockCtxType,
 ) -> None:
