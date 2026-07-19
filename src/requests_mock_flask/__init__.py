@@ -166,9 +166,13 @@ def add_flask_app_to_mock(
         rule_attributes: Any = vars(rule)
         rule_trace = rule_attributes["_trace"]
         rule_converters = rule_attributes["_converters"]
+        seen_separator = False
         for is_dynamic, data in rule_trace:
-            if data == "|":
-                # Marker separating the (unused) host part from the path.
+            if not is_dynamic and data == "|":
+                # Marker separating the host part from the path.
+                seen_separator = True
+                continue
+            if not seen_separator:
                 continue
             if is_dynamic:
                 converter = rule_converters[data]

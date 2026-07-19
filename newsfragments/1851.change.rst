@@ -1,1 +1,1 @@
-Custom converter arguments containing a quoted ``>`` are no longer truncated when generating URL patterns, so applications that use them can be attached to a mock backend.
+Custom converter arguments containing a quoted ``>`` are no longer truncated when generating URL patterns, so applications that use them can be attached to a mock back end.
