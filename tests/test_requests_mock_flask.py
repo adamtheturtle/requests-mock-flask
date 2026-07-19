@@ -1284,6 +1284,42 @@ def test_duplicate_cookies(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_cookie_name_rejected_by_simplecookie(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A cookie name rejected by ``SimpleCookie`` is forwarded."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["GET"])
+    def _() -> Response:
+        """Echo the received cookie pairs as JSON."""
+        return jsonify(pairs=list(request.cookies.items(multi=True)))
+
+    headers = {"Cookie": "good=1; bad@name=2; second=3"}
+    expected_pairs = [["good", "1"], ["bad@name", "2"], ["second", "3"]]
+
+    direct_response = app.test_client(use_cookies=False).get("/", headers=headers)
+    assert direct_response.status_code == HTTPStatus.OK
+    assert direct_response.json == {"pairs": expected_pairs}
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+            headers=headers,
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.json() == {"pairs": expected_pairs}
+
+
+@_MOCK_CTX_MARKER
 def test_valueless_cookie_token(mock_ctx: _MockCtxType) -> None:
     """A valueless cookie token is forwarded without changing its
     header.

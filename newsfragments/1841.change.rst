@@ -1,0 +1,1 @@
+Forward the original ``Cookie`` header to Flask instead of reparsing it, so requests with cookie names that Werkzeug accepts but ``SimpleCookie`` rejects no longer crash.
