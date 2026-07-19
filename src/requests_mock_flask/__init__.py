@@ -5,7 +5,7 @@ import re
 from collections.abc import Callable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 import httpretty  # pyright: ignore[reportMissingTypeStubs]
 import httpx
@@ -200,8 +200,11 @@ def _responses_callback(
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
     headers_dict = dict(request.headers).items()
+    split_url = urlsplit(url=str(object=request.url))
+    base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
+        base_url=base_url,
         method=str(object=request.method),
         data=request.body,
         headers=headers_dict,
@@ -233,7 +236,6 @@ def _httpretty_callback(
     """
     # We do this to satisfy linters.
     # The parameters are given to httpretty callbacks, but we do not use them.
-    del uri
     del headers
 
     # We disable the test client's cookie jar so that the original ``Cookie``
@@ -246,8 +248,11 @@ def _httpretty_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
+    split_url = urlsplit(url=uri)
+    base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
         path=str(object=request.path),
+        base_url=base_url,
         method=request.method,
         headers=request.headers.items(),
         data=request.body,
@@ -284,8 +289,11 @@ def _requests_mock_callback(
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
+    split_url = urlsplit(url=str(object=request.url))
+    base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
+        base_url=base_url,
         method=request.method,
         headers=list(request.headers.items()),
         data=request.body,

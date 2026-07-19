@@ -1420,3 +1420,42 @@ def test_unknown_mock_object() -> None:
             flask_app=app,
             base_url="http://www.example.com",
         )
+
+
+@_MOCK_CTX_MARKER
+def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
+    """The intercepted request host and scheme reach the Flask app."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> dict[str, object]:
+        """Return details of the incoming request origin."""
+        return {
+            "url": request.url,
+            "host": request.host,
+            "scheme": request.scheme,
+            "secure": request.is_secure,
+        }
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="https://api.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="https://api.example.com",
+        )
+
+    response_json = mock_response.json()
+
+    assert response_json == {
+        "url": "https://api.example.com/",
+        "host": "api.example.com",
+        "scheme": "https",
+        "secure": True,
+    }
