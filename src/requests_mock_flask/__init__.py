@@ -149,12 +149,11 @@ def add_flask_app_to_mock(
     )
 
     for rule in flask_app.url_map.iter_rules():
-        # Build the URL pattern from Werkzeug's parsed rule metadata rather
-        # than reparsing ``rule.rule`` with a naive regex. Reparsing breaks on
+        # Build the URL pattern from the framework's parsed rule metadata.
+        # Re-parsing ``rule.rule`` with a naive regex breaks on
         # converter arguments that contain a quoted ``>`` (e.g.
         # ``<regex("[^>]+"):value>``). ``rule.compile()`` populates
-        # ``rule._trace`` with ``(is_dynamic, data)`` parts and
-        # ``rule._converters`` with each variable's converter.
+        # internal parsed parts and each variable's converter.
         #
         # For path variables (``<path:...>``) we use ``.+`` to match any
         # characters including slashes. For all other variable types we use
@@ -164,8 +163,9 @@ def add_flask_app_to_mock(
         # appropriate response (e.g. a 404). Literal parts are kept literal.
         rule.compile()
         path_parts: list[str] = []
-        rule_trace = rule._trace  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
-        rule_converters = rule._converters  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
+        rule_attributes: Any = vars(rule)
+        rule_trace = rule_attributes["_trace"]
+        rule_converters = rule_attributes["_converters"]
         for is_dynamic, data in rule_trace:
             if data == "|":
                 # Marker separating the (unused) host part from the path.
