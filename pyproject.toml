@@ -34,6 +34,7 @@ dynamic = [
     "version",
 ]
 dependencies = [
+    "flask>=2.3",
     "httpretty>=1.1.4",
     "httpx>=0.27.0",
     "requests-mock>=1.12.1",
@@ -300,6 +301,10 @@ ignore = [
 ]
 
 [tool.deptry]
+# Flask is a runtime dependency because the public helper operates on a
+# ``flask.Flask`` application, but it is imported only by callers and tests
+# rather than by the source itself.
+per_rule_ignores.DEP002 = [ "flask" ]
 optional_dependencies_dev_groups = [
     "dev",
     "release",
