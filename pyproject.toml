@@ -337,6 +337,8 @@ ignore_names = [
     # pytest configuration
     "pytest_collect_file",
     "pytest_plugins",
+    # Werkzeug converter attribute, set on a custom converter in tests.
+    "regex",
     "rst_prolog",
     "source_suffix",
     "spelling_word_list_filename",

@@ -14,6 +14,7 @@ import requests_mock
 import responses
 import respx
 import werkzeug
+from werkzeug.routing.converters import PathConverter
 
 if TYPE_CHECKING:
     import flask
@@ -148,20 +149,36 @@ def add_flask_app_to_mock(
     )
 
     for rule in flask_app.url_map.iter_rules():
-        # We replace everything inside angle brackets with a regex pattern.
-        # For path variables (<path:...>), we use .+ to match any characters
-        # including slashes. For all other variable types, we use [^/]+ to
-        # match only within a single path segment.
-        path_to_match = re.sub(
-            pattern="<path:.+?>",
-            repl=".+",
-            string=rule.rule,
-        )
-        path_to_match = re.sub(
-            pattern="<.+?>",
-            repl="[^/]+",
-            string=path_to_match,
-        )
+        # Build the URL pattern from Werkzeug's parsed rule metadata rather
+        # than reparsing ``rule.rule`` with a naive regex. Reparsing breaks on
+        # converter arguments that contain a quoted ``>`` (e.g.
+        # ``<regex("[^>]+"):value>``). ``rule.compile()`` populates
+        # ``rule._trace`` with ``(is_dynamic, data)`` parts and
+        # ``rule._converters`` with each variable's converter.
+        #
+        # For path variables (``<path:...>``) we use ``.+`` to match any
+        # characters including slashes. For all other variable types we use
+        # ``[^/]+`` to match a single path segment. We deliberately do not use
+        # each converter's own (stricter) regex: requests with the "wrong" type
+        # should still be forwarded to the Flask app so that it can produce the
+        # appropriate response (e.g. a 404). Literal parts are kept literal.
+        rule.compile()
+        path_parts: list[str] = []
+        rule_trace = rule._trace  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
+        rule_converters = rule._converters  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]
+        for is_dynamic, data in rule_trace:
+            if data == "|":
+                # Marker separating the (unused) host part from the path.
+                continue
+            if is_dynamic:
+                converter = rule_converters[data]
+                if isinstance(converter, PathConverter):
+                    path_parts.append(".+")
+                else:
+                    path_parts.append("[^/]+")
+            else:
+                path_parts.append(re.escape(pattern=data))
+        path_to_match = "".join(path_parts)
         pattern = urljoin(base=base_url, url=path_to_match)
         urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
