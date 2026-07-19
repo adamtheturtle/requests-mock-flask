@@ -50,6 +50,19 @@ _MockObjType = (
 )
 
 
+def _host_rule_matches_base_url(
+    *,
+    host_rule: str,
+    base_url_host: str | None,
+) -> bool:
+    """Return whether a Flask host rule applies to ``base_url_host``."""
+    if base_url_host is None:
+        return False
+    host_pattern = re.sub(pattern="<path:.+?>", repl=".+", string=host_rule)
+    host_pattern = re.sub(pattern="<.+?>", repl="[^.]+", string=host_pattern)
+    return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
+
+
 @dataclasses.dataclass(frozen=True)
 class _MockCallbacks:
     """Callbacks for each supported mock back end."""
@@ -167,7 +180,13 @@ def add_flask_app_to_mock(
         httpretty=httpretty_callback,
     )
 
+    base_url_host = urlsplit(url=base_url).hostname
     for rule in flask_app.url_map.iter_rules():
+        if rule.host is not None and not _host_rule_matches_base_url(
+            host_rule=rule.host,
+            base_url_host=base_url_host,
+        ):
+            continue
         # Build the URL pattern from the framework's parsed rule metadata.
         # Re-parsing ``rule.rule`` with a naive regex breaks on
         # converter arguments that contain a quoted ``>`` (e.g.

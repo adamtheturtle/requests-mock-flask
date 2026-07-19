@@ -1,0 +1,1 @@
+Host-constrained Flask rules are now only registered against a ``base_url`` whose host matches the rule's host.

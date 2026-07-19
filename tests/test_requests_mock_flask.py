@@ -1881,3 +1881,65 @@ def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
 
     direct_response = test_client.get("/folder/")
     assert direct_response.data == b"Hello, World!"
+
+
+def _host_matching_app() -> Flask:
+    """Create an app with one host-constrained route."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+
+    @app.route(rule="/", host="api.example.com")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    return app
+
+
+@_MOCK_CTX_MARKER
+def test_host_matching_rule_not_registered_for_other_host(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A host-constrained rule is skipped for a different base URL host."""
+    app = _host_matching_app()
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://other.example.com",
+        )
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+            ValueError,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://other.example.com/",
+            )
+
+
+@_MOCK_CTX_MARKER
+def test_host_matching_rule_registered_for_matching_host(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A host-constrained rule is registered for a matching base URL host."""
+    app = _host_matching_app()
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://api.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://api.example.com/",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"
