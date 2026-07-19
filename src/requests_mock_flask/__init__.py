@@ -118,7 +118,7 @@ def _normalize_base_url(*, base_url: str) -> str:
 
     HTTP clients normalize the scheme and host to lowercase before matching
     requests, so a ``base_url`` with uppercase scheme or host characters would
-    otherwise register matchers that no client can reach. The userinfo, path
+    otherwise register patterns that no client can reach. The user information, path
     and query components retain their original case.
     """
     parts = urlsplit(url=base_url)
