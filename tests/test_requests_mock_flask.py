@@ -276,6 +276,37 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_uppercase_base_url_host(mock_ctx: _MockCtxType) -> None:
+    """A ``base_url`` with an uppercase host is matched case-insensitively."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/ping")
+    def _() -> str:
+        """Return a simple message."""
+        return "pong"
+
+    expected_status_code = HTTPStatus.OK
+    expected_data = b"pong"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://EXAMPLE.COM",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://example.com/ping",
+        )
+
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.text == expected_data.decode()
+
+
+@_MOCK_CTX_MARKER
 def test_headers(mock_ctx: _MockCtxType) -> None:
     """Request headers are sent."""
     app = Flask(import_name=__name__, static_folder=None)

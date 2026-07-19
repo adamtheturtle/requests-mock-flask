@@ -5,7 +5,7 @@ import re
 from collections.abc import Callable
 from types import ModuleType
 from typing import TYPE_CHECKING, Any
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import httpretty
 import httpx
@@ -113,6 +113,28 @@ def _register_mock(
             raise TypeError(msg)
 
 
+def _normalize_base_url(*, base_url: str) -> str:
+    """Lowercase the case-insensitive scheme and host of ``base_url``.
+
+    HTTP clients normalize the scheme and host to lowercase before matching
+    requests, so a ``base_url`` with uppercase scheme or host characters would
+    otherwise register matchers that no client can reach. The userinfo, path
+    and query components retain their original case.
+    """
+    parts = urlsplit(url=base_url)
+    userinfo, separator, hostport = parts.netloc.rpartition("@")
+    netloc = userinfo + separator + hostport.lower()
+    return urlunsplit(
+        components=(
+            parts.scheme.lower(),
+            netloc,
+            parts.path,
+            parts.query,
+            parts.fragment,
+        )
+    )
+
+
 def add_flask_app_to_mock(
     mock_obj: _MockObjType,
     flask_app: "flask.Flask",
@@ -123,6 +145,7 @@ def add_flask_app_to_mock(
     the
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
+    base_url = _normalize_base_url(base_url=base_url)
     transport = httpx.WSGITransport(app=flask_app)
 
     def respx_side_effect(

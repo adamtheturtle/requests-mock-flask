@@ -1,0 +1,1 @@
+The scheme and host of ``base_url`` are now normalized to lowercase so that requests to case-insensitive URL components are intercepted.
