@@ -56,6 +56,25 @@ _MOCK_CTX_MARKER = pytest.mark.parametrize(
     ids=_MOCK_IDS,
 )
 
+# Some tests cannot use httpretty because httpretty has a bug with
+# allow_net_connect=False when used with urllib3 2.3.0+.
+# See: https://github.com/gabrielfalcao/HTTPretty/issues/484
+_MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
+    ctx
+    for ctx, mock_id in zip(_MOCK_CTXS, _MOCK_IDS, strict=True)
+    if mock_id != "httpretty"
+]
+
+_MOCK_IDS_NO_HTTPRETTY = [
+    mock_id for mock_id in _MOCK_IDS if mock_id != "httpretty"
+]
+
+_MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=_MOCK_CTXS_NO_HTTPRETTY,
+    ids=_MOCK_IDS_NO_HTTPRETTY,
+)
+
 
 def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
     """Get the mock object, handling the None yield from httpretty."""
@@ -949,25 +968,24 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
     assert mock_post_response.text == expected_data.decode()
 
 
-@_MOCK_CTX_MARKER
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
 def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
-    """A route with the wrong type given works."""
+    """A URL which violates a converter constraint is not intercepted.
+
+    Flask routing does not match ``/a`` against ``/<int:my_variable>``, so the
+    helper leaves the request unmatched instead of forwarding it and returning
+    Flask's 404.  A URL which satisfies the constraint is still intercepted.
+    """
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<int:my_variable>")
-    def _(_: int) -> str:
-        """Return an empty string."""
-        return ""  # pragma: no cover
+    def _(my_variable: int) -> str:
+        """Return a simple message which includes the route variable."""
+        return f"Hello: {my_variable}"
 
     test_client = app.test_client()
     response = test_client.get("/a")
-
-    expected_status_code = HTTPStatus.NOT_FOUND
-    expected_content_type = "text/html; charset=utf-8"
-
-    assert response.status_code == expected_status_code
-    assert response.headers["Content-Type"] == expected_content_type
-    assert b"not found on the server" in response.data
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
@@ -978,14 +996,24 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response = _do_get(
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://www.example.com/a",
+            )
+
+        valid_response = _do_get(
             mock_obj=mock_obj_to_add,
-            url="http://www.example.com/a",
+            url="http://www.example.com/123",
         )
 
-    assert mock_response.status_code == expected_status_code
-    assert mock_response.headers["Content-Type"] == expected_content_type
-    assert "not found on the server" in mock_response.text
+    assert valid_response.status_code == HTTPStatus.OK
+    assert valid_response.text == "Hello: 123"
 
 
 @_MOCK_CTX_MARKER
@@ -1563,26 +1591,6 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         )
         assert valid_response.status_code == HTTPStatus.OK
         assert valid_response.text == "Posts for: cranes/frasier"
-
-
-# This test cannot use httpretty because httpretty has a bug with
-# allow_net_connect=False when used with urllib3 2.3.0+.
-# See: https://github.com/gabrielfalcao/HTTPretty/issues/484
-_MOCK_CTXS_NO_HTTPRETTY: list[_MockCtxType] = [
-    ctx
-    for ctx, mock_id in zip(_MOCK_CTXS, _MOCK_IDS, strict=True)
-    if mock_id != "httpretty"
-]
-
-_MOCK_IDS_NO_HTTPRETTY = [
-    mock_id for mock_id in _MOCK_IDS if mock_id != "httpretty"
-]
-
-_MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
-    argnames="mock_ctx",
-    argvalues=_MOCK_CTXS_NO_HTTPRETTY,
-    ids=_MOCK_IDS_NO_HTTPRETTY,
-)
 
 
 @_MOCK_CTX_MARKER_NO_HTTPRETTY

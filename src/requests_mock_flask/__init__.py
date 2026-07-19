@@ -221,8 +221,7 @@ def _rule_to_path_regex(rule: "Rule") -> str:
     for is_dynamic, data in rule_trace[separator_index + 1 :]:
         if is_dynamic:
             converter = rule_converters[data]
-            path_part = "[^/]+" if converter.part_isolating else ".+"
-            path_parts.append(path_part)
+            path_parts.append(converter.regex)
         else:
             path_parts.append(re.escape(pattern=data))
     return "".join(path_parts)
