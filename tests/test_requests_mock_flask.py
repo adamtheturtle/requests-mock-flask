@@ -1228,6 +1228,48 @@ def test_duplicate_cookies(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_valueless_cookie_token(mock_ctx: _MockCtxType) -> None:
+    """A valueless cookie token is forwarded without changing its
+    header.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+    cookie_header = "good=1; valueless; second=2"
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return the parsed cookies and raw request header."""
+        return jsonify(
+            {
+                "pairs": list(request.cookies.items(multi=True)),
+                "raw": request.headers.get(key="Cookie"),
+            }
+        )
+
+    test_client = app.test_client(use_cookies=False)
+    response = test_client.get("/", headers={"Cookie": cookie_header})
+    expected_pairs = [["good", "1"], ["valueless", ""], ["second", "2"]]
+    assert response.json == {"pairs": expected_pairs, "raw": cookie_header}
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+            headers={"Cookie": cookie_header},
+        )
+
+    assert mock_response.json() == {
+        "pairs": expected_pairs,
+        "raw": cookie_header,
+    }
+
+
+@_MOCK_CTX_MARKER
 def test_no_content_type(mock_ctx: _MockCtxType) -> None:
     """It is possible to get a response without a content type."""
     app = Flask(import_name=__name__, static_folder=None)

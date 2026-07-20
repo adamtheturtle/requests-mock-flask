@@ -1,0 +1,1 @@
+Forward the original ``Cookie`` header verbatim so valueless cookie tokens are preserved in forwarded requests.
