@@ -26,7 +26,10 @@ from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map
 
-from requests_mock_flask import add_flask_app_to_mock
+from requests_mock_flask import (
+    _normalize_base_url_host_to_idna,
+    add_flask_app_to_mock,
+)
 
 # We use a high timeout to allow interactive debugging while requests are being
 # made.
@@ -356,6 +359,24 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
     assert mock_response.content == expected_data
+
+
+@pytest.mark.parametrize(
+    ("base_url", "expected_url"),
+    [
+        ("a-path-with-é", "a-path-with-é"),
+        (
+            "http://user:pass@münich.example:8080",
+            "http://user:pass@xn--mnich-kva.example:8080",
+        ),
+    ],
+)
+def test_normalize_base_url_host_to_idna(
+    base_url: str,
+    expected_url: str,
+) -> None:
+    """IDNA normalization preserves the non-host URL components."""
+    assert _normalize_base_url_host_to_idna(base_url=base_url) == expected_url
 
 
 @_MOCK_CTX_MARKER
