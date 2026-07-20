@@ -155,7 +155,17 @@ _REPEATED_HEADERS_MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
     argvalues=[
         pytest.param(_MOCK_CTXS[0], id="responses"),
-        pytest.param(_MOCK_CTXS[1], id="requests_mock"),
+        pytest.param(
+            _MOCK_CTXS[1],
+            id="requests_mock",
+            marks=pytest.mark.xfail(
+                reason=(
+                    "requests-mock exposes response headers as a plain dict "
+                    "and cannot emit repeated header fields."
+                ),
+                strict=True,
+            ),
+        ),
         pytest.param(
             _MOCK_CTXS[2],
             id="httpretty",

@@ -355,8 +355,8 @@ def _requests_mock_callback(
     )
     response = test_client.open(environ_builder.get_request())
 
-    context.headers = HTTPHeaderDict(  # type: ignore[assignment]  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[invalid-assignment]
-        headers=response.headers,
-    )
+    # requests-mock exposes headers as ``dict[str, str]``, so its callback
+    # context cannot represent repeated fields.
+    context.headers = dict(response.headers)
     context.status_code = response.status_code
     return bytes(response.data)
