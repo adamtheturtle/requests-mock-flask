@@ -3,7 +3,7 @@
 from http import HTTPStatus
 from typing import Final
 
-import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpretty
 import httpx
 import requests
 import requests_mock as req_mock
@@ -183,7 +183,7 @@ class TestHTTPretty:
             """Return a simple message."""
             return "Hello, World!"
 
-        with httpretty.enabled():  # type: ignore[no-untyped-call]
+        with httpretty.enabled():
             add_flask_app_to_mock(
                 mock_obj=httpretty,
                 flask_app=app,
