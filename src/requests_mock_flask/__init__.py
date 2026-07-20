@@ -19,6 +19,7 @@ from werkzeug.routing.converters import PathConverter
 if TYPE_CHECKING:
     import flask
     import requests
+    from werkzeug.routing import Rule
 
 
 _MockObjType = (
@@ -161,28 +162,7 @@ def add_flask_app_to_mock(
         # each converter's own (stricter) regex: requests with the "wrong" type
         # should still be forwarded to the Flask app so that it can produce the
         # appropriate response (e.g. a 404). Literal parts are kept literal.
-        rule.compile()
-        path_parts: list[str] = []
-        rule_attributes: Any = vars(rule)
-        rule_trace = rule_attributes["_trace"]
-        rule_converters = rule_attributes["_converters"]
-        seen_separator = False
-        for is_dynamic, data in rule_trace:
-            if not is_dynamic and data == "|":
-                # Marker separating the host part from the path.
-                seen_separator = True
-                continue
-            if not seen_separator:
-                continue
-            if is_dynamic:
-                converter = rule_converters[data]
-                if isinstance(converter, PathConverter):
-                    path_parts.append(".+")
-                else:
-                    path_parts.append("[^/]+")
-            else:
-                path_parts.append(re.escape(pattern=data))
-        path_to_match = "".join(path_parts)
+        path_to_match = _rule_to_path_regex(rule=rule)
         pattern = urljoin(base=base_url, url=path_to_match)
         urls = (re.compile(pattern=pattern), re.compile(pattern=pattern + "$"))
 
@@ -195,6 +175,28 @@ def add_flask_app_to_mock(
                     url=url,
                     callbacks=callbacks,
                 )
+
+
+def _rule_to_path_regex(rule: "Rule") -> str:
+    """Return a regex that matches the path part of a Flask routing
+    rule.
+    """
+    rule.compile()
+    path_parts: list[str] = []
+    rule_attributes: Any = vars(rule)
+    rule_trace = rule_attributes["_trace"]
+    rule_converters = rule_attributes["_converters"]
+    separator_index = rule_trace.index((False, "|"))
+    for is_dynamic, data in rule_trace[separator_index + 1 :]:
+        if is_dynamic:
+            converter = rule_converters[data]
+            path_part = ".+"
+            if not isinstance(converter, PathConverter):
+                path_part = "[^/]+"
+            path_parts.append(path_part)
+        else:
+            path_parts.append(re.escape(pattern=data))
+    return "".join(path_parts)
 
 
 def _responses_callback(
