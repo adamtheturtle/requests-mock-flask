@@ -24,6 +24,7 @@ import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
+from werkzeug.routing import BaseConverter, Map
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -616,6 +617,68 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
+        )
+
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers["Content-Type"] == expected_content_type
+    assert mock_response.text == expected_data.decode()
+
+
+@_MOCK_CTX_MARKER
+def test_route_with_custom_converter_quoted_gt(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A route with a custom converter argument containing a quoted ``>``
+    works.
+
+    The rule grammar allows a converter argument such as ``"[^>]+"`` to
+    contain a ``>``.  The pattern generation must not truncate the placeholder
+    at that quoted character.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    class _RegexConverter(BaseConverter):
+        """A converter which matches a given regular expression."""
+
+        def __init__(
+            self,
+            url_map: Map,
+            pattern: str,
+        ) -> None:
+            """Store the given pattern as the converter's regex."""
+            super().__init__(map=url_map)
+            self.regex = pattern
+
+    app.url_map.converters["regex"] = _RegexConverter
+
+    @app.route(rule='/items/<regex("[^>]+"):my_variable>')
+    def _(my_variable: str) -> str:
+        """Return a simple message which includes the route variable."""
+        return "Hello: " + my_variable
+
+    test_client = app.test_client()
+    response = test_client.get("/items/abc")
+
+    expected_status_code = HTTPStatus.OK
+    expected_content_type = "text/html; charset=utf-8"
+    expected_data = b"Hello: abc"
+
+    assert response.status_code == expected_status_code
+    assert response.headers["Content-Type"] == expected_content_type
+    assert response.data == expected_data
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/items/abc",
         )
 
     assert mock_response.status_code == expected_status_code
