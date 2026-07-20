@@ -916,17 +916,15 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        expected_exceptions: tuple[type[Exception], ...] = (
-            AllMockedAssertionError,
-            requests.exceptions.ConnectionError,
-            NoMockAddress,
-            ValueError,
+        mock_response = _do_post(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/",
         )
-        with pytest.raises(expected_exception=expected_exceptions):
-            _do_post(
-                mock_obj=mock_obj_to_add,
-                url="http://www.example.com/",
-            )
+
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers["Content-Type"] == expected_content_type
+    assert mock_response.headers["Allow"] == response.headers["Allow"]
+    assert "not allowed for the requested URL." in mock_response.text
 
 
 @_MOCK_CTX_MARKER
