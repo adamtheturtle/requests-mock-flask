@@ -362,8 +362,8 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
 
 
 @pytest.mark.parametrize(
-    ("base_url", "expected_url"),
-    [
+    argnames=("base_url", "expected_url"),
+    argvalues=[
         ("a-path-with-é", "a-path-with-é"),
         (
             "http://user:pass@münich.example:8080",
