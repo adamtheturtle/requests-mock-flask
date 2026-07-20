@@ -28,7 +28,7 @@ Usage examples
    from http import HTTPStatus
 
    import flask
-   import httpretty  # pyright: ignore[reportMissingTypeStubs]
+   import httpretty
    import httpx
    import requests
    import requests_mock
@@ -92,7 +92,7 @@ Usage examples
 
 
    # Using httpretty
-   with httpretty.core.httprettized():  # type: ignore[no-untyped-call]
+   with httpretty.core.httprettized():
        add_flask_app_to_mock(
            mock_obj=httpretty,
            flask_app=app,

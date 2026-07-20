@@ -7,7 +7,7 @@ from types import ModuleType
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin
 
-import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpretty
 import httpx
 import requests_mock
 import responses
@@ -72,10 +72,10 @@ def _register_mock(
                 url__regex=url.pattern,
             ).mock(side_effect=callbacks.respx)
         case ModuleType() if mock_obj.__name__ == "httpretty":
-            httpretty.register_uri(  # type: ignore[no-untyped-call]  # pyright: ignore[reportUnknownMemberType]
+            httpretty.register_uri(
                 method=method,
                 uri=url,
-                body=callbacks.httpretty,  # pyright: ignore[reportArgumentType]
+                body=callbacks.httpretty,
                 forcing_headers={"Content-Type": None},
             )
         case _:

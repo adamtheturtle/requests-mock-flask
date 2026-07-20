@@ -13,7 +13,7 @@ from http import HTTPStatus
 from types import ModuleType
 from typing import Any, Final
 
-import httpretty  # pyright: ignore[reportMissingTypeStubs]
+import httpretty
 import httpx
 import pytest
 import requests
