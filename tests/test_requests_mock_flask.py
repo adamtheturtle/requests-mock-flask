@@ -1877,3 +1877,6 @@ def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Location"].endswith(expected_location_suffix)
+
+    direct_response = test_client.get("/folder/")
+    assert direct_response.data == b"Hello, World!"
