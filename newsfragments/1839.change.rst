@@ -1,0 +1,1 @@
+Duplicate request cookies with the same name are now preserved instead of being collapsed to the last value.
