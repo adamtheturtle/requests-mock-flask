@@ -134,6 +134,50 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_binary_response(mock_ctx: _MockCtxType) -> None:
+    """A binary response body is preserved byte-for-byte."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    expected_data = b"\xff\x00\xfe"
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return a binary response body."""
+        return Response(
+            response=expected_data,
+            content_type="application/octet-stream",
+        )
+
+    test_client = app.test_client()
+    response = test_client.get("/")
+
+    expected_status_code = HTTPStatus.OK
+    expected_content_type = "application/octet-stream"
+
+    assert response.status_code == expected_status_code
+    assert response.headers["Content-Type"] == expected_content_type
+    assert response.data == expected_data
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+        )
+
+    assert mock_response.status_code == expected_status_code
+    assert mock_response.headers["Content-Type"] == expected_content_type
+    assert mock_response.content == expected_data
+
+
+@_MOCK_CTX_MARKER
 def test_headers(mock_ctx: _MockCtxType) -> None:
     """Request headers are sent."""
     app = Flask(import_name=__name__, static_folder=None)

@@ -65,7 +65,7 @@ def _register_mock(
             mock_obj.register_uri(
                 method=method,
                 url=url,
-                text=callbacks.requests_mock,
+                content=callbacks.requests_mock,
             )
         case respx.MockRouter() | respx.Router():
             mock_obj.route(
@@ -119,7 +119,7 @@ def add_flask_app_to_mock(
     def requests_mock_callback(
         request: "requests_mock.Request",
         context: "requests_mock.Context",
-    ) -> str:
+    ) -> bytes:
         """Callback for requests_mock."""
         return _requests_mock_callback(
             request=request,
@@ -290,7 +290,7 @@ def _requests_mock_callback(
     request: "requests_mock.Request",
     context: "requests_mock.Context",
     flask_app: "flask.Flask",
-) -> str:
+) -> bytes:
     """Given a request to the Flask app, send an equivalent request to an
     in
     memory fake of the Flask app and return some key details of the
@@ -336,4 +336,4 @@ def _requests_mock_callback(
 
     context.headers = dict(response.headers)
     context.status_code = response.status_code
-    return str(object=response.data.decode())
+    return bytes(response.data)

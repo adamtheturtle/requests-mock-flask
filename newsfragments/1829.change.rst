@@ -1,0 +1,1 @@
+Preserve binary response bodies when using the ``requests_mock`` back end.
