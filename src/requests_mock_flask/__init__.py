@@ -13,8 +13,8 @@ import requests_mock
 import responses
 import respx
 import werkzeug
-from werkzeug.routing.converters import PathConverter
 from urllib3 import HTTPHeaderDict
+from werkzeug.routing.converters import PathConverter
 
 if TYPE_CHECKING:
     import flask
