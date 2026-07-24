@@ -1926,8 +1926,8 @@ def test_host_matching_rule_treats_dots_as_literals() -> None:
 
 
 @pytest.mark.parametrize(
-    ("base_url", "should_register"),
-    [
+    argnames=("base_url", "should_register"),
+    argvalues=[
         pytest.param("http://123.example.com", True, id="valid"),
         pytest.param("http://tenant.example.com", False, id="invalid"),
     ],
@@ -1943,7 +1943,7 @@ def test_host_matching_rule_respects_converter(
     @app.route(rule="/", host="<int:tenant>.example.com")
     def _(tenant: int) -> str:
         """Return the converted tenant."""
-        return str(tenant)
+        return f"{tenant}"
 
     direct_response = app.test_client().get(
         "/",
