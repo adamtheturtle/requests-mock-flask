@@ -24,7 +24,15 @@ if TYPE_CHECKING:
     import requests
     from werkzeug.routing import Rule
 
-    type _RequestBody = str | bytes | Iterable[str | bytes] | BinaryIO | None
+    type _RequestBody = (
+        str
+        | bytes
+        | bytearray
+        | memoryview
+        | Iterable[str | bytes]
+        | BinaryIO
+        | None
+    )
 
 
 def _without_transfer_encoding(
@@ -49,6 +57,8 @@ def _normalize_body(
     """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
+    if isinstance(body, bytearray | memoryview):
+        return bytes(body)
     if _is_binary_io(body=body):
         body_bytes: bytes = methodcaller("read")(body)
         return body_bytes

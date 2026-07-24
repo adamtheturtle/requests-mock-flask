@@ -1301,8 +1301,21 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
         assert mock_response.text == expected_data.decode()
 
 
-def test_file_like_request_body() -> None:
-    """A readable, non-iterable request body remains supported."""
+@pytest.mark.parametrize(
+    argnames="body",
+    argvalues=[
+        pytest.param(BytesIO(initial_bytes=b"body"), id="file-like"),
+        pytest.param(bytearray(b"body"), id="bytearray"),
+        pytest.param(
+            BytesIO(initial_bytes=b"body").getbuffer(),
+            id="memoryview",
+        ),
+    ],
+)
+def test_non_streaming_request_body(
+    body: BytesIO | bytearray | memoryview,
+) -> None:
+    """A file-like or buffer request body is delivered to Flask."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["POST"])
@@ -1313,7 +1326,7 @@ def test_file_like_request_body() -> None:
     prepared_request = requests.Request(
         method="POST",
         url="http://www.example.com",
-        data=BytesIO(initial_bytes=b"body"),
+        data=body,
     ).prepare()
 
     with requests_mock.Mocker() as mock_obj:
