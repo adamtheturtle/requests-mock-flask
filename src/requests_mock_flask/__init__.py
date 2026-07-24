@@ -19,10 +19,10 @@ from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from wsgiref.types import StartResponse, WSGIEnvironment
 
     import flask
     import requests
-    from _typeshed.wsgi import StartResponse, WSGIEnvironment
     from werkzeug.routing import Rule
 
     type _RequestBody = (
@@ -256,8 +256,8 @@ def add_flask_app_to_mock(
     base_url = _normalize_base_url_host_to_idna(base_url=base_url)
 
     def respx_wsgi_app(
-        environ: "WSGIEnvironment",
-        start_response: "StartResponse",
+        environ: WSGIEnvironment,
+        start_response: StartResponse,
     ) -> Iterable[bytes]:
         """Normalize HTTPX's Unicode path to the WSGI latin-1
         convention.
