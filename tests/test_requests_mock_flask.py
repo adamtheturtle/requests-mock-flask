@@ -1735,7 +1735,7 @@ def test_string_variable_rejects_extra_segments(
 def test_literal_url_components_are_escaped(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """Regex metacharacters in literal URL components stay literal."""
+    """Regex meta-characters in literal URL components stay literal."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/literal.json")
