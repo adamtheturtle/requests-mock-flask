@@ -370,6 +370,12 @@ def _httpretty_callback(
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
+        http_module: Any = vars(httpretty)["http"]
+        statuses: dict[int, str] = http_module.STATUSES
+        if response.status_code not in statuses:
+            _, _, reason_phrase = response.status.partition(" ")
+            statuses[response.status_code] = reason_phrase
+
         return (
             response.status_code,
             HTTPHeaderDict(headers=response.headers),

@@ -6,7 +6,7 @@ https://flask.palletsprojects.com/en/1.1.x/quickstart/#variable-rules
 
 import json
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
@@ -272,6 +272,46 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 
     assert set_cookies == expected_set_cookie
     assert warnings == expected_warning
+
+
+@pytest.fixture(name="nonstandard_httpretty_status")
+def fixture_nonstandard_httpretty_status() -> Iterator[int]:
+    """Provide a status code and restore HTTPretty's global table."""
+    status_code = 299
+    http_module: Any = vars(httpretty)["http"]
+    statuses: dict[int, str] = http_module.STATUSES
+    assert status_code not in statuses
+    yield status_code
+    statuses.pop(status_code, None)
+
+
+def test_httpretty_nonstandard_status_code(
+    nonstandard_httpretty_status: int,
+) -> None:
+    """HTTPretty forwards a nonstandard Flask status without crashing."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return a response with a nonstandard status."""
+        return Response(
+            response="x",
+            status=f"{nonstandard_httpretty_status} Custom Reason",
+        )
+
+    with httpretty.httprettized():
+        add_flask_app_to_mock(
+            mock_obj=httpretty,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        response = _do_get(
+            mock_obj=httpretty,
+            url="http://www.example.com",
+        )
+
+    assert response.status_code == nonstandard_httpretty_status
+    assert response.text == "x"
 
 
 @_MOCK_CTX_MARKER

@@ -1,0 +1,1 @@
+Prevent HTTPretty from crashing on nonstandard Flask status codes.
