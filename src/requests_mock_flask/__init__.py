@@ -4,7 +4,7 @@ import dataclasses
 import re
 from collections.abc import Callable
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urljoin, urlsplit
 
 import httpretty
@@ -315,6 +315,14 @@ def _httpretty_callback(
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
+        statuses = cast(
+            "dict[int, str]",
+            getattr(httpretty, "http").STATUSES,
+        )
+        if response.status_code not in statuses:
+            _, _, reason_phrase = response.status.partition(" ")
+            statuses[response.status_code] = reason_phrase
+
         return (
             response.status_code,
             HTTPHeaderDict(headers=response.headers),
