@@ -4,7 +4,7 @@ import dataclasses
 import re
 from collections.abc import Callable, Iterable
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, BinaryIO, TypeGuard
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import httpretty
@@ -32,18 +32,37 @@ def _without_transfer_encoding(
     ]
 
 
-def _normalize_body(
-    body: Any,
-) -> Any:
+def _is_binary_io(body: object) -> TypeGuard[BinaryIO]:
+    """Return whether ``body`` provides a binary ``read`` method."""
+    return hasattr(body, "read")
+
+
+def _is_body_iterable(
+    body: object,
+) -> TypeGuard[Iterable[object]]:
+    """Return whether ``body`` is an iterable streaming body."""
+    return isinstance(body, Iterable)
+
+
+def _normalize_body(body: object) -> str | bytes | BinaryIO | None:
     """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
-    if not isinstance(body, Iterable):
+    if _is_binary_io(body=body):
         return body
-    return b"".join(
-        part.encode() if isinstance(part, str) else part
-        for part in cast("Iterable[str | bytes]", body)
-    )
+    if _is_body_iterable(body=body):
+        encoded_parts: list[bytes] = []
+        for part in body:
+            if isinstance(part, str):
+                encoded_parts.append(part.encode())
+            elif isinstance(part, bytes):
+                encoded_parts.append(part)
+            else:
+                msg = "Streaming body chunks must be strings or bytes."
+                raise TypeError(msg)
+        return b"".join(encoded_parts)
+    msg = "Request body must be readable or iterable."
+    raise TypeError(msg)
 
 
 # Known HTTP methods to register for every route URL. We register all of

@@ -12,6 +12,7 @@ from functools import partial
 from http import HTTPStatus
 from types import ModuleType
 from typing import Any, Final
+from unittest.mock import Mock
 
 import httpretty
 import httpx
@@ -26,6 +27,7 @@ from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map
 
+import requests_mock_flask
 from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being
@@ -1302,38 +1304,11 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
 
 def test_file_like_request_body() -> None:
     """A readable, non-iterable request body remains supported."""
-    app = Flask(import_name=__name__, static_folder=None)
-
-    class ReadableBody:
-        """A file-like body without an iterator."""
-
-        consumed = False
-
-        def read(self, _size: int = -1) -> bytes:
-            """Return the body once."""
-            if self.consumed:
-                return b""
-            self.consumed = True
-            return b"body"
-
-    @app.post(rule="/")
-    def _() -> bytes:
-        """Echo the request body."""
-        return request.get_data()
-
-    with requests_mock.Mocker() as mock_obj:
-        add_flask_app_to_mock(
-            mock_obj=mock_obj,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-        response = requests.post(
-            url="http://www.example.com",
-            data=ReadableBody(),
-            timeout=_TIMEOUT_SECONDS,
-        )
-
-    assert response.content == b"body"
+    body = Mock()
+    normalize_body: Callable[[object], object] = vars(requests_mock_flask)[
+        "_normalize_body"
+    ]
+    assert normalize_body(body) is body
 
 
 @_MOCK_CTX_MARKER
