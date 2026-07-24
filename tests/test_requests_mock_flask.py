@@ -1912,6 +1912,49 @@ def _host_matching_app() -> Flask:
     return app
 
 
+def test_host_matching_rule_treats_dots_as_literals() -> None:
+    """Dots in a host rule do not match arbitrary characters."""
+    mock_obj = responses.RequestsMock()
+
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=_host_matching_app(),
+        base_url="http://apiXexampleYcom",
+    )
+
+    assert not mock_obj.registered()
+
+
+@pytest.mark.parametrize(
+    ("base_url", "should_register"),
+    [
+        pytest.param("http://123.example.com", True, id="valid"),
+        pytest.param("http://tenant.example.com", False, id="invalid"),
+    ],
+)
+def test_host_matching_rule_respects_converter(
+    base_url: str,
+    *,
+    should_register: bool,
+) -> None:
+    """Dynamic host rules use their Werkzeug converter constraints."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+
+    @app.route(rule="/", host="<int:tenant>.example.com")
+    def _(tenant: int) -> str:
+        """Return the converted tenant."""
+        return str(tenant)
+
+    mock_obj = responses.RequestsMock()
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=app,
+        base_url=base_url,
+    )
+
+    assert bool(mock_obj.registered()) is should_register
+
+
 @_MOCK_CTX_MARKER
 def test_host_matching_rule_not_registered_for_other_host(
     mock_ctx: _MockCtxType,

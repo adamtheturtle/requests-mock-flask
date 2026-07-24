@@ -52,14 +52,27 @@ _MockObjType = (
 
 def _host_rule_matches_base_url(
     *,
-    host_rule: str,
+    rule: "Rule",
     base_url_host: str | None,
 ) -> bool:
     """Return whether a Flask host rule applies to ``base_url_host``."""
     if base_url_host is None:
         return False
-    host_pattern = re.sub(pattern="<path:.+?>", repl=".+", string=host_rule)
-    host_pattern = re.sub(pattern="<.+?>", repl="[^.]+", string=host_pattern)
+
+    rule.compile()
+    host_parts: list[str] = []
+    rule_attributes: Any = vars(rule)
+    rule_trace = rule_attributes["_trace"]
+    rule_converters = rule_attributes["_converters"]
+    separator_index = rule_trace.index((False, "|"))
+    for is_dynamic, data in rule_trace[:separator_index]:
+        if is_dynamic:
+            converter = rule_converters[data]
+            host_parts.append(f"(?:{converter.regex})")
+        else:
+            host_parts.append(re.escape(pattern=data))
+
+    host_pattern = "".join(host_parts)
     return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
 
 
@@ -183,7 +196,7 @@ def add_flask_app_to_mock(
     base_url_host = urlsplit(url=base_url).hostname
     for rule in flask_app.url_map.iter_rules():
         if rule.host is not None and not _host_rule_matches_base_url(
-            host_rule=rule.host,
+            rule=rule,
             base_url_host=base_url_host,
         ):
             continue
