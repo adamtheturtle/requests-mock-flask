@@ -88,7 +88,7 @@ _MockObjType = (
 
 def _host_rule_matches_base_url(
     *,
-    rule: "Rule",
+    rule: Rule,
     base_url_host: str | None,
 ) -> bool:
     """Return whether a Flask host rule applies to ``base_url_host``."""
