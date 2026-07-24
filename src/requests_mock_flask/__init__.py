@@ -264,7 +264,10 @@ def add_flask_app_to_mock(
         """
         path_info = environ["PATH_INFO"]
         environ["PATH_INFO"] = path_info.encode().decode("latin-1")
-        return flask_app.wsgi_app(environ, start_response)
+        return flask_app.wsgi_app(
+            environ=environ,
+            start_response=start_response,
+        )
 
     transport = httpx.WSGITransport(app=respx_wsgi_app)
 
