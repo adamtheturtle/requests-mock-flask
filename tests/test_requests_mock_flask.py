@@ -2157,8 +2157,18 @@ def test_host_matching_rule_registered_for_matching_host(
     assert mock_response.text == "Hello, World!"
 
 
+@pytest.mark.parametrize(
+    argnames="base_url",
+    argvalues=[
+        pytest.param("http://münich.example", id="unicode"),
+        pytest.param("http://m%C3%BCnich.example", id="percent-encoded"),
+    ],
+)
 @_MOCK_CTX_MARKER
-def test_internationalized_base_url(mock_ctx: _MockCtxType) -> None:
+def test_internationalized_base_url(
+    mock_ctx: _MockCtxType,
+    base_url: str,
+) -> None:
     """A Unicode base URL host is registered in its ASCII IDNA form."""
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -2167,7 +2177,6 @@ def test_internationalized_base_url(mock_ctx: _MockCtxType) -> None:
         """Return a simple message."""
         return "Hello, World!"
 
-    base_url = "http://münich.example"
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
         add_flask_app_to_mock(

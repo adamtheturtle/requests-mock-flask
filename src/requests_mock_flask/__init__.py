@@ -179,9 +179,6 @@ def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
     before sending a request, so the registered pattern must use the same
     ASCII form in order to intercept those requests.
     """
-    if base_url.isascii():
-        return base_url
-
     split = urlsplit(url=base_url)
     host = split.hostname
     if host is None:
