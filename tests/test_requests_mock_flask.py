@@ -362,6 +362,7 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
     argnames="base_url",
     argvalues=[
         "a-path-with-é",
+        "http://[::1]/café",
         "http://user:pass@münich.example:8080",
         "http://user@münich.example",
     ],

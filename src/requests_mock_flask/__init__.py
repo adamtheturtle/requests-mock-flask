@@ -176,6 +176,8 @@ def _normalize_base_url_host_to_idna(base_url: str) -> str:
     host = split.hostname
     if host is None:
         return base_url
+    if ":" in host:
+        return base_url
 
     idna_host = host.encode(encoding="idna").decode(encoding="ascii")
     netloc = idna_host
