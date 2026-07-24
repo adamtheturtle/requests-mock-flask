@@ -1,0 +1,1 @@
+URL interception now honors Flask converter constraints, so requests that violate a route's converter (for example a non-integer where ``<int:...>`` is expected) are left unmatched instead of being forwarded.
