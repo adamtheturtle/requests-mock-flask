@@ -61,6 +61,7 @@ def test_host_rule_does_not_match_missing_base_url_host() -> None:
         base_url_host=None,
     )
 
+
 _MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
     argvalues=_MOCK_CTXS,
