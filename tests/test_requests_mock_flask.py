@@ -10,9 +10,9 @@ from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
+from io import BytesIO
 from types import ModuleType
 from typing import Any, Final
-from unittest.mock import Mock
 
 import httpretty
 import httpx
@@ -1304,7 +1304,7 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
 
 def test_file_like_request_body() -> None:
     """A readable, non-iterable request body remains supported."""
-    body = Mock()
+    body = BytesIO(initial_bytes=b"body")
     normalize_body: Callable[[object], object] = vars(requests_mock_flask)[
         "_normalize_body"
     ]
