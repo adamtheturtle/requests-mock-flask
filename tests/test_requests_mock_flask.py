@@ -562,6 +562,42 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_route_with_custom_nonisolating_converter(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A custom non-isolating converter can span path segments."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    class _EverythingConverter(BaseConverter):
+        """Match values containing slashes."""
+
+        regex = ".*?"
+        part_isolating = False
+
+    app.url_map.converters["everything"] = _EverythingConverter
+
+    @app.route(rule="/files/<everything:value>")
+    def _(value: str) -> str:
+        """Return the converted value."""
+        return value
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/files/foo/bar",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "foo/bar"
+
+
+@_MOCK_CTX_MARKER
 def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
     """A route with a uuid variable works."""
     app = Flask(import_name=__name__, static_folder=None)

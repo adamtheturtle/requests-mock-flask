@@ -1,0 +1,1 @@
+Custom framework converters that set ``part_isolating = False`` now correctly match values containing slashes.

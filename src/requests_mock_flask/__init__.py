@@ -14,7 +14,6 @@ import responses
 import respx
 import werkzeug
 from urllib3 import HTTPHeaderDict
-from werkzeug.routing.converters import PathConverter
 
 if TYPE_CHECKING:
     import flask
@@ -218,9 +217,7 @@ def _rule_to_path_regex(rule: "Rule") -> str:
     for is_dynamic, data in rule_trace[separator_index + 1 :]:
         if is_dynamic:
             converter = rule_converters[data]
-            path_part = ".+"
-            if not isinstance(converter, PathConverter):
-                path_part = "[^/]+"
+            path_part = "[^/]+" if converter.part_isolating else ".+"
             path_parts.append(path_part)
         else:
             path_parts.append(re.escape(pattern=data))
