@@ -317,7 +317,7 @@ def _httpretty_callback(
     with test_client.open(environ_builder.get_request()) as response:
         statuses = cast(
             "dict[int, str]",
-            getattr(httpretty, "http").STATUSES,
+            httpretty.http.STATUSES,
         )
         if response.status_code not in statuses:
             _, _, reason_phrase = response.status.partition(" ")

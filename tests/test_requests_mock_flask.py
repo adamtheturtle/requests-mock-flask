@@ -244,7 +244,7 @@ def nonstandard_httpretty_status() -> Iterator[int]:
     status_code = 299
     statuses = cast(
         "dict[int, str]",
-        getattr(httpretty, "http").STATUSES,
+        httpretty.http.STATUSES,
     )
     assert status_code not in statuses
     yield status_code
