@@ -1735,7 +1735,9 @@ def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
 
 @_MOCK_CTX_MARKER
 def test_call_on_close_runs(mock_ctx: _MockCtxType) -> None:
-    """Response close callbacks run after the forwarded response is consumed."""
+    """Response close callbacks run after the forwarded response is
+    consumed.
+    """
     events: list[str] = []
     app = Flask(import_name=__name__, static_folder=None)
 
