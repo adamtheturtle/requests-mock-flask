@@ -1899,7 +1899,9 @@ def _host_matching_app() -> Flask:
 def test_host_matching_rule_not_registered_for_other_host(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """A host-constrained rule is skipped for a different base URL host."""
+    """A host-constrained rule is skipped for a different base URL
+    host.
+    """
     app = _host_matching_app()
 
     with mock_ctx() as mock_obj:
@@ -1926,7 +1928,9 @@ def test_host_matching_rule_not_registered_for_other_host(
 def test_host_matching_rule_registered_for_matching_host(
     mock_ctx: _MockCtxType,
 ) -> None:
-    """A host-constrained rule is registered for a matching base URL host."""
+    """A host-constrained rule is registered for a matching base URL
+    host.
+    """
     app = _host_matching_app()
 
     with mock_ctx() as mock_obj:
