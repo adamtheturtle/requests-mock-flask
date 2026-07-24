@@ -10,6 +10,7 @@ from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
+from io import BytesIO
 from types import ModuleType
 from typing import Any, Final
 
@@ -1242,6 +1243,104 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
     assert mock_response.text == expected_data.decode()
+
+
+@_MOCK_CTX_MARKER
+def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
+    """Iterable (chunked/streaming) request bodies do not crash the
+    callback.
+
+    With the ``responses`` and ``requests-mock`` backends the iterable is
+    consumed into raw bytes and delivered to Flask. The other backends leave
+    the body chunk-framed or unread, but must at least not error.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["POST"])
+    def _() -> str:
+        """Echo the raw request body."""
+        return request.get_data(as_text=True)
+
+    expected_status_code = HTTPStatus.OK
+    expected_data = b"abcdef"
+
+    def chunks() -> Iterator[bytes]:
+        """Yield the request body in chunks."""
+        yield b"abc"
+        yield b"def"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response: requests.Response | httpx.Response
+        delivers_body = isinstance(
+            mock_obj_to_add,
+            (responses.RequestsMock, requests_mock.Mocker),
+        )
+        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+            mock_response = httpx.post(
+                url="http://www.example.com",
+                content=chunks(),
+                timeout=_TIMEOUT_SECONDS,
+            )
+        else:
+            mock_response = requests.post(
+                url="http://www.example.com",
+                data=chunks(),
+                timeout=_TIMEOUT_SECONDS,
+            )
+
+    assert mock_response.status_code == expected_status_code
+    if delivers_body:
+        assert mock_response.text == expected_data.decode()
+
+
+@pytest.mark.parametrize(
+    argnames="body",
+    argvalues=[
+        pytest.param(BytesIO(initial_bytes=b"body"), id="file-like"),
+        pytest.param(bytearray(b"body"), id="bytearray"),
+        pytest.param(
+            BytesIO(initial_bytes=b"body").getbuffer(),
+            id="memoryview",
+        ),
+    ],
+)
+def test_non_streaming_request_body(
+    body: BytesIO | bytearray | memoryview,
+) -> None:
+    """A file-like or buffer request body is delivered to Flask."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["POST"])
+    def _() -> bytes:
+        """Echo the request body."""
+        return request.get_data()
+
+    prepared_request = requests.Request(
+        method="POST",
+        url="http://www.example.com",
+        data=body,
+    ).prepare()
+
+    with requests_mock.Mocker() as mock_obj:
+        add_flask_app_to_mock(
+            mock_obj=mock_obj,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        response = requests.Session().send(
+            request=prepared_request,
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.content == b"body"
 
 
 @_MOCK_CTX_MARKER

@@ -1,10 +1,12 @@
 """Package for ``requests_mock_flask``."""
 
+from __future__ import annotations
+
 import dataclasses
 import re
-from collections.abc import Callable
+from operator import methodcaller
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, BinaryIO
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import httpretty
@@ -16,9 +18,53 @@ import werkzeug
 from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     import flask
     import requests
     from werkzeug.routing import Rule
+
+    type _RequestBody = (
+        str
+        | bytes
+        | bytearray
+        | memoryview
+        | Iterable[str | bytes]
+        | BinaryIO
+        | None
+    )
+
+
+def _without_transfer_encoding(
+    headers: Iterable[tuple[str, str]],
+) -> list[tuple[str, str]]:
+    """Return headers excluding ``Transfer-Encoding``."""
+    return [
+        (key, value)
+        for key, value in headers
+        if key.lower() != "transfer-encoding"
+    ]
+
+
+def _is_binary_io(body: object) -> bool:
+    """Return whether the body provides a file-like ``read`` method."""
+    return any("read" in vars(cls) for cls in type(body).mro())
+
+
+def _normalize_body(
+    body: _RequestBody,
+) -> str | bytes | None:
+    """Convert streaming request bodies to bytes for the WSGI app."""
+    if body is None or isinstance(body, str | bytes):
+        return body
+    if isinstance(body, bytearray | memoryview):
+        return bytes(body)
+    if _is_binary_io(body=body):
+        body_bytes: bytes = methodcaller("read")(body)
+        return body_bytes
+    return b"".join(
+        part.encode() if isinstance(part, str) else part for part in body
+    )
 
 
 # Known HTTP methods to register for every route URL. We register all of
@@ -52,7 +98,7 @@ _MockObjType = (
 
 def _host_rule_matches_base_url(
     *,
-    rule: "Rule",
+    rule: Rule,
     base_url_host: str | None,
 ) -> bool:
     """Return whether a Flask host rule applies to ``base_url_host``."""
@@ -162,7 +208,7 @@ def _normalize_base_url(*, base_url: str) -> str:
 
 def add_flask_app_to_mock(
     mock_obj: _MockObjType,
-    flask_app: "flask.Flask",
+    flask_app: flask.Flask,
     base_url: str,
 ) -> None:
     """
@@ -180,14 +226,14 @@ def add_flask_app_to_mock(
         return transport.handle_request(request=request)
 
     def responses_callback(
-        request: "requests.PreparedRequest",
+        request: requests.PreparedRequest,
     ) -> tuple[int, HTTPHeaderDict, bytes]:
         """Callback for responses."""
         return _responses_callback(request=request, flask_app=flask_app)
 
     def requests_mock_callback(
-        request: "requests_mock.Request",
-        context: "requests_mock.Context",
+        request: requests_mock.Request,
+        context: requests_mock.Context,
     ) -> bytes:
         """Callback for requests_mock."""
         return _requests_mock_callback(
@@ -197,7 +243,7 @@ def add_flask_app_to_mock(
         )
 
     def httpretty_callback(
-        request: "httpretty.core.HTTPrettyRequest",
+        request: httpretty.core.HTTPrettyRequest,
         uri: str,
         headers: dict[str, Any],
     ) -> tuple[int, HTTPHeaderDict, bytes]:
@@ -264,7 +310,7 @@ def add_flask_app_to_mock(
                 )
 
 
-def _rule_to_path_regex(rule: "Rule") -> str:
+def _rule_to_path_regex(rule: Rule) -> str:
     """Return a regex that matches the path part of a Flask routing
     rule.
     """
@@ -284,8 +330,8 @@ def _rule_to_path_regex(rule: "Rule") -> str:
 
 
 def _responses_callback(
-    request: "requests.PreparedRequest",
-    flask_app: "flask.Flask",
+    request: requests.PreparedRequest,
+    flask_app: flask.Flask,
 ) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the flask app, send an equivalent request to an
     in
@@ -307,14 +353,16 @@ def _responses_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
-    headers_dict = dict(request.headers).items()
+    headers_dict = _without_transfer_encoding(
+        headers=dict(request.headers).items(),
+    )
     split_url = urlsplit(url=str(object=request.url))
     base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
         path=request.path_url,
         base_url=base_url,
         method=str(object=request.method),
-        data=request.body,
+        data=_normalize_body(body=request.body),
         headers=headers_dict,
         environ_overrides=environ_overrides,
     )
@@ -328,10 +376,10 @@ def _responses_callback(
 
 
 def _httpretty_callback(
-    request: "httpretty.core.HTTPrettyRequest",
+    request: httpretty.core.HTTPrettyRequest,
     uri: str,
     headers: dict[str, Any],
-    flask_app: "flask.Flask",
+    flask_app: flask.Flask,
 ) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the Flask app, send an equivalent request to an
     in
@@ -384,9 +432,9 @@ def _httpretty_callback(
 
 
 def _requests_mock_callback(
-    request: "requests_mock.Request",
-    context: "requests_mock.Context",
-    flask_app: "flask.Flask",
+    request: requests_mock.Request,
+    context: requests_mock.Context,
+    flask_app: flask.Flask,
 ) -> bytes:
     """Given a request to the Flask app, send an equivalent request to an
     in
@@ -415,8 +463,8 @@ def _requests_mock_callback(
         path=request.path_url,
         base_url=base_url,
         method=request.method,
-        headers=list(request.headers.items()),
-        data=request.body,
+        headers=_without_transfer_encoding(headers=request.headers.items()),
+        data=_normalize_body(body=request.body),
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
