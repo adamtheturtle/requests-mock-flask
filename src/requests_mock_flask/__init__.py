@@ -7,7 +7,7 @@ import re
 from operator import methodcaller
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, BinaryIO
-from urllib.parse import quote, urljoin, urlsplit, urlunsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import httpretty
 import httpx
@@ -254,6 +254,20 @@ def add_flask_app_to_mock(
     """
     base_url = _normalize_base_url(base_url=base_url)
     base_url = _normalize_base_url_host_to_idna(base_url=base_url)
+    split_base_url = urlsplit(url=base_url)
+    base_url_path = quote(
+        string=split_base_url.path.rstrip("/"),
+        safe="/%",
+    )
+    registration_base_url = urlunsplit(
+        components=(
+            split_base_url.scheme,
+            split_base_url.netloc,
+            base_url_path,
+            "",
+            "",
+        )
+    )
 
     def respx_wsgi_app(
         environ: WSGIEnvironment,
@@ -262,8 +276,14 @@ def add_flask_app_to_mock(
         """Normalize HTTPX's Unicode path to the WSGI latin-1
         convention.
         """
-        path_info = environ["PATH_INFO"]
-        environ["PATH_INFO"] = path_info.encode().decode("latin-1")
+        mount_path = unquote(string=base_url_path)
+        path_info = environ["PATH_INFO"].removeprefix(mount_path) or "/"
+        environ["SCRIPT_NAME"] = mount_path.encode().decode(
+            encoding="latin-1",
+        )
+        environ["PATH_INFO"] = path_info.encode().decode(
+            encoding="latin-1",
+        )
         return flask_app.wsgi_app(
             environ=environ,
             start_response=start_response,
@@ -281,7 +301,11 @@ def add_flask_app_to_mock(
         request: requests.PreparedRequest,
     ) -> tuple[int, HTTPHeaderDict, bytes]:
         """Callback for responses."""
-        return _responses_callback(request=request, flask_app=flask_app)
+        return _responses_callback(
+            request=request,
+            flask_app=flask_app,
+            base_url_path=base_url_path,
+        )
 
     def requests_mock_callback(
         request: requests_mock.Request,
@@ -292,6 +316,7 @@ def add_flask_app_to_mock(
             request=request,
             context=context,
             flask_app=flask_app,
+            base_url_path=base_url_path,
         )
 
     def httpretty_callback(
@@ -305,6 +330,7 @@ def add_flask_app_to_mock(
             uri=uri,
             headers=headers,
             flask_app=flask_app,
+            base_url_path=base_url_path,
         )
 
     callbacks = _MockCallbacks(
@@ -334,8 +360,8 @@ def add_flask_app_to_mock(
         # should still be forwarded to the Flask app so that it can produce the
         # appropriate response (e.g. a 404). Literal parts are kept literal.
         path_to_match = _rule_to_path_regex(rule=rule)
-        escaped_base_url = re.escape(pattern=base_url)
-        patterns = [urljoin(base=escaped_base_url, url=path_to_match)]
+        escaped_base_url = re.escape(pattern=registration_base_url)
+        patterns = [escaped_base_url + path_to_match]
         has_slashless_redirect = (
             rule.strict_slashes
             and path_to_match.endswith("/")
@@ -344,9 +370,7 @@ def add_flask_app_to_mock(
         if path_to_match == "/":
             patterns.append(patterns[0].rstrip("/"))
         elif has_slashless_redirect:
-            patterns.append(
-                urljoin(base=escaped_base_url, url=path_to_match.rstrip("/"))
-            )
+            patterns.append(escaped_base_url + path_to_match.rstrip("/"))
         urls = tuple(
             re.compile(pattern=pattern + r"(\?.*)?$") for pattern in patterns
         )
@@ -385,6 +409,7 @@ def _rule_to_path_regex(rule: Rule) -> str:
 def _responses_callback(
     request: requests.PreparedRequest,
     flask_app: flask.Flask,
+    base_url_path: str,
 ) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the flask app, send an equivalent request to an
     in
@@ -410,9 +435,11 @@ def _responses_callback(
         headers=dict(request.headers).items(),
     )
     split_url = urlsplit(url=str(object=request.url))
-    base_url = f"{split_url.scheme}://{split_url.netloc}/"
+    base_url = (
+        f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
+    )
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=request.path_url,
+        path=request.path_url.removeprefix(base_url_path) or "/",
         base_url=base_url,
         method=str(object=request.method),
         data=_normalize_body(body=request.body),
@@ -433,6 +460,7 @@ def _httpretty_callback(
     uri: str,
     headers: dict[str, Any],
     flask_app: flask.Flask,
+    base_url_path: str,
 ) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the Flask app, send an equivalent request to an
     in
@@ -461,9 +489,11 @@ def _httpretty_callback(
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
     split_url = urlsplit(url=uri)
-    base_url = f"{split_url.scheme}://{split_url.netloc}/"
+    base_url = (
+        f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
+    )
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=str(object=request.path),
+        path=str(object=request.path).removeprefix(base_url_path) or "/",
         base_url=base_url,
         method=request.method,
         headers=request.headers.items(),
@@ -488,6 +518,7 @@ def _requests_mock_callback(
     request: requests_mock.Request,
     context: requests_mock.Context,
     flask_app: flask.Flask,
+    base_url_path: str,
 ) -> bytes:
     """Given a request to the Flask app, send an equivalent request to an
     in
@@ -511,9 +542,11 @@ def _requests_mock_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
     split_url = urlsplit(url=str(object=request.url))
-    base_url = f"{split_url.scheme}://{split_url.netloc}/"
+    base_url = (
+        f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
+    )
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=request.path_url,
+        path=request.path_url.removeprefix(base_url_path) or "/",
         base_url=base_url,
         method=request.method,
         headers=_without_transfer_encoding(headers=request.headers.items()),

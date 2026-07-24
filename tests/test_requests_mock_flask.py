@@ -178,6 +178,75 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
+@_MOCK_CTX_MARKER
+@pytest.mark.parametrize(
+    argnames="base_url",
+    argvalues=[
+        "http://www.example.com/service",
+        "http://www.example.com/service/",
+    ],
+)
+def test_base_url_path_prefix(
+    mock_ctx: _MockCtxType,
+    base_url: str,
+) -> None:
+    """A path in ``base_url`` prefixes the externally registered route."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/ping")
+    def _() -> str:
+        """Return a simple message."""
+        return "pong"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url=base_url,
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/service/ping",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "pong"
+
+
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
+def test_base_url_path_prefix_does_not_register_route_at_origin(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A prefixed route is not also registered at the URL origin."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/ping")
+    def _() -> str:
+        """Return a simple message."""
+        return "pong"  # pragma: no cover
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com/service",
+        )
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://www.example.com/ping",
+            )
+
+
 def _get_response_header_list(
     *,
     mock_obj: _MockObjType,

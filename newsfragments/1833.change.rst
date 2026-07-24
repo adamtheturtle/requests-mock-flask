@@ -1,0 +1,1 @@
+Path prefixes supplied in ``base_url`` are now preserved when registering Flask routes.
