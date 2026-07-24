@@ -35,7 +35,7 @@ def _without_transfer_encoding(
 def _normalize_body(
     body: str | bytes | Iterable[str | bytes] | None,
 ) -> str | bytes | None:
-    """Convert streaming request bodies to bytes for Werkzeug."""
+    """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
     return b"".join(
