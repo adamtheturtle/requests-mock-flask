@@ -2369,3 +2369,40 @@ def test_internationalized_host_rule_is_registered() -> None:
     )
 
     assert mock_obj.registered()
+
+
+@pytest.mark.parametrize(
+    argnames=("route", "url_path"),
+    argvalues=[
+        ("/café", "/café"),
+        ("/literal%2F", "/literal%252F"),
+    ],
+)
+@_MOCK_CTX_MARKER
+def test_percent_encoded_route(
+    mock_ctx: _MockCtxType,
+    route: str,
+    url_path: str,
+) -> None:
+    """Static routes are matched in their percent-encoded form."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule=route)
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url=f"http://www.example.com{url_path}",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"

@@ -7,7 +7,7 @@ import re
 from operator import methodcaller
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, BinaryIO
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 import httpretty
 import httpx
@@ -19,6 +19,7 @@ from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+    from wsgiref.types import StartResponse, WSGIEnvironment
 
     import flask
     import requests
@@ -253,7 +254,22 @@ def add_flask_app_to_mock(
     """
     base_url = _normalize_base_url(base_url=base_url)
     base_url = _normalize_base_url_host_to_idna(base_url=base_url)
-    transport = httpx.WSGITransport(app=flask_app)
+
+    def respx_wsgi_app(
+        environ: WSGIEnvironment,
+        start_response: StartResponse,
+    ) -> Iterable[bytes]:
+        """Normalize HTTPX's Unicode path to the WSGI latin-1
+        convention.
+        """
+        path_info = environ["PATH_INFO"]
+        environ["PATH_INFO"] = path_info.encode().decode("latin-1")
+        return flask_app.wsgi_app(
+            environ=environ,
+            start_response=start_response,
+        )
+
+    transport = httpx.WSGITransport(app=respx_wsgi_app)
 
     def respx_side_effect(
         request: httpx.Request,
@@ -361,7 +377,8 @@ def _rule_to_path_regex(rule: Rule) -> str:
             converter = rule_converters[data]
             path_parts.append(converter.regex)
         else:
-            path_parts.append(re.escape(pattern=data))
+            encoded_literal = quote(string=data, safe="/")
+            path_parts.append(re.escape(pattern=encoded_literal))
     return "".join(path_parts)
 
 
