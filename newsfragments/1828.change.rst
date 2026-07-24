@@ -1,0 +1,1 @@
+Escape regex meta-characters in literal URL components.
