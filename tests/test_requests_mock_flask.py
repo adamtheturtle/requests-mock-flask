@@ -370,8 +370,8 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
 def test_idna_normalization_accepts_non_host_url_components(
     base_url: str,
 ) -> None:
-    """IDNA normalization accepts credentials, ports, and hostless
-    URLs.
+    """IDNA normalization accepts credentials, ports, and URLs without
+    hosts.
     """
     app = Flask(import_name=__name__, static_folder=None)
     add_flask_app_to_mock(
