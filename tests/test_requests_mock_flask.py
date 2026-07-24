@@ -242,7 +242,8 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 def nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
-    statuses: dict[int, str] = getattr(httpretty, "http").STATUSES
+    http_module: Any = vars(httpretty)["http"]
+    statuses: dict[int, str] = http_module.STATUSES
     assert status_code not in statuses
     yield status_code
     statuses.pop(status_code, None)
