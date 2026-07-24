@@ -363,6 +363,7 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
     argvalues=[
         "a-path-with-é",
         "http://[::1]/café",
+        "http://example.com:invalid/café",
         "http://user:pass@münich.example:8080",
         "http://user@münich.example",
     ],
@@ -2178,3 +2179,22 @@ def test_internationalized_base_url(mock_ctx: _MockCtxType) -> None:
 
     assert mock_response.status_code == HTTPStatus.OK
     assert mock_response.text == "Hello, World!"
+
+
+def test_internationalized_host_rule_is_registered() -> None:
+    """A Unicode host rule applies to its IDNA-normalized base URL."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+    app.add_url_rule(
+        rule="/",
+        endpoint="internationalized",
+        host="münich.example",
+    )
+
+    mock_obj = responses.RequestsMock()
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=app,
+        base_url="http://münich.example",
+    )
+
+    assert mock_obj.registered()

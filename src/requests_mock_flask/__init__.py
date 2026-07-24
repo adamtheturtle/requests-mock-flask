@@ -70,7 +70,7 @@ def _host_rule_matches_base_url(
             converter = rule_converters[data]
             host_parts.append(f"(?:{converter.regex})")
         else:
-            host_parts.append(re.escape(pattern=data))
+            host_parts.append(re.escape(pattern=_host_to_idna(host=data)))
 
     host_pattern = "".join(host_parts)
     return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
@@ -160,7 +160,17 @@ def _normalize_base_url(*, base_url: str) -> str:
     )
 
 
-def _normalize_base_url_host_to_idna(base_url: str) -> str:
+def _host_to_idna(*, host: str) -> str:
+    """Return an internationalized host in ASCII IDNA form."""
+    if host.isascii() or ":" in host:
+        return host
+    return ".".join(
+        label.encode(encoding="idna").decode(encoding="ascii") if label else ""
+        for label in host.split(sep=".")
+    )
+
+
+def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
     """
     Return ``base_url`` with any internationalized host encoded using
     IDNA.
@@ -176,19 +186,15 @@ def _normalize_base_url_host_to_idna(base_url: str) -> str:
     host = split.hostname
     if host is None:
         return base_url
-    if ":" in host:
+    idna_host = _host_to_idna(host=host)
+    if idna_host == host:
         return base_url
 
-    idna_host = host.encode(encoding="idna").decode(encoding="ascii")
-    netloc = idna_host
-    if split.port is not None:
-        netloc = f"{netloc}:{split.port}"
-    if split.username is not None:
-        userinfo = split.username
-        if split.password is not None:
-            userinfo = f"{userinfo}:{split.password}"
-        netloc = f"{userinfo}@{netloc}"
-    return split._replace(netloc=netloc).geturl()
+    userinfo, separator, hostport = split.netloc.rpartition("@")
+    normalized_hostport = idna_host + hostport[len(host) :]
+    normalized_netloc = userinfo + separator + normalized_hostport
+    prefix, _, suffix = base_url.partition(split.netloc)
+    return prefix + normalized_netloc + suffix
 
 
 def add_flask_app_to_mock(
