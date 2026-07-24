@@ -1298,7 +1298,10 @@ def test_cookie_name_rejected_by_simplecookie(
     headers = {"Cookie": "good=1; bad@name=2; second=3"}
     expected_pairs = [["good", "1"], ["bad@name", "2"], ["second", "3"]]
 
-    direct_response = app.test_client(use_cookies=False).get("/", headers=headers)
+    direct_response = app.test_client(use_cookies=False).get(
+        "/",
+        headers=headers,
+    )
     assert direct_response.status_code == HTTPStatus.OK
     assert direct_response.json == {"pairs": expected_pairs}
 
