@@ -1731,6 +1731,44 @@ def test_string_variable_rejects_extra_segments(
             )
 
 
+@_MOCK_CTX_MARKER_NO_HTTPRETTY
+def test_literal_url_components_are_escaped(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """Regex metacharacters in literal URL components stay literal."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/literal.json")
+    def _() -> str:
+        """Return a simple message."""
+        return "matched"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://api.example.com",
+        )
+        matched_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://api.example.com/literal.json",
+        )
+        assert matched_response.status_code == HTTPStatus.OK
+        assert matched_response.text == "matched"
+
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://apiXexampleYcom/literalXjson",
+            )
+
+
 def test_unknown_mock_module() -> None:
     """When an unknown mock module is passed in, an error is raised."""
     app = Flask(import_name=__name__, static_folder=None)
