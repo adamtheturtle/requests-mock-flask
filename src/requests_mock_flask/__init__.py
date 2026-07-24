@@ -358,7 +358,7 @@ def _requests_mock_callback(
         # requests-mock exposes headers as ``dict[str, str]``, so its callback
         # context cannot represent repeated fields.
         # ``response.status`` is the full WSGI status line, so preserve its
-        # reason phrase through requests-mock's callback context.
+        # reason phrase through the requests-mock callback context.
         _, _, reason_phrase = response.status.partition(" ")
         context.headers = dict(response.headers)
         context.status_code = response.status_code
