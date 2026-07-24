@@ -238,8 +238,8 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
     assert warnings == expected_warning
 
 
-@pytest.fixture
-def nonstandard_httpretty_status() -> Iterator[int]:
+@pytest.fixture(name="nonstandard_httpretty_status")
+def fixture_nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
     http_module: Any = vars(httpretty)["http"]
