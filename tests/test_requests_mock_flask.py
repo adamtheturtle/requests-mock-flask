@@ -10,6 +10,7 @@ from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
+from io import BytesIO
 from types import ModuleType
 from typing import Any, Final
 
@@ -1298,6 +1299,30 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
     assert mock_response.status_code == expected_status_code
     if delivers_body:
         assert mock_response.text == expected_data.decode()
+
+
+def test_file_like_request_body() -> None:
+    """A readable, non-iterable request body remains supported."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.post("/")
+    def _() -> bytes:
+        """Echo the request body."""
+        return request.get_data()
+
+    with requests_mock.Mocker() as mock_obj:
+        add_flask_app_to_mock(
+            mock_obj=mock_obj,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        response = requests.post(
+            "http://www.example.com",
+            data=BytesIO(b"body"),
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.content == b"body"
 
 
 @_MOCK_CTX_MARKER

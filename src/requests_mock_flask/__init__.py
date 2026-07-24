@@ -4,7 +4,7 @@ import dataclasses
 import re
 from collections.abc import Callable, Iterable
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import httpretty
@@ -33,13 +33,16 @@ def _without_transfer_encoding(
 
 
 def _normalize_body(
-    body: str | bytes | Iterable[str | bytes] | None,
-) -> str | bytes | None:
+    body: Any,
+) -> Any:
     """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
+    if not isinstance(body, Iterable):
+        return body
     return b"".join(
-        part.encode() if isinstance(part, str) else part for part in body
+        part.encode() if isinstance(part, str) else part
+        for part in cast("Iterable[str | bytes]", body)
     )
 
 
