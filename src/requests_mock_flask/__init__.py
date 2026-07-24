@@ -188,7 +188,8 @@ def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
         return base_url
 
     userinfo, separator, hostport = split.netloc.rpartition("@")
-    normalized_hostport = idna_host + hostport[len(host) :]
+    _, port_separator, port = hostport.partition(":")
+    normalized_hostport = idna_host + port_separator + port
     normalized_netloc = userinfo + separator + normalized_hostport
     prefix, _, suffix = base_url.partition(split.netloc)
     return prefix + normalized_netloc + suffix
