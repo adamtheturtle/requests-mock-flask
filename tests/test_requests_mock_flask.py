@@ -1937,13 +1937,19 @@ def test_host_matching_rule_respects_converter(
     *,
     should_register: bool,
 ) -> None:
-    """Dynamic host rules use their Werkzeug converter constraints."""
+    """Dynamic host rules use their routing converter constraints."""
     app = Flask(import_name=__name__, host_matching=True, static_folder=None)
 
     @app.route(rule="/", host="<int:tenant>.example.com")
     def _(tenant: int) -> str:
         """Return the converted tenant."""
         return str(tenant)
+
+    direct_response = app.test_client().get(
+        "/",
+        base_url="http://123.example.com",
+    )
+    assert direct_response.text == "123"
 
     mock_obj = responses.RequestsMock()
     add_flask_app_to_mock(
