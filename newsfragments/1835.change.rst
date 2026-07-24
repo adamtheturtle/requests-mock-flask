@@ -1,0 +1,1 @@
+Requests to the form without a trailing slash of a slash-terminated Flask route are now forwarded so that Flask can produce its trailing-slash redirect.
