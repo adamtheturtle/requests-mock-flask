@@ -27,7 +27,6 @@ from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map
 
-import requests_mock_flask
 from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being
@@ -1304,11 +1303,31 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
 
 def test_file_like_request_body() -> None:
     """A readable, non-iterable request body remains supported."""
-    body = BytesIO(initial_bytes=b"body")
-    normalize_body: Callable[[object], object] = vars(requests_mock_flask)[
-        "_normalize_body"
-    ]
-    assert normalize_body(body) == b"body"
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", methods=["POST"])
+    def _() -> bytes:
+        """Echo the request body."""
+        return request.get_data()
+
+    prepared_request = requests.Request(
+        method="POST",
+        url="http://www.example.com",
+        data=BytesIO(initial_bytes=b"body"),
+    ).prepare()
+
+    with requests_mock.Mocker() as mock_obj:
+        add_flask_app_to_mock(
+            mock_obj=mock_obj,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        response = requests.Session().send(
+            request=prepared_request,
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.content == b"body"
 
 
 @_MOCK_CTX_MARKER
