@@ -50,6 +50,32 @@ _MockObjType = (
 )
 
 
+def _host_rule_matches_base_url(
+    *,
+    rule: "Rule",
+    base_url_host: str | None,
+) -> bool:
+    """Return whether a Flask host rule applies to ``base_url_host``."""
+    if base_url_host is None:
+        return False
+
+    rule.compile()
+    host_parts: list[str] = []
+    rule_attributes: Any = vars(rule)
+    rule_trace = rule_attributes["_trace"]
+    rule_converters = rule_attributes["_converters"]
+    separator_index = rule_trace.index((False, "|"))
+    for is_dynamic, data in rule_trace[:separator_index]:
+        if is_dynamic:
+            converter = rule_converters[data]
+            host_parts.append(f"(?:{converter.regex})")
+        else:
+            host_parts.append(re.escape(pattern=data))
+
+    host_pattern = "".join(host_parts)
+    return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
+
+
 @dataclasses.dataclass(frozen=True)
 class _MockCallbacks:
     """Callbacks for each supported mock back end."""
@@ -190,7 +216,13 @@ def add_flask_app_to_mock(
         httpretty=httpretty_callback,
     )
 
+    base_url_host = urlsplit(url=base_url).hostname
     for rule in flask_app.url_map.iter_rules():
+        if rule.host is not None and not _host_rule_matches_base_url(
+            rule=rule,
+            base_url_host=base_url_host,
+        ):
+            continue
         # Build the URL pattern from the framework's parsed rule metadata.
         # Re-parsing ``rule.rule`` with a naive regex breaks on
         # converter arguments that contain a quoted ``>`` (e.g.

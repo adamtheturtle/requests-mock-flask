@@ -50,6 +50,23 @@ _MOCK_CTXS: list[_MockCtxType] = [
 
 _MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx"]
 
+
+def test_host_rule_does_not_match_hostless_base_url() -> None:
+    """A host-constrained rule cannot match a URL without a host."""
+    app = Flask(import_name=__name__, static_folder=None, host_matching=True)
+
+    @app.route(rule="/", host="example.com")
+    def _() -> str:
+        """Return a simple message."""
+        return "matched"  # pragma: no cover
+
+    add_flask_app_to_mock(
+        mock_obj=responses.RequestsMock(),
+        flask_app=app,
+        base_url="hostless",
+    )
+
+
 _MOCK_CTX_MARKER = pytest.mark.parametrize(
     argnames="mock_ctx",
     argvalues=_MOCK_CTXS,
@@ -1959,3 +1976,118 @@ def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
 
     direct_response = test_client.get("/folder/")
     assert direct_response.data == b"Hello, World!"
+
+
+def _host_matching_app() -> Flask:
+    """Create an app with one host-constrained route."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+
+    @app.route(rule="/", host="api.example.com")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    return app
+
+
+def test_host_matching_rule_treats_dots_as_literals() -> None:
+    """Dots in a host rule do not match arbitrary characters."""
+    mock_obj = responses.RequestsMock()
+
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=_host_matching_app(),
+        base_url="http://apiXexampleYcom",
+    )
+
+    assert not mock_obj.registered()
+
+
+@pytest.mark.parametrize(
+    argnames=("base_url", "should_register"),
+    argvalues=[
+        pytest.param("http://123.example.com", True, id="valid"),
+        pytest.param("http://tenant.example.com", False, id="invalid"),
+    ],
+)
+def test_host_matching_rule_respects_converter(
+    base_url: str,
+    *,
+    should_register: bool,
+) -> None:
+    """Dynamic host rules use their routing converter constraints."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+
+    @app.route(rule="/", host="<int:tenant>.example.com")
+    def _(tenant: int) -> str:
+        """Return the converted tenant."""
+        return f"{tenant}"
+
+    direct_response = app.test_client().get(
+        "/",
+        base_url="http://123.example.com",
+    )
+    assert direct_response.text == "123"
+
+    mock_obj = responses.RequestsMock()
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=app,
+        base_url=base_url,
+    )
+
+    assert bool(mock_obj.registered()) is should_register
+
+
+@_MOCK_CTX_MARKER
+def test_host_matching_rule_not_registered_for_other_host(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A host-constrained rule is skipped for a different base URL
+    host.
+    """
+    app = _host_matching_app()
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://other.example.com",
+        )
+        expected_exceptions: tuple[type[Exception], ...] = (
+            AllMockedAssertionError,
+            requests.exceptions.ConnectionError,
+            NoMockAddress,
+            ValueError,
+        )
+        with pytest.raises(expected_exception=expected_exceptions):
+            _do_get(
+                mock_obj=mock_obj_to_add,
+                url="http://other.example.com/",
+            )
+
+
+@_MOCK_CTX_MARKER
+def test_host_matching_rule_registered_for_matching_host(
+    mock_ctx: _MockCtxType,
+) -> None:
+    """A host-constrained rule is registered for a matching base URL
+    host.
+    """
+    app = _host_matching_app()
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://api.example.com",
+        )
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://api.example.com/",
+        )
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"
