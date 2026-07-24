@@ -1856,7 +1856,8 @@ def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
         """Return a simple message."""
         return "Hello, World!"
 
-    response = app.test_client().get("/folder", follow_redirects=False)
+    test_client = app.test_client()
+    response = test_client.get("/folder", follow_redirects=False)
     expected_status_code = HTTPStatus.PERMANENT_REDIRECT
     expected_location_suffix = "/folder/"
     assert response.status_code == expected_status_code

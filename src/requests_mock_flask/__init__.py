@@ -181,19 +181,20 @@ def add_flask_app_to_mock(
         # should still be forwarded to the Flask app so that it can produce the
         # appropriate response (e.g. a 404). Literal parts are kept literal.
         path_to_match = _rule_to_path_regex(rule=rule)
-        paths_to_match = [path_to_match]
+        patterns = [urljoin(base=base_url, url=path_to_match)]
         has_slashless_redirect = (
             rule.strict_slashes
             and path_to_match.endswith("/")
             and path_to_match != "/"
         )
-        if has_slashless_redirect:
-            paths_to_match.append(path_to_match.rstrip("/"))
-        urls = tuple(
-            re.compile(
-                pattern=urljoin(base=base_url, url=path) + r"(\?.*)?$",
+        if path_to_match == "/":
+            patterns.append(patterns[0].rstrip("/"))
+        elif has_slashless_redirect:
+            patterns.append(
+                urljoin(base=base_url, url=path_to_match.rstrip("/"))
             )
-            for path in paths_to_match
+        urls = tuple(
+            re.compile(pattern=pattern + r"(\?.*)?$") for pattern in patterns
         )
 
         methods = (rule.methods or set()) | _KNOWN_HTTP_METHODS
