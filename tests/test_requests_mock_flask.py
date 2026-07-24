@@ -10,7 +10,6 @@ from collections.abc import Callable, Iterator
 from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
-from io import BytesIO
 from types import ModuleType
 from typing import Any, Final
 
@@ -1305,7 +1304,19 @@ def test_file_like_request_body() -> None:
     """A readable, non-iterable request body remains supported."""
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.post("/")
+    class ReadableBody:
+        """A file-like body without an iterator."""
+
+        consumed = False
+
+        def read(self, _size: int = -1) -> bytes:
+            """Return the body once."""
+            if self.consumed:
+                return b""
+            self.consumed = True
+            return b"body"
+
+    @app.post(rule="/")
     def _() -> bytes:
         """Echo the request body."""
         return request.get_data()
@@ -1317,8 +1328,8 @@ def test_file_like_request_body() -> None:
             base_url="http://www.example.com",
         )
         response = requests.post(
-            "http://www.example.com",
-            data=BytesIO(b"body"),
+            url="http://www.example.com",
+            data=ReadableBody(),
             timeout=_TIMEOUT_SECONDS,
         )
 
