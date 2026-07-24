@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
     import flask
     import requests
+    from _typeshed.wsgi import StartResponse, WSGIEnvironment
     from werkzeug.routing import Rule
 
     type _RequestBody = (
@@ -253,7 +254,19 @@ def add_flask_app_to_mock(
     """
     base_url = _normalize_base_url(base_url=base_url)
     base_url = _normalize_base_url_host_to_idna(base_url=base_url)
-    transport = httpx.WSGITransport(app=flask_app)
+
+    def respx_wsgi_app(
+        environ: "WSGIEnvironment",
+        start_response: "StartResponse",
+    ) -> Iterable[bytes]:
+        """Normalize HTTPX's Unicode path to the WSGI latin-1
+        convention.
+        """
+        path_info = environ["PATH_INFO"]
+        environ["PATH_INFO"] = path_info.encode().decode("latin-1")
+        return flask_app.wsgi_app(environ, start_response)
+
+    transport = httpx.WSGITransport(app=respx_wsgi_app)
 
     def respx_side_effect(
         request: httpx.Request,
