@@ -1308,7 +1308,7 @@ def test_file_like_request_body() -> None:
     normalize_body: Callable[[object], object] = vars(requests_mock_flask)[
         "_normalize_body"
     ]
-    assert normalize_body(body) is body
+    assert normalize_body(body) == b"body"
 
 
 @_MOCK_CTX_MARKER

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import dataclasses
 import re
-from collections.abc import Callable, Iterable
+from operator import methodcaller
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, BinaryIO, TypeGuard
+from typing import TYPE_CHECKING, Any, BinaryIO
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
 import httpretty
@@ -18,6 +18,8 @@ import werkzeug
 from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     import flask
     import requests
     from werkzeug.routing import Rule
@@ -36,19 +38,20 @@ def _without_transfer_encoding(
     ]
 
 
-def _is_binary_io(body: object) -> TypeGuard[BinaryIO]:
+def _is_binary_io(body: object) -> bool:
     """Return whether the body provides a file-like ``read`` method."""
     return any("read" in vars(cls) for cls in type(body).mro())
 
 
 def _normalize_body(
     body: _RequestBody,
-) -> str | bytes | BinaryIO | None:
+) -> str | bytes | None:
     """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
     if _is_binary_io(body=body):
-        return body
+        body_bytes: bytes = methodcaller("read")(body)
+        return body_bytes
     return b"".join(
         part.encode() if isinstance(part, str) else part for part in body
     )
