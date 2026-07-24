@@ -359,6 +359,30 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
     assert mock_response.content == expected_data
 
 
+@pytest.mark.parametrize(
+    argnames="base_url",
+    argvalues=[
+        "a-path-with-é",
+        "http://[::1]/café",
+        "http://example.com:invalid/café",
+        "http://user:pass@münich.example:8080",
+        "http://user@münich.example",
+    ],
+)
+def test_idna_normalization_accepts_non_host_url_components(
+    base_url: str,
+) -> None:
+    """IDNA normalization accepts credentials, ports, and URLs without
+    hosts.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+    add_flask_app_to_mock(
+        mock_obj=responses.RequestsMock(),
+        flask_app=app,
+        base_url=base_url,
+    )
+
+
 @_MOCK_CTX_MARKER
 def test_uppercase_base_url_host(mock_ctx: _MockCtxType) -> None:
     """A ``base_url`` with an uppercase host is matched case-insensitively."""
@@ -2230,3 +2254,55 @@ def test_host_matching_rule_registered_for_matching_host(
 
     assert mock_response.status_code == HTTPStatus.OK
     assert mock_response.text == "Hello, World!"
+
+
+@pytest.mark.parametrize(
+    argnames="base_url",
+    argvalues=[
+        pytest.param("http://münich.example", id="unicode"),
+        pytest.param("http://m%C3%BCnich.example", id="percent-encoded"),
+    ],
+)
+@_MOCK_CTX_MARKER
+def test_internationalized_base_url(
+    mock_ctx: _MockCtxType,
+    base_url: str,
+) -> None:
+    """A Unicode base URL host is registered in its ASCII IDNA form."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url=base_url,
+        )
+        mock_response = _do_get(mock_obj=mock_obj_to_add, url=base_url)
+
+    assert mock_response.status_code == HTTPStatus.OK
+    assert mock_response.text == "Hello, World!"
+
+
+def test_internationalized_host_rule_is_registered() -> None:
+    """A Unicode host rule applies to its IDNA-normalized base URL."""
+    app = Flask(import_name=__name__, host_matching=True, static_folder=None)
+    app.add_url_rule(
+        rule="/",
+        endpoint="internationalized",
+        host="münich.example",
+    )
+
+    mock_obj = responses.RequestsMock()
+    add_flask_app_to_mock(
+        mock_obj=mock_obj,
+        flask_app=app,
+        base_url="http://münich.example",
+    )
+
+    assert mock_obj.registered()

@@ -1,0 +1,1 @@
+Internationalized ``base_url`` host names are now normalized to their IDNA form so that internationalized routes are intercepted.

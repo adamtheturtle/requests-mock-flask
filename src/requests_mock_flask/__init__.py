@@ -116,7 +116,7 @@ def _host_rule_matches_base_url(
             converter = rule_converters[data]
             host_parts.append(f"(?:{converter.regex})")
         else:
-            host_parts.append(re.escape(pattern=data))
+            host_parts.append(re.escape(pattern=_host_to_idna(host=data)))
 
     host_pattern = "".join(host_parts)
     return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
@@ -206,6 +206,41 @@ def _normalize_base_url(*, base_url: str) -> str:
     )
 
 
+def _host_to_idna(*, host: str) -> str:
+    """Return an internationalized host in ASCII IDNA form."""
+    if host.isascii() or ":" in host:
+        return host
+    return ".".join(
+        label.encode(encoding="idna").decode(encoding="ascii") if label else ""
+        for label in host.split(sep=".")
+    )
+
+
+def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
+    """
+    Return ``base_url`` with any internationalized host encoded using
+    IDNA.
+
+    HTTP clients convert Unicode host names to their ASCII IDNA form
+    before sending a request, so the registered pattern must use the same
+    ASCII form in order to intercept those requests.
+    """
+    split = urlsplit(url=base_url)
+    host = split.hostname
+    if host is None:
+        return base_url
+    idna_host = _host_to_idna(host=host)
+    if idna_host == host:
+        return base_url
+
+    userinfo, separator, hostport = split.netloc.rpartition("@")
+    _, port_separator, port = hostport.partition(":")
+    normalized_hostport = idna_host + port_separator + port
+    normalized_netloc = userinfo + separator + normalized_hostport
+    prefix, _, suffix = base_url.partition(split.netloc)
+    return prefix + normalized_netloc + suffix
+
+
 def add_flask_app_to_mock(
     mock_obj: _MockObjType,
     flask_app: flask.Flask,
@@ -217,6 +252,7 @@ def add_flask_app_to_mock(
     ``Flask`` app, when in the context of the ``mock_obj``.
     """
     base_url = _normalize_base_url(base_url=base_url)
+    base_url = _normalize_base_url_host_to_idna(base_url=base_url)
     transport = httpx.WSGITransport(app=flask_app)
 
     def respx_side_effect(
