@@ -21,16 +21,26 @@ if TYPE_CHECKING:
     from werkzeug.routing import Rule
 
 
-def _without_transfer_encoding(headers: Iterable[tuple[str, str]]) -> list[tuple[str, str]]:
+def _without_transfer_encoding(
+    headers: Iterable[tuple[str, str]],
+) -> list[tuple[str, str]]:
     """Return headers excluding ``Transfer-Encoding``."""
-    return [(key, value) for key, value in headers if key.lower() != "transfer-encoding"]
+    return [
+        (key, value)
+        for key, value in headers
+        if key.lower() != "transfer-encoding"
+    ]
 
 
-def _normalize_body(body: str | bytes | Iterable[str | bytes] | None) -> str | bytes | None:
+def _normalize_body(
+    body: str | bytes | Iterable[str | bytes] | None,
+) -> str | bytes | None:
     """Convert streaming request bodies to bytes for Werkzeug."""
     if body is None or isinstance(body, str | bytes):
         return body
-    return b"".join(part.encode() if isinstance(part, str) else part for part in body)
+    return b"".join(
+        part.encode() if isinstance(part, str) else part for part in body
+    )
 
 
 # Known HTTP methods to register for every route URL. We register all of
@@ -319,7 +329,9 @@ def _responses_callback(
     if "Content-Length" in request.headers:
         environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
 
-    headers_dict = _without_transfer_encoding(headers=dict(request.headers).items())
+    headers_dict = _without_transfer_encoding(
+        headers=dict(request.headers).items(),
+    )
     split_url = urlsplit(url=str(object=request.url))
     base_url = f"{split_url.scheme}://{split_url.netloc}/"
     environ_builder = werkzeug.test.EnvironBuilder(
