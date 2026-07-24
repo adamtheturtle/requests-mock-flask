@@ -600,6 +600,7 @@ def test_route_with_custom_nonisolating_converter(
         regex = ".*?"
         part_isolating = False
 
+    assert not _EverythingConverter.part_isolating
     app.url_map.converters["everything"] = _EverythingConverter
 
     @app.route(rule="/files/<everything:value>")
