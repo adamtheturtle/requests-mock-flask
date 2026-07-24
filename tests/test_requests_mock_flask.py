@@ -55,10 +55,10 @@ def test_host_rule_does_not_match_hostless_base_url() -> None:
     """A host-constrained rule cannot match a URL without a host."""
     app = Flask(import_name=__name__, static_folder=None, host_matching=True)
 
-    @app.route("/", host="example.com")
+    @app.route(rule="/", host="example.com")
     def _() -> str:
         """Return a simple message."""
-        return "matched"
+        return "matched"  # pragma: no cover
 
     add_flask_app_to_mock(
         mock_obj=responses.RequestsMock(),
