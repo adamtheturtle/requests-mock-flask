@@ -260,10 +260,12 @@ def _responses_callback(
         environ_overrides=environ_overrides,
     )
 
-    response = test_client.open(environ_builder.get_request())
-
-    response_headers = HTTPHeaderDict(headers=response.headers)
-    return (response.status_code, response_headers, bytes(response.data))
+    with test_client.open(environ_builder.get_request()) as response:
+        return (
+            response.status_code,
+            HTTPHeaderDict(headers=response.headers),
+            bytes(response.data),
+        )
 
 
 def _httpretty_callback(
@@ -308,10 +310,12 @@ def _httpretty_callback(
         data=request.body,
         environ_overrides=environ_overrides,
     )
-    response = test_client.open(environ_builder.get_request())
-
-    response_headers = HTTPHeaderDict(headers=response.headers)
-    return (response.status_code, response_headers, response.data)
+    with test_client.open(environ_builder.get_request()) as response:
+        return (
+            response.status_code,
+            HTTPHeaderDict(headers=response.headers),
+            response.data,
+        )
 
 
 def _requests_mock_callback(
@@ -350,10 +354,9 @@ def _requests_mock_callback(
         data=request.body,
         environ_overrides=environ_overrides,
     )
-    response = test_client.open(environ_builder.get_request())
-
-    # requests-mock exposes headers as ``dict[str, str]``, so its callback
-    # context cannot represent repeated fields.
-    context.headers = dict(response.headers)
-    context.status_code = response.status_code
-    return bytes(response.data)
+    with test_client.open(environ_builder.get_request()) as response:
+        # requests-mock exposes headers as ``dict[str, str]``, so its callback
+        # context cannot represent repeated fields.
+        context.headers = dict(response.headers)
+        context.status_code = response.status_code
+        return bytes(response.data)
