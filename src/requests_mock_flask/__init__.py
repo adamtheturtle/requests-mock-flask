@@ -13,6 +13,7 @@ import requests_mock
 import responses
 import respx
 import werkzeug
+from urllib3 import HTTPHeaderDict
 from werkzeug.routing.converters import PathConverter
 
 if TYPE_CHECKING:
@@ -132,7 +133,7 @@ def add_flask_app_to_mock(
 
     def responses_callback(
         request: "requests.PreparedRequest",
-    ) -> tuple[int, dict[str, str], bytes]:
+    ) -> tuple[int, HTTPHeaderDict, bytes]:
         """Callback for responses."""
         return _responses_callback(request=request, flask_app=flask_app)
 
@@ -151,7 +152,7 @@ def add_flask_app_to_mock(
         request: "httpretty.core.HTTPrettyRequest",
         uri: str,
         headers: dict[str, Any],
-    ) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+    ) -> tuple[int, HTTPHeaderDict, bytes]:
         """Callback for HTTPretty."""
         return _httpretty_callback(
             request=request,
@@ -229,7 +230,7 @@ def _rule_to_path_regex(rule: "Rule") -> str:
 def _responses_callback(
     request: "requests.PreparedRequest",
     flask_app: "flask.Flask",
-) -> tuple[int, dict[str, str], bytes]:
+) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the flask app, send an equivalent request to an
     in
     memory fake of the flask app and return some key details of the
@@ -264,7 +265,8 @@ def _responses_callback(
 
     response = test_client.open(environ_builder.get_request())
 
-    return (response.status_code, dict(response.headers), bytes(response.data))
+    response_headers = HTTPHeaderDict(headers=response.headers)
+    return (response.status_code, response_headers, bytes(response.data))
 
 
 def _httpretty_callback(
@@ -272,7 +274,7 @@ def _httpretty_callback(
     uri: str,
     headers: dict[str, Any],
     flask_app: "flask.Flask",
-) -> tuple[int, dict[str, str | int | bool | None], bytes]:
+) -> tuple[int, HTTPHeaderDict, bytes]:
     """Given a request to the Flask app, send an equivalent request to an
     in
     memory fake of the Flask app and return some key details of the
@@ -311,7 +313,8 @@ def _httpretty_callback(
     )
     response = test_client.open(environ_builder.get_request())
 
-    return (response.status_code, dict(response.headers), response.data)
+    response_headers = HTTPHeaderDict(headers=response.headers)
+    return (response.status_code, response_headers, response.data)
 
 
 def _requests_mock_callback(
@@ -352,6 +355,8 @@ def _requests_mock_callback(
     )
     response = test_client.open(environ_builder.get_request())
 
+    # requests-mock exposes headers as ``dict[str, str]``, so its callback
+    # context cannot represent repeated fields.
     context.headers = dict(response.headers)
     context.status_code = response.status_code
     return bytes(response.data)

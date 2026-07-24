@@ -134,6 +134,103 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert mock_response.text == expected_data.decode()
 
 
+def _get_response_header_list(
+    *,
+    mock_obj: _MockObjType,
+    response: requests.Response | httpx.Response,
+    name: str,
+) -> list[str]:
+    """Get every value for a repeated response header across HTTP
+    clients.
+    """
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        assert isinstance(response, httpx.Response)
+        return response.headers.get_list(key=name)
+    assert isinstance(response, requests.Response)
+    header_values: list[str] = response.raw.headers.getlist(key=name)
+    return header_values
+
+
+_REPEATED_HEADERS_MOCK_CTX_MARKER = pytest.mark.parametrize(
+    argnames="mock_ctx",
+    argvalues=[
+        pytest.param(_MOCK_CTXS[0], id="responses"),
+        pytest.param(
+            _MOCK_CTXS[1],
+            id="requests_mock",
+            marks=pytest.mark.xfail(
+                reason=(
+                    "requests-mock exposes response headers as a plain dict "
+                    "and cannot emit repeated header fields."
+                ),
+                strict=True,
+            ),
+        ),
+        pytest.param(
+            _MOCK_CTXS[2],
+            id="httpretty",
+            marks=pytest.mark.xfail(
+                reason=(
+                    "HTTPretty normalises response headers into a plain "
+                    "dict and cannot emit repeated header fields."
+                ),
+                strict=True,
+            ),
+        ),
+        pytest.param(_MOCK_CTXS[3], id="respx"),
+    ],
+)
+
+
+@_REPEATED_HEADERS_MOCK_CTX_MARKER
+def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
+    """Repeated response headers are preserved, not collapsed to one value."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return a response with repeated ``Set-Cookie`` and
+        ``Warning``.
+        """
+        response = make_response("Hello, World!")
+        response.headers.add("Set-Cookie", "a=1; Path=/")
+        response.headers.add("Set-Cookie", "b=2; Path=/")
+        response.headers.add("Warning", "199 first")
+        response.headers.add("Warning", "299 second")
+        return response
+
+    expected_set_cookie = ["a=1; Path=/", "b=2; Path=/"]
+    expected_warning = ["199 first", "299 second"]
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+        )
+
+    set_cookies = _get_response_header_list(
+        mock_obj=mock_obj_to_add,
+        response=mock_response,
+        name="Set-Cookie",
+    )
+    warnings = _get_response_header_list(
+        mock_obj=mock_obj_to_add,
+        response=mock_response,
+        name="Warning",
+    )
+
+    assert set_cookies == expected_set_cookie
+    assert warnings == expected_warning
+
+
 @_MOCK_CTX_MARKER
 def test_binary_response(mock_ctx: _MockCtxType) -> None:
     """A binary response body is preserved byte-for-byte."""

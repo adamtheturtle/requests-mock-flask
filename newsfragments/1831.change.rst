@@ -1,0 +1,1 @@
+Repeated response headers such as ``Set-Cookie`` and ``Warning`` are now preserved by the ``responses`` and ``requests_mock`` back ends instead of being collapsed to a single value.
