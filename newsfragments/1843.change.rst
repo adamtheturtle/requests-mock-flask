@@ -1,0 +1,1 @@
+Custom HTTP reason phrases from Flask responses are now preserved for the ``requests_mock`` back end.

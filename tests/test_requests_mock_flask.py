@@ -501,6 +501,69 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
 
 
 @_MOCK_CTX_MARKER
+def test_custom_reason_phrase(mock_ctx: _MockCtxType) -> None:
+    """A custom HTTP reason phrase is preserved where the back end allows
+    it.
+
+    Only ``requests_mock`` exposes an API to set the reason phrase:
+
+    * ``responses`` derives the reason from a status-code map, so an unknown
+      code has no reason.
+    * ``respx`` reads the phrase via the ``httpx`` WSGI transport, which drops
+      it, so the reason phrase is empty.
+    * HTTPretty crashes on unknown status codes (tracked in #1844), so it is
+      not exercised here.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> Response:
+        """Return a response with a custom reason phrase."""
+        return Response(response="Hello", status="299 Custom Reason")
+
+    test_client = app.test_client()
+    response = test_client.get("/")
+
+    expected_status_code = 299
+
+    assert response.status == "299 Custom Reason"
+    assert response.status_code == expected_status_code
+
+    with mock_ctx() as mock_obj:
+        mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
+
+        if mock_obj_to_add is httpretty:
+            pytest.skip(
+                reason="HTTPretty crashes on unknown status codes; see #1844."
+            )
+
+        add_flask_app_to_mock(
+            mock_obj=mock_obj_to_add,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com",
+        )
+
+    assert mock_response.status_code == expected_status_code
+
+    if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+        assert isinstance(mock_response, httpx.Response)
+        assert mock_response.reason_phrase == ""
+    elif isinstance(
+        mock_obj_to_add, (requests_mock.Mocker, requests_mock.Adapter)
+    ):
+        assert isinstance(mock_response, requests.Response)
+        assert mock_response.reason == "Custom Reason"
+    else:
+        assert isinstance(mock_response, requests.Response)
+        assert mock_response.reason is None
+
+
+@_MOCK_CTX_MARKER
 def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
     """A route with a variable works."""
     app = Flask(import_name=__name__, static_folder=None)
