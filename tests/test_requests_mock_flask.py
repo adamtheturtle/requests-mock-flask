@@ -2371,12 +2371,23 @@ def test_internationalized_host_rule_is_registered() -> None:
     assert mock_obj.registered()
 
 
+@pytest.mark.parametrize(
+    argnames=("route", "url_path"),
+    argvalues=[
+        ("/café", "/café"),
+        ("/literal%2F", "/literal%252F"),
+    ],
+)
 @_MOCK_CTX_MARKER
-def test_non_ascii_route(mock_ctx: _MockCtxType) -> None:
-    """A non-ASCII static route is matched in percent-encoded form."""
+def test_percent_encoded_route(
+    mock_ctx: _MockCtxType,
+    route: str,
+    url_path: str,
+) -> None:
+    """Static routes are matched in their percent-encoded form."""
     app = Flask(import_name=__name__, static_folder=None)
 
-    @app.route(rule="/café")
+    @app.route(rule=route)
     def _() -> str:
         """Return a simple message."""
         return "Hello, World!"
@@ -2390,7 +2401,7 @@ def test_non_ascii_route(mock_ctx: _MockCtxType) -> None:
         )
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
-            url="http://www.example.com/café",
+            url=f"http://www.example.com{url_path}",
         )
 
     assert mock_response.status_code == HTTPStatus.OK
