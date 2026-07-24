@@ -568,7 +568,7 @@ def test_route_with_custom_nonisolating_converter(
     """A custom non-isolating converter can span path segments."""
     app = Flask(import_name=__name__, static_folder=None)
 
-    class _EverythingConverter(werkzeug.routing.BaseConverter):
+    class _EverythingConverter(BaseConverter):
         """Match values containing slashes."""
 
         regex = ".*?"
