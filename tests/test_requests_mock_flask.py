@@ -26,10 +26,7 @@ from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map
 
-from requests_mock_flask import (
-    _host_rule_matches_base_url,
-    add_flask_app_to_mock,
-)
+from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being
 # made.
@@ -54,11 +51,19 @@ _MOCK_CTXS: list[_MockCtxType] = [
 _MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx"]
 
 
-def test_host_rule_does_not_match_missing_base_url_host() -> None:
+def test_host_rule_does_not_match_hostless_base_url() -> None:
     """A host-constrained rule cannot match a URL without a host."""
-    assert not _host_rule_matches_base_url(
-        host_rule="example.com",
-        base_url_host=None,
+    app = Flask(import_name=__name__, static_folder=None, host_matching=True)
+
+    @app.route("/", host="example.com")
+    def _() -> str:
+        """Return a simple message."""
+        return "matched"
+
+    add_flask_app_to_mock(
+        mock_obj=responses.RequestsMock(),
+        flask_app=app,
+        base_url="hostless",
     )
 
 
