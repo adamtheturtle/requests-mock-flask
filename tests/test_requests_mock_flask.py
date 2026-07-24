@@ -11,7 +11,7 @@ from contextlib import AbstractContextManager
 from functools import partial
 from http import HTTPStatus
 from types import ModuleType
-from typing import Any, Final, cast
+from typing import Any, Final
 
 import httpretty
 import httpx
@@ -242,10 +242,7 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 def nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
-    statuses = cast(
-        "dict[int, str]",
-        httpretty.http.STATUSES,
-    )
+    statuses: dict[int, str] = getattr(httpretty, "http").STATUSES
     assert status_code not in statuses
     yield status_code
     statuses.pop(status_code, None)
