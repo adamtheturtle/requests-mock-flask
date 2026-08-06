@@ -103,8 +103,8 @@ def _do_get(
     *,
     mock_obj: _MockObjType,
     url: str,
-    headers: dict[str, str] | None = None,  # noqa: NOD001
-    allow_redirects: bool = True,  # noqa: NOD001
+    headers: dict[str, str] | None,
+    allow_redirects: bool,
 ) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
@@ -126,7 +126,7 @@ def _do_post(
     *,
     mock_obj: _MockObjType,
     url: str,
-    cookies: dict[str, str] | None = None,  # noqa: NOD001
+    cookies: dict[str, str] | None,
 ) -> requests.Response | httpx.Response:
     """Make a POST request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
@@ -171,6 +171,8 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -209,6 +211,8 @@ def test_base_url_path_prefix(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/service/ping",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == HTTPStatus.OK
@@ -244,6 +248,8 @@ def test_base_url_path_prefix_does_not_register_route_at_origin(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/ping",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -327,6 +333,8 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     set_cookies = _get_response_header_list(
@@ -378,6 +386,8 @@ def test_httpretty_nonstandard_status_code(
         response = _do_get(
             mock_obj=httpretty,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert response.status_code == nonstandard_httpretty_status
@@ -421,6 +431,8 @@ def test_binary_response(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -477,6 +489,8 @@ def test_uppercase_base_url_host(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://example.com/ping",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -522,6 +536,7 @@ def test_headers(mock_ctx: _MockCtxType) -> None:
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"hello": "world"},
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -562,6 +577,8 @@ def test_route_with_json(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -615,6 +632,8 @@ def test_custom_reason_phrase(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -665,6 +684,8 @@ def test_route_with_variable_no_type_given(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -705,6 +726,8 @@ def test_route_with_string_variable(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/Frasier",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -745,6 +768,8 @@ def test_route_with_int_variable(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/4",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -785,6 +810,8 @@ def test_route_with_float_variable(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/4.0",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -825,6 +852,8 @@ def test_route_with_path_variable_with_slash(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/foo/bar",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -863,6 +892,8 @@ def test_route_with_custom_nonisolating_converter(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/files/foo/bar",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == HTTPStatus.OK
@@ -903,6 +934,8 @@ def test_route_with_uuid_variable(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url=f"http://www.example.com/{random_uuid}",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -943,6 +976,8 @@ def test_nested_path(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/4/posts",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -983,6 +1018,8 @@ def test_route_with_multiple_variables(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1045,6 +1082,8 @@ def test_route_with_custom_converter_quoted_gt(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/items/abc",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1085,6 +1124,7 @@ def test_post_verb(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_post(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
+            cookies=None,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1199,10 +1239,13 @@ def test_multiple_http_verbs(mock_ctx: _MockCtxType) -> None:
         mock_get_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
+            headers=None,
+            allow_redirects=True,
         )
         mock_post_response = _do_post(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
+            cookies=None,
         )
 
     assert mock_get_response.status_code == expected_status_code
@@ -1251,11 +1294,15 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/a",
+                headers=None,
+                allow_redirects=True,
             )
 
         valid_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/123",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert valid_response.status_code == HTTPStatus.OK
@@ -1294,6 +1341,7 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_post(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/",
+            cookies=None,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1337,6 +1385,7 @@ def test_request_needs_content_type(mock_ctx: _MockCtxType) -> None:
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"Content-Type": "application/json"},
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1541,6 +1590,8 @@ def test_multiple_functions_same_path_different_type(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/4",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1585,6 +1636,8 @@ def test_query_string(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com?frasier=crane",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1693,6 +1746,7 @@ def test_duplicate_cookies(mock_ctx: _MockCtxType) -> None:
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers=headers,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1731,6 +1785,7 @@ def test_cookie_name_rejected_by_simplecookie(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers=headers,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == HTTPStatus.OK
@@ -1771,6 +1826,7 @@ def test_valueless_cookie_token(mock_ctx: _MockCtxType) -> None:
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
             headers={"Cookie": cookie_header},
+            allow_redirects=True,
         )
 
     assert mock_response.json() == {
@@ -1814,6 +1870,8 @@ def test_no_content_type(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -1874,16 +1932,22 @@ def test_overlapping_routes_multiple_requests(mock_ctx: _MockCtxType) -> None:
         mock_response_base = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
+            headers=None,
+            allow_redirects=True,
         )
 
         mock_response_var = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/base/Frasier",
+            headers=None,
+            allow_redirects=True,
         )
 
         mock_response_base_2 = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/base",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response_base.status_code == expected_status_code
@@ -1932,6 +1996,8 @@ def test_multiple_variables_no_extra_segments(mock_ctx: _MockCtxType) -> None:
         valid_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/users/cranes/frasier/posts",
+            headers=None,
+            allow_redirects=True,
         )
         assert valid_response.status_code == HTTPStatus.OK
         assert valid_response.text == "Posts for: cranes/frasier"
@@ -1969,6 +2035,8 @@ def test_multiple_variables_rejects_extra_segments(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/users/cranes/frasier/extra/posts",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -1997,6 +2065,8 @@ def test_route_matches_optional_query_string(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/api",
+            headers=None,
+            allow_redirects=True,
         )
         assert mock_response.status_code == HTTPStatus.OK
         assert mock_response.text == "api"
@@ -2004,6 +2074,8 @@ def test_route_matches_optional_query_string(mock_ctx: _MockCtxType) -> None:
         query_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/api?x=1",
+            headers=None,
+            allow_redirects=True,
         )
         assert query_response.status_code == HTTPStatus.OK
         assert query_response.text == "api"
@@ -2040,6 +2112,8 @@ def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/api-extra",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -2080,6 +2154,8 @@ def test_string_variable_rejects_extra_segments(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/foo/bar",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -2105,6 +2181,8 @@ def test_literal_url_components_are_escaped(
         matched_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://api.example.com/literal.json",
+            headers=None,
+            allow_redirects=True,
         )
         assert matched_response.status_code == HTTPStatus.OK
         assert matched_response.text == "matched"
@@ -2118,6 +2196,8 @@ def test_literal_url_components_are_escaped(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://apiXexampleYcom/literalXjson",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -2193,6 +2273,8 @@ def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="https://api.example.com",
+            headers=None,
+            allow_redirects=True,
         )
 
     response_json = mock_response.json()
@@ -2230,6 +2312,8 @@ def test_call_on_close_runs(mock_ctx: _MockCtxType) -> None:
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://www.example.com",
+            headers=None,
+            allow_redirects=True,
         )
         assert mock_response.text == "ok"
 
@@ -2264,6 +2348,7 @@ def test_missing_trailing_slash_redirect(mock_ctx: _MockCtxType) -> None:
             mock_obj=mock_obj_to_add,
             url="http://www.example.com/folder",
             allow_redirects=False,
+            headers=None,
         )
 
     assert mock_response.status_code == expected_status_code
@@ -2360,6 +2445,8 @@ def test_host_matching_rule_not_registered_for_other_host(
             _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://other.example.com/",
+                headers=None,
+                allow_redirects=True,
             )
 
 
@@ -2382,6 +2469,8 @@ def test_host_matching_rule_registered_for_matching_host(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url="http://api.example.com/",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == HTTPStatus.OK
@@ -2415,7 +2504,12 @@ def test_internationalized_base_url(
             flask_app=app,
             base_url=base_url,
         )
-        mock_response = _do_get(mock_obj=mock_obj_to_add, url=base_url)
+        mock_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url=base_url,
+            headers=None,
+            allow_redirects=True,
+        )
 
     assert mock_response.status_code == HTTPStatus.OK
     assert mock_response.text == "Hello, World!"
@@ -2471,6 +2565,8 @@ def test_percent_encoded_route(
         mock_response = _do_get(
             mock_obj=mock_obj_to_add,
             url=f"http://www.example.com{url_path}",
+            headers=None,
+            allow_redirects=True,
         )
 
     assert mock_response.status_code == HTTPStatus.OK
