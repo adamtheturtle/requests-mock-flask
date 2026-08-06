@@ -103,8 +103,8 @@ def _do_get(
     *,
     mock_obj: _MockObjType,
     url: str,
-    headers: dict[str, str] | None = None,
-    allow_redirects: bool = True,
+    headers: dict[str, str] | None = None,  # noqa: NOD001
+    allow_redirects: bool = True,  # noqa: NOD001
 ) -> requests.Response | httpx.Response:
     """Make a GET request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
@@ -126,7 +126,7 @@ def _do_post(
     *,
     mock_obj: _MockObjType,
     url: str,
-    cookies: dict[str, str] | None = None,
+    cookies: dict[str, str] | None = None,  # noqa: NOD001
 ) -> requests.Response | httpx.Response:
     """Make a POST request via the appropriate HTTP client."""
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
