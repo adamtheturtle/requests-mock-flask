@@ -1,1 +1,0 @@
-The intercepted request host and scheme are now preserved when forwarding to the Flask app.

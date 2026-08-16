@@ -1,1 +1,0 @@
-Support iterable streaming request bodies with the ``responses`` and ``requests-mock`` backends.
