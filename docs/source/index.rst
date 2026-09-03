@@ -1,7 +1,7 @@
 |project|
 =========
 
-|project| helps with testing `Flask`_ applications with `httpretty`_, `respx`_, `responses`_ or `requests-mock`_.
+|project| helps with testing `Flask`_ applications with `httpretty`_, `respx`_ (for `httpx`_ and `HTTPX2`_), `responses`_ or `requests-mock`_.
 
 Installation
 ------------
@@ -25,6 +25,7 @@ Usage examples
    import flask
    import httpretty
    import httpx
+   import httpx2
    import requests
    import requests_mock
    import responses
@@ -113,6 +114,23 @@ Usage examples
    assert httpx_response.status_code == HTTPStatus.OK
    assert httpx_response.text == "Hello, World!"
 
+
+   # Using respx with httpx2
+   #
+   # ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``.
+   # It is loaded automatically under pytest; import it elsewhere.
+   with respx.mock(assert_all_called=False, using="httpcore2") as respx_mock:
+       add_flask_app_to_mock(
+           mock_obj=respx_mock,
+           flask_app=app,
+           base_url="http://www.example.com",
+       )
+
+       httpx2_response = httpx2.get(url="http://www.example.com")
+
+   assert httpx2_response.status_code == HTTPStatus.OK
+   assert httpx2_response.text == "Hello, World!"
+
 Use cases
 ---------
 
@@ -133,6 +151,8 @@ Reference
    contributing
 
 .. _Flask: https://flask.palletsprojects.com/
+.. _httpx: https://www.python-httpx.org/
+.. _HTTPX2: https://httpx2.pydantic.dev/
 .. _httpretty: https://httpretty.readthedocs.io
 .. _requests-mock: https://requests-mock.readthedocs.io/en/latest/
 .. _respx: https://lundberg.github.io/respx/

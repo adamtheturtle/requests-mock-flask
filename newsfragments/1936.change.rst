@@ -1,0 +1,1 @@
+Support forwarding ``httpx2`` requests to Flask applications through ``respx``.

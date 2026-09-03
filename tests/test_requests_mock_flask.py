@@ -16,6 +16,7 @@ from typing import Any, Final
 
 import httpretty
 import httpx
+import httpx2
 import pytest
 import requests
 import requests_mock
@@ -41,15 +42,21 @@ _MockObjType = (
 )
 _MockCtxManagerYieldType = _MockObjType | None
 _MockCtxType = Callable[[], AbstractContextManager[_MockCtxManagerYieldType]]
+_ResponseType = requests.Response | httpx.Response | httpx2.Response
+
+# ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``, which
+# intercepts ``httpx2`` rather than ``httpx`` requests.
+_HTTPX2_MOCKER = "httpcore2"
 
 _MOCK_CTXS: list[_MockCtxType] = [
     partial(responses.RequestsMock, assert_all_requests_are_fired=False),
     requests_mock.Mocker,
     httpretty.httprettized,
     partial(respx.mock, assert_all_called=False),
+    partial(respx.mock, assert_all_called=False, using=_HTTPX2_MOCKER),
 ]
 
-_MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx"]
+_MOCK_IDS = ["responses", "requests_mock", "httpretty", "respx", "httpx2"]
 
 
 def test_host_rule_does_not_match_hostless_base_url() -> None:
@@ -99,14 +106,31 @@ def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
     return mock_obj or httpretty
 
 
+def _uses_httpx2(*, mock_obj: _MockObjType) -> bool:
+    """Whether ``mock_obj`` is a ``respx`` router intercepting
+    ``httpx2``.
+    """
+    return (
+        isinstance(mock_obj, respx.MockRouter)
+        and mock_obj.using == _HTTPX2_MOCKER
+    )
+
+
 def _do_get(
     *,
     mock_obj: _MockObjType,
     url: str,
     headers: dict[str, str] | None,
     allow_redirects: bool,
-) -> requests.Response | httpx.Response:
+) -> _ResponseType:
     """Make a GET request via the appropriate HTTP client."""
+    if _uses_httpx2(mock_obj=mock_obj):
+        return httpx2.get(
+            url=url,
+            headers=headers,
+            timeout=_TIMEOUT_SECONDS,
+            follow_redirects=allow_redirects,
+        )
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
         return httpx.get(
             url=url,
@@ -127,8 +151,13 @@ def _do_post(
     mock_obj: _MockObjType,
     url: str,
     cookies: dict[str, str] | None,
-) -> requests.Response | httpx.Response:
+) -> _ResponseType:
     """Make a POST request via the appropriate HTTP client."""
+    if _uses_httpx2(mock_obj=mock_obj):
+        # ``httpx2`` deprecates per-request cookies, so we set them on the
+        # client.
+        with httpx2.Client(cookies=cookies) as client:
+            return client.post(url=url, timeout=_TIMEOUT_SECONDS)
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
         return httpx.post(url=url, cookies=cookies, timeout=_TIMEOUT_SECONDS)
     return requests.post(
@@ -253,15 +282,84 @@ def test_base_url_path_prefix_does_not_register_route_at_origin(
             )
 
 
+def _do_request_with_content(
+    *,
+    mock_obj: _MockObjType,
+    method: str,
+    url: str,
+    headers: dict[str, str] | None,
+    content: bytes | Iterator[bytes],
+) -> _ResponseType:
+    """Make a request with a body via the appropriate HTTP client."""
+    if _uses_httpx2(mock_obj=mock_obj):
+        return httpx2.request(
+            method=method,
+            url=url,
+            headers=headers,
+            content=content,
+            timeout=_TIMEOUT_SECONDS,
+        )
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        return httpx.request(
+            method=method,
+            url=url,
+            headers=headers,
+            content=content,
+            timeout=_TIMEOUT_SECONDS,
+        )
+    return requests.request(
+        method=method,
+        url=url,
+        headers=headers,
+        data=content,
+        timeout=_TIMEOUT_SECONDS,
+    )
+
+
+def _do_post_with_content_length(
+    *,
+    mock_obj: _MockObjType,
+    url: str,
+    data: bytes,
+    content_length: str,
+) -> _ResponseType:
+    """Make a POST request with an explicit ``Content-Length`` header.
+
+    ``requests`` derives ``Content-Length`` from the body, so we set the
+    header on an already-prepared request to keep the given value.
+    """
+    headers = {"Content-Length": content_length}
+    if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
+        return _do_request_with_content(
+            mock_obj=mock_obj,
+            method="POST",
+            url=url,
+            headers=headers,
+            content=data,
+        )
+
+    requests_request = requests.Request(
+        method="POST",
+        url=url,
+        data=data,
+    ).prepare()
+    requests_request.headers["Content-Length"] = content_length
+    session = requests.Session()
+    return session.send(request=requests_request)
+
+
 def _get_response_header_list(
     *,
     mock_obj: _MockObjType,
-    response: requests.Response | httpx.Response,
+    response: _ResponseType,
     name: str,
 ) -> list[str]:
     """Get every value for a repeated response header across HTTP
     clients.
     """
+    if _uses_httpx2(mock_obj=mock_obj):
+        assert isinstance(response, httpx2.Response)
+        return response.headers.get_list(key=name)
     if isinstance(mock_obj, (respx.MockRouter, respx.Router)):
         assert isinstance(response, httpx.Response)
         return response.headers.get_list(key=name)
@@ -297,6 +395,7 @@ _REPEATED_HEADERS_MOCK_CTX_MARKER = pytest.mark.parametrize(
             ),
         ),
         pytest.param(_MOCK_CTXS[3], id="respx"),
+        pytest.param(_MOCK_CTXS[4], id="httpx2"),
     ],
 )
 
@@ -638,7 +737,10 @@ def test_custom_reason_phrase(mock_ctx: _MockCtxType) -> None:
 
     assert mock_response.status_code == expected_status_code
 
-    if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
+    if _uses_httpx2(mock_obj=mock_obj_to_add):
+        assert isinstance(mock_response, httpx2.Response)
+        assert mock_response.reason_phrase == ""
+    elif isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
         assert isinstance(mock_response, httpx.Response)
         assert mock_response.reason_phrase == ""
     elif isinstance(
@@ -1180,23 +1282,12 @@ def test_incorrect_content_length(
             base_url="http://www.example.com",
         )
 
-        mock_response: requests.Response | httpx.Response
-        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
-            mock_response = httpx.request(
-                method="POST",
-                url="http://www.example.com/",
-                content=data,
-                headers={"Content-Length": custom_content_length},
-            )
-        else:
-            requests_request = requests.Request(
-                method="POST",
-                url="http://www.example.com/",
-                data=data,
-            ).prepare()
-            requests_request.headers["Content-Length"] = custom_content_length
-            session = requests.Session()
-            mock_response = session.send(request=requests_request)
+        mock_response = _do_post_with_content_length(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/",
+            data=data,
+            content_length=custom_content_length,
+        )
 
     assert mock_response.status_code == expected_status_code
 
@@ -1429,21 +1520,13 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response: requests.Response | httpx.Response
-        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
-            mock_response = httpx.request(
-                method="GET",
-                url="http://www.example.com",
-                headers={"Content-Type": "application/json"},
-                content=json.dumps(obj={"hello": "world"}).encode(),
-            )
-        else:
-            mock_response = requests.get(
-                url="http://www.example.com",
-                headers={"Content-Type": "application/json"},
-                data=json.dumps(obj={"hello": "world"}),
-                timeout=_TIMEOUT_SECONDS,
-            )
+        mock_response = _do_request_with_content(
+            mock_obj=mock_obj_to_add,
+            method="GET",
+            url="http://www.example.com",
+            headers={"Content-Type": "application/json"},
+            content=json.dumps(obj={"hello": "world"}).encode(),
+        )
 
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
@@ -1483,23 +1566,17 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
             base_url="http://www.example.com",
         )
 
-        mock_response: requests.Response | httpx.Response
         delivers_body = isinstance(
             mock_obj_to_add,
             (responses.RequestsMock, requests_mock.Mocker),
         )
-        if isinstance(mock_obj_to_add, (respx.MockRouter, respx.Router)):
-            mock_response = httpx.post(
-                url="http://www.example.com",
-                content=chunks(),
-                timeout=_TIMEOUT_SECONDS,
-            )
-        else:
-            mock_response = requests.post(
-                url="http://www.example.com",
-                data=chunks(),
-                timeout=_TIMEOUT_SECONDS,
-            )
+        mock_response = _do_request_with_content(
+            mock_obj=mock_obj_to_add,
+            method="POST",
+            url="http://www.example.com",
+            headers=None,
+            content=chunks(),
+        )
 
     assert mock_response.status_code == expected_status_code
     if delivers_body:
