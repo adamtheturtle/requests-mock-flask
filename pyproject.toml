@@ -391,6 +391,11 @@ terminal.error-on-warning = true
 analysis.respect-type-ignore-comments = false
 
 [tool.pytest]
+# ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``, which
+# the httpx2 tests use. It is also loaded via its entry point, but we enable it
+# explicitly so the dependency is visible and survives
+# ``PYTEST_DISABLE_PLUGIN_AUTOLOAD``.
+addopts = [ "-p", "pytest_httpx2" ]
 log_cli = true
 xfail_strict = true
 
