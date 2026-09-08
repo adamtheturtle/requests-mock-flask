@@ -3,6 +3,11 @@ Changelog
 
 .. towncrier release notes start
 
+2026.09.08
+----------
+
+- Support forwarding ``httpx2`` requests to Flask applications through ``respx``.
+
 2026.08.16
 ----------
 
