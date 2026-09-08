@@ -50,11 +50,6 @@ class _RuleAttributes(TypedDict):
     _converters: dict[str, BaseConverter]
 
 
-def _stringify(value: object, /) -> str:
-    """Return the string representation of an external value."""
-    return str(object=value)
-
-
 def _rule_methods(*, rule: Rule) -> set[str]:
     """Return the methods that must be registered for a Flask rule."""
     methods = set(_KNOWN_HTTP_METHODS)
@@ -309,7 +304,7 @@ def add_flask_app_to_mock(
         convention.
         """
         mount_path = unquote(string=base_url_path)
-        path_info_value = _stringify(environ["PATH_INFO"])
+        path_info_value = str(object=environ["PATH_INFO"])
         path_info = _path_or_root(
             path=path_info_value.removeprefix(mount_path)
         )
@@ -521,7 +516,7 @@ def _httpretty_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        content_length = _stringify(request.headers["Content-Length"])
+        content_length = str(object=request.headers["Content-Length"])
         environ_overrides["CONTENT_LENGTH"] = content_length
 
     split_url = urlsplit(url=uri)
