@@ -24,6 +24,7 @@ reqs
 respx
 todo
 tuple
+ty
 typehints
 ubuntu
 untyped

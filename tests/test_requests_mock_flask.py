@@ -371,7 +371,7 @@ def _get_response_header_list(
         assert isinstance(response, httpx.Response)
         return response.headers.get_list(key=name)
     assert isinstance(response, requests.Response)
-    header_values: list[str] = response.raw.headers.getlist(key=name)
+    header_values: list[str] = response.raw.headers.getlist(key=name)  # ty: ignore[unsound-assignment]
     return header_values
 
 
@@ -462,7 +462,7 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 def fixture_nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
-    http_module: _HTTPModule = vars(httpretty)["http"]
+    http_module: _HTTPModule = vars(httpretty)["http"]  # ty: ignore[unsound-assignment]
     statuses: dict[int, str] = http_module.STATUSES
     assert status_code not in statuses
     yield status_code
@@ -1500,7 +1500,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     def _() -> str:
         """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
-        request_json: dict[str, object] = request.get_json()
+        request_json: dict[str, object] = request.get_json()  # ty: ignore[unsound-assignment]
         return str(object=request_json["hello"])
 
     test_client = app.test_client()

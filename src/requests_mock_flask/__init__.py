@@ -91,7 +91,7 @@ def _normalize_body(
     if isinstance(body, bytearray | memoryview):
         return bytes(body)
     if _is_binary_io(body=body):
-        body_bytes: bytes = methodcaller("read")(body)
+        body_bytes: bytes = methodcaller("read")(body)  # ty: ignore[unsound-assignment]
         return body_bytes
     return b"".join(
         part.encode() if isinstance(part, str) else part for part in body
@@ -311,7 +311,7 @@ def add_flask_app_to_mock(
         convention.
         """
         mount_path = unquote(string=base_url_path)
-        path_info_value: str = environ["PATH_INFO"]
+        path_info_value: str = environ["PATH_INFO"]  # ty: ignore[unsound-assignment]
         path_info = _path_or_root(
             path=path_info_value.removeprefix(mount_path)
         )
@@ -523,7 +523,7 @@ def _httpretty_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        content_length: str = request.headers["Content-Length"]
+        content_length: str = request.headers["Content-Length"]  # ty: ignore[unsound-assignment]
         environ_overrides["CONTENT_LENGTH"] = content_length
 
     split_url = urlsplit(url=uri)
@@ -541,7 +541,7 @@ def _httpretty_callback(
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
-        http_module: _HTTPModule = vars(httpretty)["http"]
+        http_module: _HTTPModule = vars(httpretty)["http"]  # ty: ignore[unsound-assignment]
         statuses: dict[int, str] = http_module.STATUSES
         if response.status_code not in statuses:
             _, _, reason_phrase = response.status.partition(" ")
@@ -580,14 +580,14 @@ def _requests_mock_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        content_length: str = request.headers["Content-Length"]
+        content_length: str = request.headers["Content-Length"]  # ty: ignore[unsound-assignment]
         environ_overrides["CONTENT_LENGTH"] = content_length
     split_url = urlsplit(url=str(object=request.url))
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
-    request_path: str = request.path_url
-    request_headers: Iterable[tuple[str, str]] = request.headers.items()
+    request_path: str = request.path_url  # ty: ignore[unsound-assignment]
+    request_headers: Iterable[tuple[str, str]] = request.headers.items()  # ty: ignore[unsound-assignment]
     environ_builder = werkzeug.test.EnvironBuilder(
         path=_path_or_root(path=request_path.removeprefix(base_url_path)),
         base_url=base_url,
