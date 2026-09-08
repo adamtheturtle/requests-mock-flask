@@ -26,7 +26,7 @@ import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
 from respx.models import AllMockedAssertionError
-from werkzeug.routing import BaseConverter, Map
+from werkzeug.routing import BaseConverter, Map, Rule
 
 from requests_mock_flask import add_flask_app_to_mock
 
@@ -214,6 +214,36 @@ def test_simple_route(mock_ctx: _MockCtxType) -> None:
     assert mock_response.status_code == expected_status_code
     assert mock_response.headers["Content-Type"] == expected_content_type
     assert mock_response.text == expected_data.decode()
+
+
+def test_rule_without_methods() -> None:
+    """A rule without a method constraint accepts every known method."""
+    app = Flask(import_name=__name__, static_folder=None)
+    endpoint = "any_method"
+    app.url_map.add(
+        rulefactory=Rule(string="/", endpoint=endpoint, methods=None)
+    )
+
+    def any_method() -> str:
+        """Return a match for any HTTP method."""
+        return "matched"
+
+    app.view_functions[endpoint] = any_method
+
+    with responses.RequestsMock(
+        assert_all_requests_are_fired=False
+    ) as mock_obj:
+        add_flask_app_to_mock(
+            mock_obj=mock_obj,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+        response = requests.patch(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.text == "matched"
 
 
 @_MOCK_CTX_MARKER
