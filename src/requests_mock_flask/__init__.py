@@ -9,13 +9,13 @@ from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     BinaryIO,
-    Protocol,
     TypedDict,
     cast,  # noqa: TID251
 )
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import httpretty
+import httpretty.http as httpretty_http
 import httpx
 import requests_mock
 import responses
@@ -50,16 +50,15 @@ class _RuleAttributes(TypedDict):
     _converters: dict[str, BaseConverter]
 
 
-class _HTTPModule(Protocol):
-    """The part of HTTPretty's bundled HTTP module that we use."""
-
-    STATUSES: dict[int, str]
+def _stringify(value: object, /) -> str:
+    """Return the string representation of an external value."""
+    return str(object=value)
 
 
 def _rule_methods(*, rule: Rule) -> set[str]:
     """Return the methods that must be registered for a Flask rule."""
     methods = set(_KNOWN_HTTP_METHODS)
-    if rule.methods is not None:  # pragma: no branch
+    if rule.methods is not None:
         for rule_method in rule.methods:
             typed_method: str = rule_method
             methods.add(typed_method)
@@ -91,8 +90,7 @@ def _normalize_body(
     if isinstance(body, bytearray | memoryview):
         return bytes(body)
     if _is_binary_io(body=body):
-        body_bytes: bytes = methodcaller("read")(body)  # ty: ignore[unsound-assignment]
-        return body_bytes
+        return bytes(methodcaller("read")(body))
     return b"".join(
         part.encode() if isinstance(part, str) else part for part in body
     )
@@ -311,7 +309,7 @@ def add_flask_app_to_mock(
         convention.
         """
         mount_path = unquote(string=base_url_path)
-        path_info_value: str = environ["PATH_INFO"]  # ty: ignore[unsound-assignment]
+        path_info_value = _stringify(environ["PATH_INFO"])
         path_info = _path_or_root(
             path=path_info_value.removeprefix(mount_path)
         )
@@ -523,7 +521,7 @@ def _httpretty_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        content_length: str = request.headers["Content-Length"]  # ty: ignore[unsound-assignment]
+        content_length = _stringify(request.headers["Content-Length"])
         environ_overrides["CONTENT_LENGTH"] = content_length
 
     split_url = urlsplit(url=uri)
@@ -541,8 +539,7 @@ def _httpretty_callback(
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
-        http_module: _HTTPModule = vars(httpretty)["http"]  # ty: ignore[unsound-assignment]
-        statuses: dict[int, str] = http_module.STATUSES
+        statuses = httpretty_http.STATUSES
         if response.status_code not in statuses:
             _, _, reason_phrase = response.status.partition(" ")
             statuses[response.status_code] = reason_phrase
