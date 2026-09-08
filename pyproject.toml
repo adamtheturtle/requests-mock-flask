@@ -43,7 +43,11 @@ dependencies = [
     "urllib3>=2",
     "werkzeug>=2.3",
 ]
-optional-dependencies.dev = [
+urls.Documentation = "https://adamtheturtle.github.io/requests-mock-flask/"
+urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
+
+[dependency-groups]
+dev = [
     "actionlint-py==1.7.12.24",
     "beartype==0.22.9",
     "check-manifest==0.51",
@@ -97,12 +101,7 @@ optional-dependencies.dev = [
     "yamlfix==1.19.1",
     "zizmor==1.30.0",
 ]
-optional-dependencies.release = [ "check-wheel-contents==0.6.3", "towncrier==26.9.0" ]
-urls.Documentation = "https://adamtheturtle.github.io/requests-mock-flask/"
-urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
-
-[dependency-groups]
-dev = []
+release = [ "check-wheel-contents==0.6.3", "towncrier==26.9.0" ]
 
 [tool.setuptools]
 packages.find.where = [
@@ -309,12 +308,6 @@ ignore = [
     "tests",
     "tests/**",
     "zizmor.yml",
-]
-
-[tool.deptry]
-optional_dependencies_dev_groups = [
-    "dev",
-    "release",
 ]
 
 [tool.vulture]
