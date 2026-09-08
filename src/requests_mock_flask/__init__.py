@@ -6,7 +6,13 @@ import dataclasses
 import re
 from operator import methodcaller
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, BinaryIO
+from typing import (
+    TYPE_CHECKING,
+    BinaryIO,
+    Protocol,
+    TypedDict,
+    cast,  # noqa: TID251
+)
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 import httpretty
@@ -18,12 +24,12 @@ import werkzeug
 from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable, Iterable, Mapping
     from wsgiref.types import StartResponse, WSGIEnvironment
 
     import flask
     import requests
-    from werkzeug.routing import Rule
+    from werkzeug.routing import BaseConverter, Rule
 
     type _RequestBody = (
         str
@@ -34,6 +40,30 @@ if TYPE_CHECKING:
         | BinaryIO
         | None
     )
+    type _HTTPHeaders = Mapping[str, bool | int | str | None]
+
+
+class _RuleAttributes(TypedDict):
+    """Werkzeug routing details populated by ``Rule.compile``."""
+
+    _trace: list[tuple[bool, str]]
+    _converters: dict[str, BaseConverter]
+
+
+class _HTTPModule(Protocol):
+    """The part of HTTPretty's bundled HTTP module that we use."""
+
+    STATUSES: dict[int, str]
+
+
+def _rule_methods(*, rule: Rule) -> set[str]:
+    """Return the methods that must be registered for a Flask rule."""
+    methods = set(_KNOWN_HTTP_METHODS)
+    if rule.methods is not None:  # pragma: no branch
+        for rule_method in rule.methods:
+            typed_method: str = rule_method
+            methods.add(typed_method)
+    return methods
 
 
 def _without_transfer_encoding(
@@ -68,6 +98,11 @@ def _normalize_body(
     )
 
 
+def _path_or_root(*, path: str) -> str:
+    """Return the root path when a stripped request path is empty."""
+    return "/" if path == "" else path
+
+
 # Known HTTP methods to register for every route URL. We register all of
 # these (rather than only the methods a rule supports) so that requests using
 # an unsupported method for a known path are still forwarded to Flask, which
@@ -87,16 +122,6 @@ _KNOWN_HTTP_METHODS = frozenset(
 )
 
 
-_MockObjType = (
-    responses.RequestsMock
-    | requests_mock.Mocker
-    | requests_mock.Adapter
-    | respx.MockRouter
-    | respx.Router
-    | ModuleType
-)
-
-
 def _host_rule_matches_base_url(
     *,
     rule: Rule,
@@ -106,9 +131,9 @@ def _host_rule_matches_base_url(
     if base_url_host is None:
         return False
 
-    rule.compile()
     host_parts: list[str] = []
-    rule_attributes: Any = vars(rule)
+    rule.compile()
+    rule_attributes = cast(_RuleAttributes, vars(rule))  # noqa: TC006
     rule_trace = rule_attributes["_trace"]
     rule_converters = rule_attributes["_converters"]
     separator_index = rule_trace.index((False, "|"))
@@ -127,14 +152,21 @@ def _host_rule_matches_base_url(
 class _MockCallbacks:
     """Callbacks for each supported mock back end."""
 
-    responses: Callable[..., Any]
-    requests_mock: Callable[..., Any]
-    respx: Callable[..., Any]
-    httpretty: Callable[..., Any]
+    responses: Callable[
+        [requests.PreparedRequest], tuple[int, HTTPHeaderDict, bytes]
+    ]
+    requests_mock: Callable[
+        [requests_mock.Request, requests_mock.Context], bytes
+    ]
+    respx: Callable[[httpx.Request], httpx.Response]
+    httpretty: Callable[
+        [httpretty.core.HTTPrettyRequest, str, _HTTPHeaders],
+        tuple[int, HTTPHeaderDict, bytes],
+    ]
 
 
 def _register_mock(
-    mock_obj: _MockObjType,
+    mock_obj: object,
     method: str,
     url: re.Pattern[str],
     callbacks: _MockCallbacks,
@@ -148,20 +180,20 @@ def _register_mock(
             not isinstance(mock_obj, ModuleType)
             or mock_obj.__name__ == "responses"
         ):
-            mock_obj.add_callback(
+            _ = mock_obj.add_callback(
                 method=method,
                 url=url,
                 callback=callbacks.responses,
                 content_type=None,
             )
         case requests_mock.Mocker() | requests_mock.Adapter():
-            mock_obj.register_uri(
+            _ = mock_obj.register_uri(
                 method=method,
                 url=url,
                 content=callbacks.requests_mock,
             )
         case respx.MockRouter() | respx.Router():
-            mock_obj.route(
+            _ = mock_obj.route(
                 method=method,
                 url__regex=url.pattern,
             ).mock(side_effect=callbacks.respx)
@@ -212,7 +244,9 @@ def _host_to_idna(*, host: str) -> str:
     if host.isascii() or ":" in host:
         return host
     return ".".join(
-        label.encode(encoding="idna").decode(encoding="ascii") if label else ""
+        label.encode(encoding="idna").decode(encoding="ascii")
+        if label != ""
+        else ""
         for label in host.split(sep=".")
     )
 
@@ -243,7 +277,7 @@ def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
 
 
 def add_flask_app_to_mock(
-    mock_obj: _MockObjType,
+    mock_obj: object,
     flask_app: flask.Flask,
     base_url: str,
 ) -> None:
@@ -270,14 +304,17 @@ def add_flask_app_to_mock(
     )
 
     def respx_wsgi_app(
-        environ: WSGIEnvironment,
+        environ: WSGIEnvironment,  # pyrefly: ignore [explicit-any]
         start_response: StartResponse,
     ) -> Iterable[bytes]:
         """Normalize HTTPX's Unicode path to the WSGI latin-1
         convention.
         """
         mount_path = unquote(string=base_url_path)
-        path_info = environ["PATH_INFO"].removeprefix(mount_path) or "/"
+        path_info_value: str = environ["PATH_INFO"]
+        path_info = _path_or_root(
+            path=path_info_value.removeprefix(mount_path)
+        )
         environ["SCRIPT_NAME"] = mount_path.encode().decode(
             encoding="latin-1",
         )
@@ -322,7 +359,7 @@ def add_flask_app_to_mock(
     def httpretty_callback(
         request: httpretty.core.HTTPrettyRequest,
         uri: str,
-        headers: dict[str, Any],
+        headers: _HTTPHeaders,
     ) -> tuple[int, HTTPHeaderDict, bytes]:
         """Callback for HTTPretty."""
         return _httpretty_callback(
@@ -363,7 +400,7 @@ def add_flask_app_to_mock(
         escaped_base_url = re.escape(pattern=registration_base_url)
         patterns = [escaped_base_url + path_to_match]
         has_slashless_redirect = (
-            rule.strict_slashes
+            rule.strict_slashes is True
             and path_to_match.endswith("/")
             and path_to_match != "/"
         )
@@ -375,8 +412,7 @@ def add_flask_app_to_mock(
             re.compile(pattern=pattern + r"(\?.*)?$") for pattern in patterns
         )
 
-        methods = (rule.methods or set()) | _KNOWN_HTTP_METHODS
-        for method in methods:
+        for method in _rule_methods(rule=rule):
             for url in urls:
                 _register_mock(
                     mock_obj=mock_obj,
@@ -390,9 +426,9 @@ def _rule_to_path_regex(rule: Rule) -> str:
     """Return a regex that matches the path part of a Flask routing
     rule.
     """
-    rule.compile()
     path_parts: list[str] = []
-    rule_attributes: Any = vars(rule)
+    rule.compile()
+    rule_attributes = cast(_RuleAttributes, vars(rule))  # noqa: TC006
     rule_trace = rule_attributes["_trace"]
     rule_converters = rule_attributes["_converters"]
     separator_index = rule_trace.index((False, "|"))
@@ -438,8 +474,9 @@ def _responses_callback(
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
+    request_path: str = request.path_url
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=request.path_url.removeprefix(base_url_path) or "/",
+        path=_path_or_root(path=request_path.removeprefix(base_url_path)),
         base_url=base_url,
         method=str(object=request.method),
         data=_normalize_body(body=request.body),
@@ -451,14 +488,14 @@ def _responses_callback(
         return (
             response.status_code,
             HTTPHeaderDict(headers=response.headers),
-            bytes(response.data),
+            response.data,
         )
 
 
 def _httpretty_callback(
     request: httpretty.core.HTTPrettyRequest,
     uri: str,
-    headers: dict[str, Any],
+    headers: _HTTPHeaders,
     flask_app: flask.Flask,
     base_url_path: str,
 ) -> tuple[int, HTTPHeaderDict, bytes]:
@@ -486,14 +523,17 @@ def _httpretty_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
+        content_length: str = request.headers["Content-Length"]
+        environ_overrides["CONTENT_LENGTH"] = content_length
 
     split_url = urlsplit(url=uri)
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=str(object=request.path).removeprefix(base_url_path) or "/",
+        path=_path_or_root(
+            path=str(object=request.path).removeprefix(base_url_path)
+        ),
         base_url=base_url,
         method=request.method,
         headers=request.headers.items(),
@@ -501,7 +541,7 @@ def _httpretty_callback(
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
-        http_module: Any = vars(httpretty)["http"]
+        http_module: _HTTPModule = vars(httpretty)["http"]
         statuses: dict[int, str] = http_module.STATUSES
         if response.status_code not in statuses:
             _, _, reason_phrase = response.status.partition(" ")
@@ -540,16 +580,19 @@ def _requests_mock_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        environ_overrides["CONTENT_LENGTH"] = request.headers["Content-Length"]
+        content_length: str = request.headers["Content-Length"]
+        environ_overrides["CONTENT_LENGTH"] = content_length
     split_url = urlsplit(url=str(object=request.url))
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
+    request_path: str = request.path_url
+    request_headers: Iterable[tuple[str, str]] = request.headers.items()
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=request.path_url.removeprefix(base_url_path) or "/",
+        path=_path_or_root(path=request_path.removeprefix(base_url_path)),
         base_url=base_url,
         method=request.method,
-        headers=_without_transfer_encoding(headers=request.headers.items()),
+        headers=_without_transfer_encoding(headers=request_headers),
         data=_normalize_body(body=request.body),
         environ_overrides=environ_overrides,
     )
@@ -562,4 +605,5 @@ def _requests_mock_callback(
         context.headers = dict(response.headers)
         context.status_code = response.status_code
         context.reason = reason_phrase
-        return bytes(response.data)
+        response_data: bytes = response.data
+        return response_data

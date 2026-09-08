@@ -12,7 +12,7 @@ from functools import partial
 from http import HTTPStatus
 from io import BytesIO
 from types import ModuleType
-from typing import Any, Final
+from typing import Final, Protocol
 
 import httpretty
 import httpx
@@ -43,6 +43,13 @@ _MockObjType = (
 _MockCtxManagerYieldType = _MockObjType | None
 _MockCtxType = Callable[[], AbstractContextManager[_MockCtxManagerYieldType]]
 _ResponseType = requests.Response | httpx.Response | httpx2.Response
+
+
+class _HTTPModule(Protocol):
+    """The part of HTTPretty's bundled HTTP module used by this test."""
+
+    STATUSES: dict[int, str]
+
 
 # ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``, which
 # intercepts ``httpx2`` rather than ``httpx`` requests.
@@ -103,7 +110,7 @@ _MOCK_CTX_MARKER_NO_HTTPRETTY = pytest.mark.parametrize(
 
 def _get_mock_obj(mock_obj: _MockCtxManagerYieldType) -> _MockObjType:
     """Get the mock object, handling the None yield from httpretty."""
-    return mock_obj or httpretty
+    return httpretty if mock_obj is None else mock_obj
 
 
 def _uses_httpx2(*, mock_obj: _MockObjType) -> bool:
@@ -274,7 +281,7 @@ def test_base_url_path_prefix_does_not_register_route_at_origin(
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/ping",
                 headers=None,
@@ -455,11 +462,11 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 def fixture_nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
-    http_module: Any = vars(httpretty)["http"]
+    http_module: _HTTPModule = vars(httpretty)["http"]
     statuses: dict[int, str] = http_module.STATUSES
     assert status_code not in statuses
     yield status_code
-    statuses.pop(status_code, None)
+    _ = statuses.pop(status_code, None)
 
 
 def test_httpretty_nonstandard_status_code(
@@ -1382,7 +1389,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/a",
                 headers=None,
@@ -1493,7 +1500,7 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     def _() -> str:
         """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
-        request_json = request.get_json()
+        request_json: dict[str, object] = request.get_json()
         return str(object=request_json["hello"])
 
     test_client = app.test_client()
@@ -1732,7 +1739,7 @@ def test_cookies(mock_ctx: _MockCtxType) -> None:
         """Set cookies and return a simple message."""
         response = make_response()
         response.set_cookie(key="frasier_set", value="crane_set")
-        assert request.cookies, request
+        assert len(request.cookies) > 0, request
         assert request.cookies["frasier"] == "crane"
         assert request.cookies["frasier2"] == "crane2"
         response.data = "Hello, World!"
@@ -2109,7 +2116,7 @@ def test_multiple_variables_rejects_extra_segments(
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/users/cranes/frasier/extra/posts",
                 headers=None,
@@ -2186,7 +2193,7 @@ def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/api-extra",
                 headers=None,
@@ -2228,7 +2235,7 @@ def test_string_variable_rejects_extra_segments(
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://www.example.com/foo/bar",
                 headers=None,
@@ -2270,7 +2277,7 @@ def test_literal_url_components_are_escaped(
             NoMockAddress,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://apiXexampleYcom/literalXjson",
                 headers=None,
@@ -2309,7 +2316,7 @@ def test_unknown_mock_object() -> None:
         """Return a simple message."""
         return ""  # pragma: no cover
 
-    unknown_mock_obj: Any = object()
+    unknown_mock_obj = object()
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, "
         "``respx``, or ``responses`` object, "
@@ -2376,7 +2383,7 @@ def test_call_on_close_runs(mock_ctx: _MockCtxType) -> None:
     def _() -> Response:
         """Return a response with a close callback."""
         response = Response(response="ok")
-        response.call_on_close(func=lambda: events.append("closed"))
+        _ = response.call_on_close(func=lambda: events.append("closed"))
         return response
 
     with mock_ctx() as mock_obj:
@@ -2457,7 +2464,7 @@ def test_host_matching_rule_treats_dots_as_literals() -> None:
         base_url="http://apiXexampleYcom",
     )
 
-    assert not mock_obj.registered()
+    assert mock_obj.registered() == []
 
 
 @pytest.mark.parametrize(
@@ -2519,7 +2526,7 @@ def test_host_matching_rule_not_registered_for_other_host(
             ValueError,
         )
         with pytest.raises(expected_exception=expected_exceptions):
-            _do_get(
+            _response = _do_get(
                 mock_obj=mock_obj_to_add,
                 url="http://other.example.com/",
                 headers=None,
@@ -2608,7 +2615,7 @@ def test_internationalized_host_rule_is_registered() -> None:
         base_url="http://münich.example",
     )
 
-    assert mock_obj.registered()
+    assert len(mock_obj.registered()) > 0
 
 
 @pytest.mark.parametrize(
