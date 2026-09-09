@@ -9,8 +9,6 @@ from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     BinaryIO,
-    TypedDict,
-    cast,  # noqa: TID251
 )
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
@@ -21,6 +19,7 @@ import requests_mock
 import responses
 import respx
 import werkzeug
+import werkzeug.routing
 from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
@@ -29,7 +28,6 @@ if TYPE_CHECKING:
 
     import flask
     import requests
-    from werkzeug.routing import BaseConverter, Rule
 
     type _RequestBody = (
         str
@@ -43,14 +41,25 @@ if TYPE_CHECKING:
     type _HTTPHeaders = Mapping[str, bool | int | str | None]
 
 
-class _RuleAttributes(TypedDict):
+@dataclasses.dataclass(frozen=True)
+class _CompiledRule:
     """Werkzeug routing details populated by ``Rule.compile``."""
 
-    _trace: list[tuple[bool, str]]
-    _converters: dict[str, BaseConverter]
+    trace: list[tuple[bool, str]]
+    converters: dict[str, werkzeug.routing.BaseConverter]
 
 
-def _rule_methods(*, rule: Rule) -> set[str]:
+def _compiled_rule(*, rule: werkzeug.routing.Rule) -> _CompiledRule:
+    """Compile a Werkzeug rule and narrow its populated routing data."""
+    rule.compile()
+    attributes = vars(rule)
+    return _CompiledRule(
+        trace=attributes["_trace"],
+        converters=attributes["_converters"],
+    )
+
+
+def _rule_methods(*, rule: werkzeug.routing.Rule) -> set[str]:
     """Return the methods that must be registered for a Flask rule."""
     methods = set(_KNOWN_HTTP_METHODS)
     if rule.methods is not None:
@@ -117,7 +126,7 @@ _KNOWN_HTTP_METHODS = frozenset(
 
 def _host_rule_matches_base_url(
     *,
-    rule: Rule,
+    rule: werkzeug.routing.Rule,
     base_url_host: str | None,
 ) -> bool:
     """Return whether a Flask host rule applies to ``base_url_host``."""
@@ -125,10 +134,9 @@ def _host_rule_matches_base_url(
         return False
 
     host_parts: list[str] = []
-    rule.compile()
-    rule_attributes = cast(_RuleAttributes, vars(rule))  # noqa: TC006
-    rule_trace = rule_attributes["_trace"]
-    rule_converters = rule_attributes["_converters"]
+    compiled_rule = _compiled_rule(rule=rule)
+    rule_trace = compiled_rule.trace
+    rule_converters = compiled_rule.converters
     separator_index = rule_trace.index((False, "|"))
     for is_dynamic, data in rule_trace[:separator_index]:
         if is_dynamic:
@@ -415,15 +423,14 @@ def add_flask_app_to_mock(
                 )
 
 
-def _rule_to_path_regex(rule: Rule) -> str:
+def _rule_to_path_regex(rule: werkzeug.routing.Rule) -> str:
     """Return a regex that matches the path part of a Flask routing
     rule.
     """
     path_parts: list[str] = []
-    rule.compile()
-    rule_attributes = cast(_RuleAttributes, vars(rule))  # noqa: TC006
-    rule_trace = rule_attributes["_trace"]
-    rule_converters = rule_attributes["_converters"]
+    compiled_rule = _compiled_rule(rule=rule)
+    rule_trace = compiled_rule.trace
+    rule_converters = compiled_rule.converters
     separator_index = rule_trace.index((False, "|"))
     for is_dynamic, data in rule_trace[separator_index + 1 :]:
         if is_dynamic:
