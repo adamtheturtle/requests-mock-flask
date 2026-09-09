@@ -572,14 +572,17 @@ def _requests_mock_callback(
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
     if "Content-Length" in request.headers:
-        content_length: str = request.headers["Content-Length"]  # ty: ignore[unsound-assignment]
-        environ_overrides["CONTENT_LENGTH"] = content_length
+        environ_overrides["CONTENT_LENGTH"] = (
+            f"{request.headers['Content-Length']}"
+        )
     split_url = urlsplit(url=str(object=request.url))
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
-    request_path: str = request.path_url  # ty: ignore[unsound-assignment]
-    request_headers: Iterable[tuple[str, str]] = request.headers.items()  # ty: ignore[unsound-assignment]
+    request_path = str(object=request.path_url)
+    request_headers: Iterable[tuple[str, str]] = (
+        (f"{name}", f"{value}") for name, value in request.headers.items()
+    )
     environ_builder = werkzeug.test.EnvironBuilder(
         path=_path_or_root(path=request_path.removeprefix(base_url_path)),
         base_url=base_url,

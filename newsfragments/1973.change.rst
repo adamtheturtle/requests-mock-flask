@@ -1,0 +1,1 @@
+Normalize request metadata before passing it to Werkzeug.
