@@ -12,9 +12,10 @@ from functools import partial
 from http import HTTPStatus
 from io import BytesIO
 from types import ModuleType
-from typing import Final, Protocol
+from typing import Final
 
 import httpretty
+import httpretty.http as httpretty_http
 import httpx
 import httpx2
 import pytest
@@ -43,12 +44,6 @@ _MockObjType = (
 _MockCtxManagerYieldType = _MockObjType | None
 _MockCtxType = Callable[[], AbstractContextManager[_MockCtxManagerYieldType]]
 _ResponseType = requests.Response | httpx.Response | httpx2.Response
-
-
-class _HTTPModule(Protocol):
-    """The part of HTTPretty's bundled HTTP module used by this test."""
-
-    STATUSES: dict[int, str]
 
 
 # ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``, which
@@ -401,8 +396,9 @@ def _get_response_header_list(
         assert isinstance(response, httpx.Response)
         return response.headers.get_list(key=name)
     assert isinstance(response, requests.Response)
-    header_values: list[str] = response.raw.headers.getlist(key=name)  # ty: ignore[unsound-assignment]
-    return header_values
+    header_values = response.raw.headers.getlist(key=name)
+    assert all(isinstance(value, str) for value in header_values)
+    return [value for value in header_values if isinstance(value, str)]
 
 
 _REPEATED_HEADERS_MOCK_CTX_MARKER = pytest.mark.parametrize(
@@ -492,8 +488,7 @@ def test_repeated_response_headers(mock_ctx: _MockCtxType) -> None:
 def fixture_nonstandard_httpretty_status() -> Iterator[int]:
     """Provide a status code and restore HTTPretty's global table."""
     status_code = 299
-    http_module: _HTTPModule = vars(httpretty)["http"]  # ty: ignore[unsound-assignment]
-    statuses: dict[int, str] = http_module.STATUSES
+    statuses = httpretty_http.STATUSES
     assert status_code not in statuses
     yield status_code
     _ = statuses.pop(status_code, None)
@@ -1530,8 +1525,8 @@ def test_request_needs_data(mock_ctx: _MockCtxType) -> None:
     def _() -> str:
         """Check the MIME type and return some given data."""
         assert request.mimetype == "application/json"
-        request_json: dict[str, object] = request.get_json()  # ty: ignore[unsound-assignment]
-        return str(object=request_json["hello"])
+        assert request.get_json() == {"hello": "world"}
+        return "world"
 
     test_client = app.test_client()
     response = test_client.get(
