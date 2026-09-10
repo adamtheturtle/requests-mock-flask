@@ -47,7 +47,7 @@ class _BinaryReader(Protocol):
 
     def read(self) -> bytes:
         """Read the remaining bytes."""
-        ...  # pylint: disable=unnecessary-ellipsis
+        raise NotImplementedError
 
 
 @dataclasses.dataclass(frozen=True)
