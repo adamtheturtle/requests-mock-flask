@@ -2361,7 +2361,7 @@ def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/")
-    def _() -> dict[str, object]:
+    def _() -> dict[str, str | bool]:
         """Return details of the incoming request origin."""
         return {
             "url": request.url,
