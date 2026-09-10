@@ -1,0 +1,1 @@
+Narrow the request-origin integration response to its actual value types.
