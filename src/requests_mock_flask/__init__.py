@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import dataclasses
 import re
-from operator import methodcaller
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
-    BinaryIO,
+    Protocol,
+    runtime_checkable,
 )
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
@@ -35,10 +35,19 @@ if TYPE_CHECKING:
         | bytearray
         | memoryview
         | Iterable[str | bytes]
-        | BinaryIO
+        | _BinaryReader
         | None
     )
     type _HTTPHeaders = Mapping[str, bool | int | str | None]
+
+
+@runtime_checkable
+class _BinaryReader(Protocol):
+    """A multipart body which supplies bytes from a stream."""
+
+    def read(self) -> bytes:
+        """Read the remaining bytes."""
+        ...  # pylint: disable=unnecessary-ellipsis
 
 
 @dataclasses.dataclass(frozen=True)
@@ -80,11 +89,6 @@ def _without_transfer_encoding(
     ]
 
 
-def _is_binary_io(body: object) -> bool:
-    """Return whether the body provides a file-like ``read`` method."""
-    return any("read" in vars(cls) for cls in type(body).mro())
-
-
 def _normalize_body(
     body: _RequestBody,
 ) -> str | bytes | None:
@@ -93,8 +97,8 @@ def _normalize_body(
         return body
     if isinstance(body, bytearray | memoryview):
         return bytes(body)
-    if _is_binary_io(body=body):
-        return bytes(methodcaller("read")(body))
+    if isinstance(body, _BinaryReader):
+        return body.read()
     return b"".join(
         part.encode() if isinstance(part, str) else part for part in body
     )
