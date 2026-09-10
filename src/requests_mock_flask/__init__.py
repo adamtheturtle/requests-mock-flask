@@ -8,7 +8,6 @@ from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Protocol,
-    TypeGuard,
     runtime_checkable,
 )
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
@@ -90,11 +89,6 @@ def _without_transfer_encoding(
     ]
 
 
-def _is_binary_io(body: object) -> TypeGuard[_BinaryReader]:
-    """Return whether the body provides a file-like ``read`` method."""
-    return isinstance(body, _BinaryReader)
-
-
 def _normalize_body(
     body: _RequestBody,
 ) -> str | bytes | None:
@@ -103,7 +97,7 @@ def _normalize_body(
         return body
     if isinstance(body, bytearray | memoryview):
         return bytes(body)
-    if _is_binary_io(body=body):
+    if isinstance(body, _BinaryReader):
         return body.read()
     return b"".join(
         part.encode() if isinstance(part, str) else part for part in body
