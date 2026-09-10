@@ -22,6 +22,15 @@ import werkzeug
 import werkzeug.routing
 from urllib3 import HTTPHeaderDict
 
+type _Mock = (
+    ModuleType
+    | requests_mock.Adapter
+    | requests_mock.Mocker
+    | responses.RequestsMock
+    | respx.MockRouter
+    | respx.Router
+)
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
     from wsgiref.types import StartResponse, WSGIEnvironment
@@ -167,7 +176,7 @@ class _MockCallbacks:
 
 
 def _register_mock(
-    mock_obj: object,
+    mock_obj: _Mock,
     method: str,
     url: re.Pattern[str],
     callbacks: _MockCallbacks,
@@ -278,7 +287,7 @@ def _normalize_base_url_host_to_idna(*, base_url: str) -> str:
 
 
 def add_flask_app_to_mock(
-    mock_obj: object,
+    mock_obj: _Mock,
     flask_app: flask.Flask,
     base_url: str,
 ) -> None:
