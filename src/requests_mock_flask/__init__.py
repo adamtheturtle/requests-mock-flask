@@ -24,7 +24,7 @@ from urllib3 import HTTPHeaderDict
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
-    from wsgiref.types import StartResponse, WSGIEnvironment
+    from wsgiref.types import StartResponse
 
     import flask
     import requests
@@ -309,7 +309,7 @@ def add_flask_app_to_mock(
     )
 
     def respx_wsgi_app(
-        environ: WSGIEnvironment,  # pyrefly: ignore [explicit-any]
+        environ: dict[str, object],
         start_response: StartResponse,
     ) -> Iterable[bytes]:
         """Normalize HTTPX's Unicode path to the WSGI latin-1
