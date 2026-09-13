@@ -68,7 +68,11 @@ def test_host_rule_does_not_match_hostless_base_url() -> None:
     @app.route(rule="/", host="example.com")
     def _() -> str:
         """Return a simple message."""
-        return "matched"  # pragma: no cover
+        return "matched"
+
+    response = app.test_client().get("/", base_url="http://example.com")
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "matched"
 
     add_flask_app_to_mock(
         mock_obj=responses.RequestsMock(),
@@ -1449,9 +1453,12 @@ def test_405_no_such_method(mock_ctx: _MockCtxType) -> None:
     @app.route(rule="/")
     def _() -> str:
         """Return an empty string."""
-        return ""  # pragma: no cover
+        return ""
 
     test_client = app.test_client()
+    valid_response = test_client.get("/")
+    assert valid_response.status_code == HTTPStatus.OK
+    assert valid_response.text == ""
     response = test_client.post("/")
 
     expected_status_code = HTTPStatus.METHOD_NOT_ALLOWED
@@ -2353,7 +2360,11 @@ def test_unknown_mock_module() -> None:
     @app.route(rule="/")
     def _() -> str:
         """Return a simple message."""
-        return ""  # pragma: no cover
+        return ""
+
+    response = app.test_client().get("/")
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == ""
 
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, "
@@ -2375,9 +2386,13 @@ def test_unknown_mock_object() -> None:
     @app.route(rule="/")
     def _() -> str:
         """Return a simple message."""
-        return ""  # pragma: no cover
+        return ""
 
     unknown_mock_obj = object()
+    response = app.test_client().get("/")
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == ""
+
     expected_error = (
         "Expected a HTTPretty, ``requests_mock``, "
         "``respx``, or ``responses`` object, "
