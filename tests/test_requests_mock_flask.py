@@ -290,7 +290,7 @@ def test_base_url_path_prefix_does_not_register_route_at_origin(
     @app.route(rule="/ping")
     def _() -> str:
         """Return a simple message."""
-        return "pong"  # pragma: no cover
+        return "pong"
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
@@ -312,6 +312,15 @@ def test_base_url_path_prefix_does_not_register_route_at_origin(
                 headers=None,
                 allow_redirects=True,
             )
+
+        valid_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/service/ping",
+            headers=None,
+            allow_redirects=True,
+        )
+        assert valid_response.status_code == HTTPStatus.OK
+        assert valid_response.text == "pong"
 
 
 def _do_request_with_content(
@@ -2125,7 +2134,7 @@ def test_multiple_variables_rejects_extra_segments(
     @app.route(rule="/users/<string:my_org>/<string:my_user>/posts")
     def _(my_org: str, my_user: str) -> str:
         """Return a simple message which includes the route variables."""
-        return "Posts for: " + my_org + "/" + my_user  # pragma: no cover
+        return "Posts for: " + my_org + "/" + my_user
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
@@ -2147,6 +2156,15 @@ def test_multiple_variables_rejects_extra_segments(
                 headers=None,
                 allow_redirects=True,
             )
+
+        valid_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/users/cranes/frasier/posts",
+            headers=None,
+            allow_redirects=True,
+        )
+        assert valid_response.status_code == HTTPStatus.OK
+        assert valid_response.text == "Posts for: cranes/frasier"
 
 
 @_MOCK_CTX_MARKER
@@ -2202,7 +2220,7 @@ def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
     @app.route(rule="/api")
     def _() -> str:
         """Return a simple message."""
-        return "api"  # pragma: no cover
+        return "api"
 
     with mock_ctx() as mock_obj:
         mock_obj_to_add = _get_mock_obj(mock_obj=mock_obj)
@@ -2225,6 +2243,15 @@ def test_route_does_not_match_path_prefix(mock_ctx: _MockCtxType) -> None:
                 allow_redirects=True,
             )
 
+        valid_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/api",
+            headers=None,
+            allow_redirects=True,
+        )
+        assert valid_response.status_code == HTTPStatus.OK
+        assert valid_response.text == "api"
+
 
 @_MOCK_CTX_MARKER_NO_HTTPRETTY
 def test_string_variable_rejects_extra_segments(
@@ -2237,9 +2264,9 @@ def test_string_variable_rejects_extra_segments(
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/<string:my_variable>")
-    def _(_: str) -> str:
-        """Return an empty string."""
-        return ""  # pragma: no cover
+    def _(my_variable: str) -> str:
+        """Return the matched path variable."""
+        return my_variable
 
     # The real Flask app rejects URLs with extra segments.
     test_client = app.test_client()
@@ -2266,6 +2293,15 @@ def test_string_variable_rejects_extra_segments(
                 headers=None,
                 allow_redirects=True,
             )
+
+        valid_response = _do_get(
+            mock_obj=mock_obj_to_add,
+            url="http://www.example.com/foo",
+            headers=None,
+            allow_redirects=True,
+        )
+        assert valid_response.status_code == HTTPStatus.OK
+        assert valid_response.text == "foo"
 
 
 @_MOCK_CTX_MARKER_NO_HTTPRETTY
