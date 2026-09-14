@@ -271,7 +271,7 @@ hooks = [
     id = "pyrefly-docs",
     name = "pyrefly-docs",
     stages = ["pre-push"],
-    entry = 'uv run --group=dev doccmd --no-write-to-file --example-workers 0 --language=python --command="pyrefly check"',
+    entry = 'uv run --group=dev doccmd --no-write-to-file --example-workers 0 --language=python --command="pyrefly check --config pyproject.toml"',
     language = "python",
     types_or = [
       "markdown",
