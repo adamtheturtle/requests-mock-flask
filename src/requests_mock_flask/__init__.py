@@ -402,7 +402,10 @@ def add_flask_app_to_mock(
         # should still be forwarded to the Flask app so that it can produce the
         # appropriate response (e.g. a 404). Literal parts are kept literal.
         path_to_match = _rule_to_path_regex(rule=rule)
-        escaped_base_url = re.escape(pattern=registration_base_url)
+        escaped_base_url = _escape_base_url(
+            value=registration_base_url,
+            mock_obj=mock_obj,
+        )
         patterns = [escaped_base_url + path_to_match]
         has_slashless_redirect = (
             rule.strict_slashes is True
@@ -427,6 +430,21 @@ def add_flask_app_to_mock(
                 )
 
 
+def _escape_base_url(*, value: str, mock_obj: object) -> str:
+    """Escape the base URL for the selected mock back end."""
+    if isinstance(mock_obj, ModuleType) and mock_obj.__name__ == "httpretty":
+        # HTTPretty parses the regex as a URL and rejects character
+        # classes in its host, while Requests uses uppercase escapes.
+        return re.escape(
+            pattern=re.sub(
+                pattern=r"%[0-9a-fA-F]{2}",
+                repl=lambda match: match.group().upper(),
+                string=value,
+            )
+        )
+    return _escape_url_literal(value=value)
+
+
 def _rule_to_path_regex(rule: werkzeug.routing.Rule) -> str:
     """Return a regex that matches the path part of a Flask routing
     rule.
@@ -442,8 +460,25 @@ def _rule_to_path_regex(rule: werkzeug.routing.Rule) -> str:
             path_parts.append(converter.regex)
         else:
             encoded_literal = quote(string=data, safe="/")
-            path_parts.append(re.escape(pattern=encoded_literal))
+            path_parts.append(_escape_url_literal(value=encoded_literal))
     return "".join(path_parts)
+
+
+def _escape_url_literal(*, value: str) -> str:
+    """Escape a URL literal while treating percent-escape hex case equally."""
+
+    def _escape_percent(match: re.Match[str]) -> str:
+        """Match each hexadecimal digit in either case."""
+        return "%" + "".join(
+            f"[{digit.lower()}{digit.upper()}]" if digit.isalpha() else digit
+            for digit in match.group()[1:]
+        )
+
+    return re.sub(
+        pattern=r"%[0-9a-fA-F]{2}",
+        repl=_escape_percent,
+        string=re.escape(pattern=value),
+    )
 
 
 def _responses_callback(
