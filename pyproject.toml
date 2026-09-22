@@ -48,7 +48,7 @@ urls.Source = "https://github.com/adamtheturtle/requests-mock-flask"
 
 [dependency-groups]
 dev = [
-    "actionlint-py==1.7.12.24",
+    "actionlint-py==1.7.12.25",
     "beartype==0.22.9",
     "check-manifest==0.51",
     "deptry==0.25.1",
