@@ -20,229 +20,199 @@ from requests_mock_flask import add_flask_app_to_mock
 _TIMEOUT_SECONDS: Final[int] = 120
 
 
-class TestResponses:
-    """Tests for using the helper with ``responses``."""
-
-    @staticmethod
-    def test_context_manager() -> None:
-        """
-        It is possible to use the helper with a ``responses`` context
-        manager.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
-
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
-
-        response = requests.Response()
-
-        with responses.RequestsMock(
-            assert_all_requests_are_fired=False,
-        ) as resp_m:
-            add_flask_app_to_mock(
-                mock_obj=resp_m,
-                flask_app=app,
-                base_url="http://www.example.com",
-            )
-
-            response = requests.get(
-                url="http://www.example.com",
-                timeout=_TIMEOUT_SECONDS,
-            )
-
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
-
-    @staticmethod
-    @responses.activate
-    def test_decorator() -> None:
-        """It is possible to use the helper with a ``responses`` decorator."""
-        app = Flask(import_name=__name__, static_folder=None)
-
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
-
-        add_flask_app_to_mock(
-            mock_obj=responses,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-
-        response = requests.get(
-            url="http://www.example.com",
-            timeout=_TIMEOUT_SECONDS,
-        )
-
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
+# Tests for using the helper with ``responses``.
 
 
-class TestRequestsMock:
-    """Tests for using the helper with ``requests_mock``."""
-
-    @staticmethod
-    def test_context_manager() -> None:
-        """
-        It is possible to use the helper with a ``requests_mock``
-        context
-        manager.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
-
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
-
-        with req_mock.Mocker() as resp_m:
-            add_flask_app_to_mock(
-                mock_obj=resp_m,
-                flask_app=app,
-                base_url="http://www.example.com",
-            )
-
-            response = requests.get(
-                url="http://www.example.com",
-                timeout=_TIMEOUT_SECONDS,
-            )
-
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
-
-    @staticmethod
-    def test_fixture(requests_mock: req_mock.Mocker) -> None:
-        """
-        It is possible to use the helper with a ``requests_mock``
-        fixture.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
-
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
-
-        add_flask_app_to_mock(
-            mock_obj=requests_mock,
-            flask_app=app,
-            base_url="http://www.example.com",
-        )
-
-        response = requests.get(
-            url="http://www.example.com",
-            timeout=_TIMEOUT_SECONDS,
-        )
-
-        assert response.status_code == HTTPStatus.OK
-
-    @staticmethod
-    def test_adapter() -> None:
-        """
-        It is possible to use the helper with a ``requests_mock``
-        adapter.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
-
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
-
-        session = requests.Session()
-        adapter = req_mock.Adapter()
-        session.mount(prefix="mock", adapter=adapter)
-
-        add_flask_app_to_mock(
-            mock_obj=adapter,
-            flask_app=app,
-            base_url="mock://www.example.com",
-        )
-
-        response = session.get(url="mock://www.example.com")
-
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
-
-
-class TestHTTPretty:
-    """Tests for using the helper with HTTPretty.
-
-    We only test one way of using the helper with HTTPretty, because the
-    other ways also pass in the HTTPretty module.
+def test_responses_context_manager() -> None:
     """
+    It is possible to use the helper with a ``responses`` context
+    manager.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
 
-    @staticmethod
-    def test_use() -> None:
-        """It is possible to use the helper with HTTPretty."""
-        app = Flask(import_name=__name__, static_folder=None)
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
 
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
+    response = requests.Response()
 
-        with httpretty.enabled():
-            add_flask_app_to_mock(
-                mock_obj=httpretty,
-                flask_app=app,
-                base_url="http://www.example.com",
-            )
+    with responses.RequestsMock(
+        assert_all_requests_are_fired=False,
+    ) as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
 
-            response = requests.get(
-                url="http://www.example.com",
-                timeout=_TIMEOUT_SECONDS,
-            )
+        response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
 
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
 
 
-class TestRespx:
-    """Tests for using the helper with ``respx``."""
+@responses.activate
+def test_responses_decorator() -> None:
+    """It is possible to use the helper with a ``responses`` decorator."""
+    app = Flask(import_name=__name__, static_folder=None)
 
-    @staticmethod
-    def test_context_manager() -> None:
-        """
-        It is possible to use the helper with a ``respx`` context
-        manager.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
 
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
+    add_flask_app_to_mock(
+        mock_obj=responses,
+        flask_app=app,
+        base_url="http://www.example.com",
+    )
 
-        with respx.mock(assert_all_called=False) as respx_mock:
-            add_flask_app_to_mock(
-                mock_obj=respx_mock,
-                flask_app=app,
-                base_url="http://www.example.com",
-            )
+    response = requests.get(
+        url="http://www.example.com",
+        timeout=_TIMEOUT_SECONDS,
+    )
 
-            response = httpx.get(url="http://www.example.com")
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
 
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
 
-    @staticmethod
-    @respx.mock(assert_all_called=False)
-    def test_decorator(respx_mock: respx.MockRouter) -> None:
-        """
-        It is possible to use the helper with a ``respx``
-        decorator.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
+# Tests for using the helper with ``requests_mock``.
 
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
 
+def test_requests_mock_context_manager() -> None:
+    """
+    It is possible to use the helper with a ``requests_mock``
+    context
+    manager.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with req_mock.Mocker() as resp_m:
+        add_flask_app_to_mock(
+            mock_obj=resp_m,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
+
+
+def test_requests_mock_fixture(requests_mock: req_mock.Mocker) -> None:
+    """
+    It is possible to use the helper with a ``requests_mock``
+    fixture.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    add_flask_app_to_mock(
+        mock_obj=requests_mock,
+        flask_app=app,
+        base_url="http://www.example.com",
+    )
+
+    response = requests.get(
+        url="http://www.example.com",
+        timeout=_TIMEOUT_SECONDS,
+    )
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_adapter() -> None:
+    """
+    It is possible to use the helper with a ``requests_mock``
+    adapter.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    session = requests.Session()
+    adapter = req_mock.Adapter()
+    session.mount(prefix="mock", adapter=adapter)
+
+    add_flask_app_to_mock(
+        mock_obj=adapter,
+        flask_app=app,
+        base_url="mock://www.example.com",
+    )
+
+    response = session.get(url="mock://www.example.com")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
+
+
+# Tests for using the helper with HTTPretty.
+#
+# We only test one way of using the helper with HTTPretty, because the
+# other ways also pass in the HTTPretty module.
+
+
+def test_use() -> None:
+    """It is possible to use the helper with HTTPretty."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with httpretty.enabled():
+        add_flask_app_to_mock(
+            mock_obj=httpretty,
+            flask_app=app,
+            base_url="http://www.example.com",
+        )
+
+        response = requests.get(
+            url="http://www.example.com",
+            timeout=_TIMEOUT_SECONDS,
+        )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
+
+
+# Tests for using the helper with ``respx``.
+
+
+def test_respx_context_manager() -> None:
+    """
+    It is possible to use the helper with a ``respx`` context
+    manager.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with respx.mock(assert_all_called=False) as respx_mock:
         add_flask_app_to_mock(
             mock_obj=respx_mock,
             flask_app=app,
@@ -251,62 +221,85 @@ class TestRespx:
 
         response = httpx.get(url="http://www.example.com")
 
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
 
 
-class TestHTTPX2:
-    """Tests for using the helper with ``respx`` and ``httpx2``.
-
-    ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``.
+@respx.mock(assert_all_called=False)
+def test_respx_decorator(respx_mock: respx.MockRouter) -> None:
     """
+    It is possible to use the helper with a ``respx``
+    decorator.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
 
-    @staticmethod
-    def test_context_manager() -> None:
-        """
-        It is possible to use the helper with a ``respx`` context
-        manager which intercepts ``httpx2`` requests.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
 
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
+    add_flask_app_to_mock(
+        mock_obj=respx_mock,
+        flask_app=app,
+        base_url="http://www.example.com",
+    )
 
-        with respx.mock(assert_all_called=False, using="httpcore2") as m:
-            add_flask_app_to_mock(
-                mock_obj=m,
-                flask_app=app,
-                base_url="http://www.example.com",
-            )
+    response = httpx.get(url="http://www.example.com")
 
-            response = httpx2.get(url="http://www.example.com")
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
 
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
 
-    @staticmethod
-    @pytest.mark.httpx2(assert_all_called=False)
-    def test_fixture(httpx2_mock: respx.MockRouter) -> None:
-        """
-        It is possible to use the helper with the ``pytest-httpx2``
-        fixture, configured with its marker.
-        """
-        app = Flask(import_name=__name__, static_folder=None)
+# Tests for using the helper with ``respx`` and ``httpx2``.
+#
+# ``pytest-httpx2`` registers the ``httpcore2`` mocker with ``respx``.
 
-        @app.route(rule="/")
-        def _() -> str:
-            """Return a simple message."""
-            return "Hello, World!"
 
+def test_httpx2_context_manager() -> None:
+    """
+    It is possible to use the helper with a ``respx`` context
+    manager which intercepts ``httpx2`` requests.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    with respx.mock(assert_all_called=False, using="httpcore2") as m:
         add_flask_app_to_mock(
-            mock_obj=httpx2_mock,
+            mock_obj=m,
             flask_app=app,
             base_url="http://www.example.com",
         )
 
         response = httpx2.get(url="http://www.example.com")
 
-        assert response.status_code == HTTPStatus.OK
-        assert response.text == "Hello, World!"
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
+
+
+@pytest.mark.httpx2(assert_all_called=False)
+def test_httpx2_fixture(httpx2_mock: respx.MockRouter) -> None:
+    """
+    It is possible to use the helper with the ``pytest-httpx2``
+    fixture, configured with its marker.
+    """
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/")
+    def _() -> str:
+        """Return a simple message."""
+        return "Hello, World!"
+
+    add_flask_app_to_mock(
+        mock_obj=httpx2_mock,
+        flask_app=app,
+        base_url="http://www.example.com",
+    )
+
+    response = httpx2.get(url="http://www.example.com")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.text == "Hello, World!"
