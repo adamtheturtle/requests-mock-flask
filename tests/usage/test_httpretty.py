@@ -13,7 +13,7 @@ import requests
 from flask import Flask
 
 from requests_mock_flask import add_flask_app_to_mock
-from tests.usage.helpers import TIMEOUT_SECONDS
+from tests.usage.constants import TIMEOUT_SECONDS
 
 
 def test_use() -> None:

@@ -1,4 +1,4 @@
-"""Shared helpers for usage tests."""
+"""Constants for usage tests."""
 
 from typing import Final
 
