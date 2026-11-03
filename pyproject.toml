@@ -100,7 +100,7 @@ dev = [
     "ty==0.0.95",
     "types-httpretty==1.1.4.20260827",
     "types-requests==2.33.0.20261030",
-    "vale==3.25.1.0",
+    "vale==3.26.0.1",
     "vulture==2.16",
     "yamlfix==1.19.1",
     "zizmor==1.31.1",
