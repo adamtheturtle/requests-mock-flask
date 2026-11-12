@@ -388,6 +388,7 @@ num_workers = "auto"
 [tool.pyrefly]
 search-path = [ "." ]
 errors.non-exhaustive-match = "error"
+coverage.includes = [ "src/**" ]
 enabled-ignores = [ "pyrefly" ]
 preset = "all"
 
