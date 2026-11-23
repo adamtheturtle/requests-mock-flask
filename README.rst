@@ -62,7 +62,8 @@ Usage examples
 
 
    # Using requests-mock
-   with requests_mock.Mocker() as req_m:
+   req_m = requests_mock.Mocker()
+   with req_m:
        add_flask_app_to_mock(
            mock_obj=req_m,
            flask_app=app,

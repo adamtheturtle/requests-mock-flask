@@ -23,7 +23,8 @@ def test_context_manager() -> None:
         """Return a simple message."""
         return "Hello, World!"
 
-    with req_mock.Mocker() as resp_m:
+    resp_m = req_mock.Mocker()
+    with resp_m:
         add_flask_app_to_mock(
             mock_obj=resp_m,
             flask_app=app,

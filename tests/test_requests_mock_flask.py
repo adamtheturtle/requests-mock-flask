@@ -26,10 +26,17 @@ import respx
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
+
+# pylint: disable-next=import-private-name,wrong-spelling-in-comment
+from requests_mock.request import _RequestObjectProxy  # pyright: ignore[reportPrivateUsage]
+
+# pylint: disable-next=import-private-name,wrong-spelling-in-comment
+from requests_mock.response import _Context  # pyright: ignore[reportPrivateUsage]
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map, Rule
 
-from requests_mock_flask import add_flask_app_to_mock
+# pylint: disable-next=import-private-name,wrong-spelling-in-comment
+from requests_mock_flask import _requests_mock_callback, add_flask_app_to_mock  # pyright: ignore[reportPrivateUsage]
 
 # We use a high timeout to allow interactive debugging while requests are being
 # made.
@@ -1399,7 +1406,7 @@ def test_wrong_type_given(mock_ctx: _MockCtxType) -> None:
 
     Flask routing does not match ``/a`` against ``/<int:my_variable>``, so the
     helper leaves the request unmatched instead of forwarding it and returning
-    Flask's 404.  A URL which satisfies the constraint is still intercepted.
+    a 404 from Flask. A URL that satisfies the constraint is still intercepted.
     """
     app = Flask(import_name=__name__, static_folder=None)
 
@@ -1659,7 +1666,8 @@ def test_non_streaming_request_body(
         data=body,
     ).prepare()
 
-    with requests_mock.Mocker() as mock_obj:
+    mock_obj = requests_mock.Mocker()
+    with mock_obj:
         add_flask_app_to_mock(
             mock_obj=mock_obj,
             flask_app=app,
@@ -1671,6 +1679,44 @@ def test_non_streaming_request_body(
         )
 
     assert response.content == b"body"
+
+
+@pytest.mark.parametrize(
+    argnames=("wrapped_request", "expected_exception", "message"),
+    argvalues=[
+        pytest.param(
+            object(), TypeError, "wrap a prepared request", id="wrong-type"
+        ),
+        pytest.param(
+            requests.PreparedRequest(),
+            ValueError,
+            "with a URL and method",
+            id="missing-url",
+        ),
+        pytest.param(
+            requests.Request(url="http://www.example.com").prepare(),
+            ValueError,
+            "with a URL and method",
+            id="missing-method",
+        ),
+    ],
+)
+def test_requests_mock_rejects_invalid_prepared_requests(
+    wrapped_request: object,
+    expected_exception: type[TypeError | ValueError],
+    message: str,
+) -> None:
+    """Reject an invalid request before passing it to Flask."""
+    app = Flask(import_name=__name__, static_folder=None)
+    with pytest.raises(expected_exception=expected_exception, match=message):
+        _ = _requests_mock_callback(
+            request=_RequestObjectProxy(request=wrapped_request),
+            context=_Context(
+                headers={}, status_code=HTTPStatus.OK, reason="", cookies=None
+            ),
+            flask_app=app,
+            base_url_path="",
+        )
 
 
 @_MOCK_CTX_MARKER
@@ -2437,7 +2483,7 @@ def test_preserve_host_and_scheme(mock_ctx: _MockCtxType) -> None:
             allow_redirects=True,
         )
 
-    response_json = mock_response.json()
+    response_json: object = mock_response.json()
 
     assert response_json == {
         "url": "https://api.example.com/",
