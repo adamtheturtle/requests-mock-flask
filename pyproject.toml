@@ -37,7 +37,6 @@ dynamic = [
 dependencies = [
     "httpretty>=1.1.4",
     "httpx>=0.27.0",
-    "requests>=2.22",
     "requests-mock>=1.12.1",
     # Ignore 0.25.5 because of https://github.com/getsentry/responses/issues/751.
     "responses>=0.25.3,!=0.25.5",

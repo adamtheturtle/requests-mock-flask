@@ -26,17 +26,10 @@ import respx
 import werkzeug
 from flask import Flask, Response, jsonify, make_response, request
 from requests_mock.exceptions import NoMockAddress
-
-# pylint: disable-next=import-private-name,wrong-spelling-in-comment
-from requests_mock.request import _RequestObjectProxy  # pyright: ignore[reportPrivateUsage]
-
-# pylint: disable-next=import-private-name,wrong-spelling-in-comment
-from requests_mock.response import _Context  # pyright: ignore[reportPrivateUsage]
 from respx.models import AllMockedAssertionError
 from werkzeug.routing import BaseConverter, Map, Rule
 
-# pylint: disable-next=import-private-name,wrong-spelling-in-comment
-from requests_mock_flask import _requests_mock_callback, add_flask_app_to_mock  # pyright: ignore[reportPrivateUsage]
+from requests_mock_flask import add_flask_app_to_mock
 
 # We use a high timeout to allow interactive debugging while requests are being
 # made.
@@ -86,6 +79,29 @@ def test_host_rule_does_not_match_hostless_base_url() -> None:
         flask_app=app,
         base_url="hostless",
     )
+
+
+def test_host_rule_on_map_without_host_matching() -> None:
+    """Use the bound subdomain when the map does not match hosts."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    @app.route(rule="/", host="example.com")
+    def index() -> str:
+        """Return a message with the default Flask routing mode."""
+        return "matched"
+
+    assert app.test_client().get("/").text == "matched"
+
+    adapter = requests_mock.Adapter()
+    add_flask_app_to_mock(
+        mock_obj=adapter, flask_app=app, base_url="http://example.com"
+    )
+    with pytest.raises(expected_exception=NoMockAddress):
+        _ = adapter.send(
+            request=requests.Request(
+                method="GET", url="http://example.com"
+            ).prepare()
+        )
 
 
 _MOCK_CTX_MARKER = pytest.mark.parametrize(
@@ -1643,16 +1659,17 @@ def test_iterable_streaming_request_body(mock_ctx: _MockCtxType) -> None:
     argvalues=[
         pytest.param(BytesIO(initial_bytes=b"body"), id="file-like"),
         pytest.param(bytearray(b"body"), id="bytearray"),
+        pytest.param(iter(("bo", "dy")), id="text-chunks"),
         pytest.param(
             BytesIO(initial_bytes=b"body").getbuffer(),
             id="memoryview",
         ),
     ],
 )
-def test_non_streaming_request_body(
-    body: BytesIO | bytearray | memoryview,
+def test_prepared_request_body(
+    body: BytesIO | bytearray | memoryview | Iterator[str | bytes],
 ) -> None:
-    """A file-like or buffer request body is delivered to Flask."""
+    """A file-like, buffer, or iterable body is delivered to Flask."""
     app = Flask(import_name=__name__, static_folder=None)
 
     @app.route(rule="/", methods=["POST"])
@@ -1682,41 +1699,50 @@ def test_non_streaming_request_body(
 
 
 @pytest.mark.parametrize(
-    argnames=("wrapped_request", "expected_exception", "message"),
+    argnames=("data", "message"),
     argvalues=[
-        pytest.param(
-            object(), TypeError, "wrap a prepared request", id="wrong-type"
-        ),
-        pytest.param(
-            requests.PreparedRequest(),
-            ValueError,
-            "with a URL and method",
-            id="missing-url",
-        ),
-        pytest.param(
-            requests.Request(url="http://www.example.com").prepare(),
-            ValueError,
-            "with a URL and method",
-            id="missing-method",
-        ),
+        pytest.param(object(), "iterable request body", id="non-iterable"),
+        pytest.param(iter([1]), "body chunk", id="invalid-chunk"),
     ],
 )
-def test_requests_mock_rejects_invalid_prepared_requests(
-    wrapped_request: object,
-    expected_exception: type[TypeError | ValueError],
-    message: str,
+def test_requests_mock_rejects_invalid_body(
+    data: object, message: str
 ) -> None:
-    """Reject an invalid request before passing it to Flask."""
+    """Reject invalid bodies while forwarding a request to Flask."""
     app = Flask(import_name=__name__, static_folder=None)
-    with pytest.raises(expected_exception=expected_exception, match=message):
-        _ = _requests_mock_callback(
-            request=_RequestObjectProxy(request=wrapped_request),
-            context=_Context(
-                headers={}, status_code=HTTPStatus.OK, reason="", cookies=None
-            ),
-            flask_app=app,
-            base_url_path="",
-        )
+
+    app.add_url_rule(rule="/", endpoint="root")
+
+    adapter = requests_mock.Adapter()
+    add_flask_app_to_mock(
+        mock_obj=adapter, flask_app=app, base_url="http://www.example.com"
+    )
+    prepared = requests.Request(
+        method="POST", url="http://www.example.com", data=data
+    ).prepare()
+
+    with pytest.raises(expected_exception=TypeError, match=message):
+        _ = adapter.send(request=prepared)
+
+
+def test_requests_mock_rejects_missing_headers() -> None:
+    """Reject a prepared request without headers."""
+    app = Flask(import_name=__name__, static_folder=None)
+
+    app.add_url_rule(rule="/", endpoint="root")
+
+    adapter = requests_mock.Adapter()
+    add_flask_app_to_mock(
+        mock_obj=adapter, flask_app=app, base_url="http://www.example.com"
+    )
+    prepared = requests.PreparedRequest()
+    prepared.method = "GET"
+    prepared.url = "http://www.example.com"
+
+    with pytest.raises(
+        expected_exception=TypeError, match="supply a prepared request"
+    ):
+        _ = adapter.send(request=prepared)
 
 
 @_MOCK_CTX_MARKER

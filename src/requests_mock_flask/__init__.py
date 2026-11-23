@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import dataclasses
 import re
+from collections.abc import Buffer, Iterable, Mapping
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Protocol,
+    TypeGuard,
     runtime_checkable,
 )
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
@@ -15,29 +17,21 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 import httpretty
 import httpretty.http as httpretty_http
 import httpx
-import requests
 import requests_mock
 import responses
 import respx
 import werkzeug
 import werkzeug.routing
 from urllib3 import HTTPHeaderDict
+from werkzeug.routing.rules import parse_converter_args
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping
+    from collections.abc import Callable
     from wsgiref.types import StartResponse
 
     import flask
+    import requests
 
-    type _RequestBody = (
-        str
-        | bytes
-        | bytearray
-        | memoryview
-        | Iterable[str | bytes]
-        | _BinaryReader
-        | None
-    )
     type _HTTPHeaders = Mapping[str, bool | int | str | None]
 
 
@@ -50,23 +44,45 @@ class _BinaryReader(Protocol):
         ...
 
 
-@dataclasses.dataclass(frozen=True)
-class _CompiledRule:
-    """Werkzeug routing details populated by ``Rule.compile``."""
+# Match through the closing converter parenthesis so quoted arguments may
+# contain angle brackets.
+_RULE_VARIABLE = re.compile(
+    pattern=r"<(?:(?P<converter>[a-zA-Z_][a-zA-Z0-9_]*)"
+    r"(?:\((?P<arguments>.*?)\))?:)?"
+    r"(?P<variable>[a-zA-Z_][a-zA-Z0-9_]*)>"
+)
 
-    trace: list[tuple[bool, str]]
-    converters: dict[str, werkzeug.routing.BaseConverter]
 
-
-def _compiled_rule(*, rule: werkzeug.routing.Rule) -> _CompiledRule:
-    """Compile a Werkzeug rule and narrow its populated routing data."""
-    rule.compile()
-    # Werkzeug exposes the compiled routing data through protected members.
-    # pylint: disable-next=protected-access,wrong-spelling-in-comment
-    trace = rule._trace  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]  # pyrefly: ignore[protected-access]
-    # pylint: disable-next=protected-access,wrong-spelling-in-comment
-    converters = rule._converters  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]  # pyrefly: ignore[protected-access]
-    return _CompiledRule(trace=trace, converters=converters)
+def _rule_regex(
+    *,
+    rule: werkzeug.routing.Rule,
+    pattern: str,
+    escape_literal: Callable[[str], str],
+    group_converter: bool,
+) -> str:
+    """Build a regular expression using the configured converters."""
+    parts: list[str] = []
+    end = 0
+    for match in _RULE_VARIABLE.finditer(string=pattern):
+        parts.append(escape_literal(pattern[end : match.start()]))
+        args: tuple[object, ...]
+        kwargs: Mapping[str, object]
+        groups = match.groupdict(default="")
+        args, kwargs = parse_converter_args(argstr=groups["arguments"])
+        converter_name = groups["converter"]
+        converter = rule.get_converter(
+            variable_name=groups["variable"],
+            converter_name="default"
+            if converter_name == ""
+            else converter_name,
+            args=args,
+            kwargs=kwargs,
+        )
+        regex = converter.regex
+        parts.append(f"(?:{regex})" if group_converter else regex)
+        end = match.end()
+    parts.append(escape_literal(pattern[end:]))
+    return "".join(parts)
 
 
 def _rule_methods(*, rule: werkzeug.routing.Rule) -> set[str]:
@@ -90,19 +106,44 @@ def _without_transfer_encoding(
     ]
 
 
+def _is_iterable(value: object, /) -> TypeGuard[Iterable[object]]:
+    """Check whether a value supports iteration."""
+    return isinstance(value, Iterable)
+
+
+def _has_headers(value: object, /) -> TypeGuard[Mapping[str, object]]:
+    """Check for a header mapping with text names."""
+    if not _is_iterable(value):
+        return False
+    keys = value
+    return isinstance(value, Mapping) and all(
+        isinstance(key, str) for key in keys
+    )
+
+
 def _normalize_body(
-    body: _RequestBody,
+    body: object,
 ) -> str | bytes | None:
     """Convert streaming request bodies to bytes for the WSGI app."""
     if body is None or isinstance(body, str | bytes):
         return body
-    if isinstance(body, bytearray | memoryview):
+    if isinstance(body, Buffer):
         return bytes(body)
     if isinstance(body, _BinaryReader):
         return body.read()
-    return b"".join(
-        part.encode() if isinstance(part, str) else part for part in body
-    )
+    if not _is_iterable(body):
+        msg = "Expected an iterable request body."
+        raise TypeError(msg)
+    chunks: list[bytes] = []
+    for part in body:
+        if isinstance(part, str):
+            chunks.append(part.encode())
+        elif isinstance(part, Buffer):
+            chunks.append(bytes(part))
+        else:
+            msg = "Expected a request body chunk to be text or bytes-like."
+            raise TypeError(msg)
+    return b"".join(chunks)
 
 
 def _path_or_root(*, path: str) -> str:
@@ -133,24 +174,20 @@ def _host_rule_matches_base_url(
     *,
     rule: werkzeug.routing.Rule,
     base_url_host: str | None,
+    domain: str | None,
 ) -> bool:
     """Return whether a Flask host rule applies to ``base_url_host``."""
-    if base_url_host is None:
+    if base_url_host is None or domain is None:
         return False
 
-    host_parts: list[str] = []
-    compiled_rule = _compiled_rule(rule=rule)
-    rule_trace = compiled_rule.trace
-    rule_converters = compiled_rule.converters
-    separator_index = rule_trace.index((False, "|"))
-    for is_dynamic, data in rule_trace[:separator_index]:
-        if is_dynamic:
-            converter = rule_converters[data]
-            host_parts.append(f"(?:{converter.regex})")
-        else:
-            host_parts.append(re.escape(pattern=_host_to_idna(host=data)))
-
-    host_pattern = "".join(host_parts)
+    host_pattern = _rule_regex(
+        rule=rule,
+        pattern=domain,
+        escape_literal=lambda value: re.escape(
+            pattern=_host_to_idna(host=value)
+        ),
+        group_converter=True,
+    )
     return re.fullmatch(pattern=host_pattern, string=base_url_host) is not None
 
 
@@ -385,23 +422,13 @@ def add_flask_app_to_mock(
 
     base_url_host = urlsplit(url=base_url).hostname
     for rule in flask_app.url_map.iter_rules():
-        if rule.host is not None and not _host_rule_matches_base_url(
+        host = rule.host
+        if host is not None and not _host_rule_matches_base_url(
             rule=rule,
             base_url_host=base_url_host,
+            domain=host if flask_app.url_map.host_matching else rule.subdomain,
         ):
             continue
-        # Build the URL pattern from the parsed rule metadata.
-        # Re-parsing ``rule.rule`` with a naive regex breaks on
-        # converter arguments that contain a quoted ``>`` (e.g.
-        # ``<regex("[^>]+"):value>``). ``rule.compile()`` populates
-        # internal parsed parts and each variable's converter.
-        #
-        # For path variables (``<path:...>``) we use ``.+`` to match any
-        # characters including slashes. For all other variable types we use
-        # ``[^/]+`` to match a single path segment. We deliberately do not use
-        # each converter's own (stricter) regex: requests with the "wrong" type
-        # should still be forwarded to the Flask app so that it can produce the
-        # appropriate response (e.g. a 404). Literal parts are kept literal.
         path_to_match = _rule_to_path_regex(rule=rule)
         escaped_base_url = _escape_base_url(
             value=registration_base_url,
@@ -450,19 +477,19 @@ def _rule_to_path_regex(rule: werkzeug.routing.Rule) -> str:
     """Return a regex that matches the path part of a Flask routing
     rule.
     """
-    path_parts: list[str] = []
-    compiled_rule = _compiled_rule(rule=rule)
-    rule_trace = compiled_rule.trace
-    rule_converters = compiled_rule.converters
-    separator_index = rule_trace.index((False, "|"))
-    for is_dynamic, data in rule_trace[separator_index + 1 :]:
-        if is_dynamic:
-            converter = rule_converters[data]
-            path_parts.append(converter.regex)
-        else:
-            encoded_literal = quote(string=data, safe="/")
-            path_parts.append(_escape_url_literal(value=encoded_literal))
-    return "".join(path_parts)
+    path = (
+        re.sub(pattern=r"/{2,}", repl="/", string=rule.rule)
+        if rule.merge_slashes is True
+        else rule.rule
+    )
+    return _rule_regex(
+        rule=rule,
+        pattern=path,
+        escape_literal=lambda value: _escape_url_literal(
+            value=quote(string=value, safe="/")
+        ),
+        group_converter=False,
+    )
 
 
 def _escape_url_literal(*, value: str) -> str:
@@ -615,18 +642,20 @@ def _requests_mock_callback(
     # header is forwarded to the Flask app untouched. This preserves duplicate
     # cookies with the same name and other multi-value header semantics.
     test_client = flask_app.test_client(use_cookies=False)
-    # The proxy stubs leave delegated attributes untyped. Read them from
-    # the underlying prepared request.
-    prepared_request: object = vars(request).get("_request")
-    if not isinstance(prepared_request, requests.PreparedRequest):
-        msg = "Expected the proxy to wrap a prepared request."
-        raise TypeError(msg)
-    url = prepared_request.url
-    method = prepared_request.method
-    if url is None or method is None:
-        msg = "Expected a prepared request with a URL and method."
-        raise ValueError(msg)
-    headers = prepared_request.headers
+    # The callback stub leaves the forwarded attributes untyped. Match
+    # the public request interface before building the Flask request.
+    match request:
+        case object(
+            url=str() as url,
+            method=str() as method,
+            path_url=str() as path_url,
+            headers=object() as headers,
+            body=object() as body,
+        ) if _has_headers(headers):
+            pass
+        case _:
+            msg = "Expected requests-mock to supply a prepared request."
+            raise TypeError(msg)
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
@@ -638,7 +667,7 @@ def _requests_mock_callback(
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
-    request_path = prepared_request.path_url.removeprefix(base_url_path)
+    request_path = path_url.removeprefix(base_url_path)
     request_headers: Iterable[tuple[str, str]] = (
         (str(object=name), str(object=value))
         for name, value in headers.items()
@@ -648,7 +677,7 @@ def _requests_mock_callback(
         base_url=base_url,
         method=method,
         headers=_without_transfer_encoding(headers=request_headers),
-        data=_normalize_body(body=prepared_request.body),
+        data=_normalize_body(body=body),
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
