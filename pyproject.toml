@@ -37,6 +37,7 @@ dynamic = [
 dependencies = [
     "httpretty>=1.1.4",
     "httpx>=0.27.0",
+    "requests>=2.22",
     "requests-mock>=1.12.1",
     # Ignore 0.25.5 because of https://github.com/getsentry/responses/issues/751.
     "responses>=0.25.3,!=0.25.5",
@@ -71,7 +72,7 @@ dev = [
     "pylint[spelling]==4.1.4",
     "pylint-per-file-ignores==4.0.0",
     "pyproject-fmt==2.31.2",
-    "pyrefly==1.4.1",
+    "pyrefly==1.5.0",
     "pyright==1.1.414",
     "pyroma==5.0.1",
     "pytest==9.2.0",

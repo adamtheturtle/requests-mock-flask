@@ -15,6 +15,7 @@ from urllib.parse import quote, unquote, urlsplit, urlunsplit
 import httpretty
 import httpretty.http as httpretty_http
 import httpx
+import requests
 import requests_mock
 import responses
 import respx
@@ -27,7 +28,6 @@ if TYPE_CHECKING:
     from wsgiref.types import StartResponse
 
     import flask
-    import requests
 
     type _RequestBody = (
         str
@@ -61,11 +61,12 @@ class _CompiledRule:
 def _compiled_rule(*, rule: werkzeug.routing.Rule) -> _CompiledRule:
     """Compile a Werkzeug rule and narrow its populated routing data."""
     rule.compile()
-    attributes = vars(rule)
-    return _CompiledRule(
-        trace=attributes["_trace"],
-        converters=attributes["_converters"],
-    )
+    # Werkzeug exposes the compiled routing data through protected members.
+    # pylint: disable-next=protected-access,wrong-spelling-in-comment
+    trace = rule._trace  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]  # pyrefly: ignore[protected-access]
+    # pylint: disable-next=protected-access,wrong-spelling-in-comment
+    converters = rule._converters  # noqa: SLF001  # pyright: ignore[reportPrivateUsage]  # pyrefly: ignore[protected-access]
+    return _CompiledRule(trace=trace, converters=converters)
 
 
 def _rule_methods(*, rule: werkzeug.routing.Rule) -> set[str]:
@@ -389,7 +390,7 @@ def add_flask_app_to_mock(
             base_url_host=base_url_host,
         ):
             continue
-        # Build the URL pattern from the framework's parsed rule metadata.
+        # Build the URL pattern from the parsed rule metadata.
         # Re-parsing ``rule.rule`` with a naive regex breaks on
         # converter arguments that contain a quoted ``>`` (e.g.
         # ``<regex("[^>]+"):value>``). ``rule.compile()`` populates
@@ -614,27 +615,40 @@ def _requests_mock_callback(
     # header is forwarded to the Flask app untouched. This preserves duplicate
     # cookies with the same name and other multi-value header semantics.
     test_client = flask_app.test_client(use_cookies=False)
+    # The proxy stubs leave delegated attributes untyped. Read them from
+    # the underlying prepared request.
+    prepared_request: object = vars(request).get("_request")
+    if not isinstance(prepared_request, requests.PreparedRequest):
+        msg = "Expected the proxy to wrap a prepared request."
+        raise TypeError(msg)
+    url = prepared_request.url
+    method = prepared_request.method
+    if url is None or method is None:
+        msg = "Expected a prepared request with a URL and method."
+        raise ValueError(msg)
+    headers = prepared_request.headers
     # See parameters at
     # https://werkzeug.palletsprojects.com/en/0.15.x/test/#werkzeug.test.EnvironBuilder
     environ_overrides: dict[str, str] = {}
-    if "Content-Length" in request.headers:
-        environ_overrides["CONTENT_LENGTH"] = (
-            f"{request.headers['Content-Length']}"
+    if "Content-Length" in headers:
+        environ_overrides["CONTENT_LENGTH"] = str(
+            object=headers["Content-Length"]
         )
-    split_url = urlsplit(url=str(object=request.url))
+    split_url = urlsplit(url=url)
     base_url = (
         f"{split_url.scheme}://{split_url.netloc}{base_url_path.rstrip('/')}/"
     )
-    request_path = str(object=request.path_url)
+    request_path = prepared_request.path_url.removeprefix(base_url_path)
     request_headers: Iterable[tuple[str, str]] = (
-        (f"{name}", f"{value}") for name, value in request.headers.items()
+        (str(object=name), str(object=value))
+        for name, value in headers.items()
     )
     environ_builder = werkzeug.test.EnvironBuilder(
-        path=_path_or_root(path=request_path.removeprefix(base_url_path)),
+        path=_path_or_root(path=request_path),
         base_url=base_url,
-        method=request.method,
+        method=method,
         headers=_without_transfer_encoding(headers=request_headers),
-        data=_normalize_body(body=request.body),
+        data=_normalize_body(body=prepared_request.body),
         environ_overrides=environ_overrides,
     )
     with test_client.open(environ_builder.get_request()) as response:
