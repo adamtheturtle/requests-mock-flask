@@ -96,7 +96,7 @@ dev = [
     # as Markdown in docs/source/unreleased.md during Sphinx builds.
     "sphinxcontrib-towncrier==0.5.0a0",
     "strict-kwargs==2026.11.14",
-    "sybil==10.1.0",
+    "sybil==10.2.0",
     "towncrier==26.9.0",
     "ty==0.0.107",
     "types-httpretty==1.1.4.20260827",
