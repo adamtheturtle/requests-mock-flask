@@ -98,7 +98,7 @@ dev = [
     "strict-kwargs==2026.11.14",
     "sybil==10.2.0",
     "towncrier==26.9.0",
-    "ty==0.0.108",
+    "ty==0.0.109",
     "types-httpretty==1.1.4.20261122",
     "types-requests==2.33.0.20261030",
     "vale==3.28.1.0",
